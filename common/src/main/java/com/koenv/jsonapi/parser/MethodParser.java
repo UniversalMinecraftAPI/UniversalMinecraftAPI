@@ -13,17 +13,21 @@ import java.util.regex.Pattern;
 
 public class MethodParser {
     private static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$");
-    private static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+) *\\(([^\\)]*)\\)$");
+    private static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\((.*)\\)$");
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^([0-9]+)$");
     private static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"$");
 
-    public List<Expression> parse(String method) throws ParseException {
+    public List<Expression> parse(String string) throws ParseException {
+        return parseChainedMethodCall(string).getExpressions();
+    }
+
+    public ChainedMethodCallExpression parseChainedMethodCall(String string) throws ParseException {
         List<Expression> expressions = new ArrayList<>();
-        for (String part : method.split("\\.")) {
+        for (String part : string.split("\\.")) {
             expressions.add(parseExpression(part));
         }
 
-        return expressions;
+        return new ChainedMethodCallExpression(expressions);
     }
 
     private Expression parseExpression(String string) throws ParseException {
@@ -44,7 +48,7 @@ public class MethodParser {
         return new NamespaceExpression(string);
     }
 
-    private MethodCallExpression parseMethod(String string) throws MethodParseException, ParameterParseException {
+    private MethodCallExpression parseMethod(String string) throws ParseException {
         Matcher matcher = METHOD_PATTERN.matcher(string);
         if (!matcher.matches()) {
             throw new MethodParseException(string);
@@ -72,11 +76,13 @@ public class MethodParser {
         return new StringExpression(string.substring(1, string.length() - 1).replaceAll("\\\\", ""));
     }
 
-    private Expression parseParameter(String string) throws ParameterParseException {
+    private Expression parseParameter(String string) throws ParseException {
         if (INTEGER_PATTERN.matcher(string).matches()) {
             return parseIntegerExpression(string);
         } else if (STRING_PATTERN.matcher(string).matches()) {
             return parseStringExpression(string);
+        } else if (METHOD_PATTERN.matcher(string).matches()) {
+            return parseChainedMethodCall(string);
         } else {
             throw new ParameterParseException(string);
         }

@@ -29,4 +29,9 @@ public class MethodParserTest {
     public void complexMethod() throws Exception {
         new MethodParser().parse("this.getPlayers().filterBy()");
     }
+
+    @Test
+    public void nestedMethods() throws Exception {
+        new MethodParser().parse("getIt(getIt())");
+    }
 }

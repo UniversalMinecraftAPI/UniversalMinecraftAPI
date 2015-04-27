@@ -9,7 +9,7 @@ public final class MethodPrinter {
 
     }
 
-    public static String printBlocks(List<Expression> expressions) {
+    public static String printExpressions(List<Expression> expressions) {
         StringBuilder builder = new StringBuilder();
         for (Expression expression : expressions) {
             builder.append(printExpression(expression));
@@ -30,9 +30,15 @@ public final class MethodPrinter {
             return printStringParameter((StringExpression) expression);
         } else if (expression instanceof IntegerExpression) {
             return printIntegerParameter((IntegerExpression) expression);
+        } else if (expression instanceof ChainedMethodCallExpression) {
+            return printChainedMethodCallExpression((ChainedMethodCallExpression) expression);
         } else {
             return "undefined";
         }
+    }
+
+    public static String printChainedMethodCallExpression(ChainedMethodCallExpression chainedMethodCallExpression) {
+        return printExpressions(chainedMethodCallExpression.getExpressions());
     }
 
     public static String printMethodCallExpression(MethodCallExpression methodCallExpression) {
