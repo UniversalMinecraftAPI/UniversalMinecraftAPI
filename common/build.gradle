@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java.srcDirs
+    classifier = 'src'
+}
+
+dependencies {
+    compile 'io.netty:netty-all:4.0.27.Final'
+}
