@@ -5,13 +5,21 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
 	fatJar
-	compile {
-		extendsFrom fatJar
-	}
+	compile.extendsFrom fatJar
+}
+
+repositories {
+    maven {
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
 }
 
 dependencies {
     fatJar project(':common')
+    compile 'org.spigotmc:spigot-api:1.8.3-R0.1-SNAPSHOT'
 }
 
 task sourcesJar(type: Jar) {
