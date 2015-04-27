@@ -10,4 +10,5 @@ task sourcesJar(type: Jar) {
 
 dependencies {
     compile 'io.netty:netty-all:4.0.27.Final'
+    testCompile 'junit:junit:4.12'
 }
