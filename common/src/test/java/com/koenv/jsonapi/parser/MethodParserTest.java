@@ -81,12 +81,17 @@ public class MethodParserTest {
     }
 
     @Test(expected = ParseException.class)
-    public void invalidMethodThrowsException() throws Exception {
+    public void invalidMethodThrowsParseException() throws Exception {
         new MethodParser().parse("namespace.getIt(name)as");
     }
 
     @Test(expected = ParseException.class)
-    public void invalidNumberExpression() throws Exception {
+    public void invalidNumberExpressionThrowsParseException() throws Exception {
         new MethodParser().parse("getIt().12.67");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidNumberOfParenthesesThrowsParseException() throws Exception {
+        new MethodParser().parse("getIt(getIt()");
     }
 }
