@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MethodParser {
-    private static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$");
+    private static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
     private static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\(");
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");
     private static final Pattern DOUBLE_PATTERN = Pattern.compile("^[0-9]+\\.[0-9]+");
@@ -50,6 +50,14 @@ public class MethodParser {
                 string = string.substring(1);
                 continue;
             }
+            Matcher matcher = METHOD_PATTERN.matcher(string);
+            if (matcher.find()) {
+                ExpressionResult expressionResult = parseMethod(string, counter);
+                expressions.add(expressionResult.expression);
+                string = expressionResult.string;
+                continue;
+            }
+
             if (i == 0) {
                 Matcher namespaceMatcher = NAMESPACE_PATTERN.matcher(string);
                 if (namespaceMatcher.find()) {
@@ -58,14 +66,14 @@ public class MethodParser {
                     continue;
                 }
             }
-            Matcher matcher = METHOD_PATTERN.matcher(string);
-            if (matcher.find()) {
-                ExpressionResult expressionResult = parseMethod(string, counter);
-                expressions.add(expressionResult.expression);
-                string = expressionResult.string;
-            } else {
-                throw new ParseException("Invalid expression: " + string);
+
+            if (string.startsWith(")")) {
+                counter.decrement();
+                string = string.substring(1);
+                continue;
             }
+
+            throw new ParseException("Invalid expression: " + string);
         }
 
         if (expressions.size() == 1 && expressions.get(0) instanceof NamespaceExpression) {

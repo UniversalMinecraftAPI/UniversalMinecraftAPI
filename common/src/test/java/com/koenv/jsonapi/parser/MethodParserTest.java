@@ -44,15 +44,29 @@ public class MethodParserTest {
     }
 
     @Test
+    public void simpleNamespace() throws Exception {
+        new MethodParser().parse("test.getThat()");
+    }
+
+    @Test
+    public void multipleNamespaces() throws Exception {
+        new MethodParser().parse("test.getThat(test.getThat())");
+    }
+
+    @Test
     public void methodWithParametersAsParameterAndIntegerAsParameter() throws Exception {
-        Expression expression = new MethodParser().parse("getIt(getThat(12, \"test\"), 12)");
+        Expression expression = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
         assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
 
         ChainedMethodCallExpression root = (ChainedMethodCallExpression) expression;
-        assertEquals(1, root.getExpressions().size());
-        assertThat(root.getExpressions().get(0), instanceOf(MethodCallExpression.class));
+        assertEquals(2, root.getExpressions().size());
+        assertThat(root.getExpressions().get(0), instanceOf(NamespaceExpression.class));
+        assertThat(root.getExpressions().get(1), instanceOf(MethodCallExpression.class));
 
-        MethodCallExpression firstMethodCall = (MethodCallExpression) root.getExpressions().get(0);
+        NamespaceExpression firstNamespace = (NamespaceExpression) root.getExpressions().get(0);
+        assertEquals("it", firstNamespace.getName());
+
+        MethodCallExpression firstMethodCall = (MethodCallExpression) root.getExpressions().get(1);
         assertEquals("getIt", firstMethodCall.getMethodName());
         assertEquals(2, firstMethodCall.getParameters().size());
         assertThat(firstMethodCall.getParameters().get(0), instanceOf(MethodCallExpression.class));
@@ -92,5 +106,10 @@ public class MethodParserTest {
     @Test(expected = ParseException.class)
     public void invalidNumberOfParenthesesThrowsParseException() throws Exception {
         new MethodParser().parse("getIt(getIt()");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidNamespacesThrowsParseException() throws Exception {
+        new MethodParser().parse("test.getThat().test.getThat()");
     }
 }

@@ -17,6 +17,15 @@ public class MethodInvokerTest {
         buildMethodInvoker().invokeMethod(expressions);
     }
 
+    @Test
+    public void invokeMethodWithNamespace() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("test"));
+        expressions.add(new MethodCallExpression("getThat", new ArrayList<>()));
+
+        buildMethodInvoker().invokeMethod(expressions);
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void namespaceNotInFirstPosition() throws MethodInvocationException {
         List<Expression> expressions = new ArrayList<>();
@@ -32,6 +41,12 @@ public class MethodInvokerTest {
         methodInvoker.registerMethods(new Object() {
             @APIMethod()
             public void getIt() {
+
+            }
+        });
+        methodInvoker.registerMethods(new Object() {
+            @APIMethod(namespace = "test")
+            public void getThat() {
 
             }
         });
