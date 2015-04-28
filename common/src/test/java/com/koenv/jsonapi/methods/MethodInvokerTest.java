@@ -9,9 +9,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 public class MethodInvokerTest {
     @Test
     public void invokeMethod() throws Exception {
@@ -21,19 +18,14 @@ public class MethodInvokerTest {
         buildMethodInvoker().invokeMethod(expressions);
     }
 
-    @Test
-    public void namespaceNotInFirstPosition() {
+    @Test(expected = MethodInvocationException.class)
+    public void namespaceNotInFirstPosition() throws MethodInvocationException {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new MethodCallExpression("getIt", new ArrayList<>()));
         expressions.add(new NamespaceExpression("test"));
         expressions.add(new MethodCallExpression("testIt", new ArrayList<>()));
 
-        try {
-            buildMethodInvoker().invokeMethod(expressions);
-            fail("Expected MethodInvocationException to be thrown");
-        } catch (MethodInvocationException e) {
-            assertEquals("Namespace can only be in first position", e.getMessage());
-        }
+        buildMethodInvoker().invokeMethod(expressions);
     }
 
     private MethodInvoker buildMethodInvoker() {

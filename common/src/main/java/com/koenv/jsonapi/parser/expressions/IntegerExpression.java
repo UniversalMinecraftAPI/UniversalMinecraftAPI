@@ -1,6 +1,6 @@
 package com.koenv.jsonapi.parser.expressions;
 
-public class IntegerExpression extends Expression {
+public class IntegerExpression extends NumberExpression {
     private int value;
 
     public IntegerExpression(int value) {
