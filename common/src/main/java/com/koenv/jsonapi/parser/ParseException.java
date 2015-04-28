@@ -1,4 +1,4 @@
-package com.koenv.jsonapi.parser.exceptions;
+package com.koenv.jsonapi.parser;
 
 public class ParseException extends Exception {
     public ParseException() {

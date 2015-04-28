@@ -1,6 +1,5 @@
 package com.koenv.jsonapi.methods;
 
-import com.koenv.jsonapi.methods.exception.MethodInvocationException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 import com.koenv.jsonapi.parser.expressions.MethodCallExpression;
 import com.koenv.jsonapi.parser.expressions.NamespaceExpression;

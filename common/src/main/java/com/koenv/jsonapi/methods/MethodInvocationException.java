@@ -1,4 +1,4 @@
-package com.koenv.jsonapi.methods.exception;
+package com.koenv.jsonapi.methods;
 
 public class MethodInvocationException extends Exception {
     public MethodInvocationException() {

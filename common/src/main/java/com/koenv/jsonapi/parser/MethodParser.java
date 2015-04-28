@@ -1,6 +1,5 @@
 package com.koenv.jsonapi.parser;
 
-import com.koenv.jsonapi.parser.exceptions.ParseException;
 import com.koenv.jsonapi.parser.expressions.*;
 import com.koenv.jsonapi.util.Counter;
 
