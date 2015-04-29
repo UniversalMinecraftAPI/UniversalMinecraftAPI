@@ -133,7 +133,9 @@ public class MethodInvoker {
 
         for (int i = 0; i < methodCallExpression.getParameters().size(); i++) {
             Expression expression = methodCallExpression.getParameters().get(i);
-            if (expression instanceof DoubleExpression) {
+            if (expression instanceof BooleanExpression) {
+                parameters.add(((BooleanExpression) expression).getValue());
+            } else if (expression instanceof DoubleExpression) {
                 parameters.add(((DoubleExpression) expression).getValue());
             } else if (expression instanceof IntegerExpression) {
                 parameters.add(((IntegerExpression) expression).getValue());
@@ -145,7 +147,15 @@ public class MethodInvoker {
             } else if (expression instanceof ChainedMethodCallExpression) {
                 Object result = invokeMethod(expression);
                 parameters.add(result);
+            } else {
+                throw new MethodInvocationException("Unknown expression: " + expression);
             }
+        }
+
+        if (method.getJavaMethod().getParameterCount() != parameters.size()) {
+            throw new MethodInvocationException("Method " + getMethodDeclaration(method) + " requires " +
+                    method.getJavaMethod().getParameterCount() +
+                    " parameters, received " + parameters.size());
         }
 
         Parameter[] javaParameters = method.getJavaMethod().getParameters();

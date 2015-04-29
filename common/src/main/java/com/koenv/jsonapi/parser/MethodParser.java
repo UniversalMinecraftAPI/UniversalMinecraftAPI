@@ -14,6 +14,7 @@ public class MethodParser {
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");
     private static final Pattern DOUBLE_PATTERN = Pattern.compile("^[0-9]+\\.[0-9]+");
     private static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
+    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
 
     public Expression parse(String string) throws ParseException {
@@ -27,7 +28,12 @@ public class MethodParser {
 
     private ExpressionResult parseExpression(String string, Counter counter) throws ParseException {
         string = string.trim();
-        Matcher matcher = DOUBLE_PATTERN.matcher(string);
+        Matcher matcher = BOOLEAN_PATTERN.matcher(string);
+        if (matcher.find()) {
+            string = matcher.replaceFirst("");
+            return new ExpressionResult(string, parseBooleanExpression(matcher.group(0)));
+        }
+        matcher = DOUBLE_PATTERN.matcher(string);
         if (matcher.find()) {
             string = matcher.replaceFirst("");
             return new ExpressionResult(string, parseDoubleExpression(matcher.group(0)));
@@ -133,6 +139,10 @@ public class MethodParser {
 
     private DoubleExpression parseDoubleExpression(String string) {
         return new DoubleExpression(Double.parseDouble(string));
+    }
+
+    private BooleanExpression parseBooleanExpression(String string) {
+        return new BooleanExpression(string.equalsIgnoreCase("true"));
     }
 
     private class ExpressionResult {

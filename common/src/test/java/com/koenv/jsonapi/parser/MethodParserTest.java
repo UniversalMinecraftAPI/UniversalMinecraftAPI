@@ -36,6 +36,11 @@ public class MethodParserTest {
     }
 
     @Test
+    public void booleanAsParameter() throws Exception{
+        new MethodParser().parse("getIt(true)");
+    }
+
+    @Test
     public void methodAsParameter() throws Exception {
         new MethodParser().parse("getIt(getIt())");
     }

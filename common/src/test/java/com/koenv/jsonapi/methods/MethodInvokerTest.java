@@ -111,6 +111,20 @@ public class MethodInvokerTest {
         assertEquals(12.67f, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
+    @Test
+    public void testBoolean() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("booleans"));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new BooleanExpression(true));
+
+        expressions.add(new MethodCallExpression("getBoolean", parameters));
+
+        // booleans.getBoolean(true)
+        assertEquals(true, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void invokeMethodWithWrongIntParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
@@ -176,6 +190,11 @@ public class MethodInvokerTest {
 
         @APIMethod(namespace = "floats")
         public static float getFloat(float arg) {
+            return arg;
+        }
+
+        @APIMethod(namespace = "booleans")
+        public static boolean getBoolean(boolean arg) {
             return arg;
         }
 
