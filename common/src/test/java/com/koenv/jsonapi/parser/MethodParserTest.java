@@ -3,6 +3,8 @@ package com.koenv.jsonapi.parser;
 import com.koenv.jsonapi.parser.expressions.*;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -54,25 +56,31 @@ public class MethodParserTest {
     }
 
     @Test
+    public void methodWithManyDifferentParameters() throws Exception {
+        new MethodParser().parse("test.getThat(test.getThat(12, \"get\"), 67.23)");
+    }
+
+    @Test
     public void methodWithParametersAsParameterAndIntegerAsParameter() throws Exception {
-        Expression expression = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
-        assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
+        List<Expression> expressions = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
+        ;
+        assertEquals(2, expressions.size());
+        assertThat(expressions.get(0), instanceOf(NamespaceExpression.class));
+        assertThat(expressions.get(1), instanceOf(MethodCallExpression.class));
 
-        ChainedMethodCallExpression root = (ChainedMethodCallExpression) expression;
-        assertEquals(2, root.getExpressions().size());
-        assertThat(root.getExpressions().get(0), instanceOf(NamespaceExpression.class));
-        assertThat(root.getExpressions().get(1), instanceOf(MethodCallExpression.class));
-
-        NamespaceExpression firstNamespace = (NamespaceExpression) root.getExpressions().get(0);
+        NamespaceExpression firstNamespace = (NamespaceExpression) expressions.get(0);
         assertEquals("it", firstNamespace.getName());
 
-        MethodCallExpression firstMethodCall = (MethodCallExpression) root.getExpressions().get(1);
+        MethodCallExpression firstMethodCall = (MethodCallExpression) expressions.get(1);
         assertEquals("getIt", firstMethodCall.getMethodName());
         assertEquals(2, firstMethodCall.getParameters().size());
-        assertThat(firstMethodCall.getParameters().get(0), instanceOf(MethodCallExpression.class));
+        assertThat(firstMethodCall.getParameters().get(0), instanceOf(ChainedMethodCallExpression.class));
         assertThat(firstMethodCall.getParameters().get(1), instanceOf(IntegerExpression.class));
 
-        MethodCallExpression secondMethodCall = (MethodCallExpression) firstMethodCall.getParameters().get(0);
+        ChainedMethodCallExpression secondChainedMethodCall = (ChainedMethodCallExpression) firstMethodCall.getParameters().get(0);
+        assertThat(secondChainedMethodCall.getExpressions().get(0), instanceOf(MethodCallExpression.class));
+
+        MethodCallExpression secondMethodCall = (MethodCallExpression) secondChainedMethodCall.getExpressions().get(0);
         assertEquals("getThat", secondMethodCall.getMethodName());
         assertEquals(2, secondMethodCall.getParameters().size());
         assertThat(secondMethodCall.getParameters().get(0), instanceOf(IntegerExpression.class));

@@ -4,6 +4,7 @@ import com.koenv.jsonapi.parser.expressions.*;
 import com.koenv.jsonapi.util.Counter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,9 +17,16 @@ public class MethodParser {
     private static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
 
-    public Expression parse(String string) throws ParseException {
+    public List<Expression> parse(String string) throws ParseException {
         Counter counter = new Counter();
-        return parseExpression(string, counter).expression;
+        Expression expression = parseExpression(string, counter).expression;
+        if (counter.count() != 0) {
+            throw new ParseException("Invalid number of parentheses");
+        }
+        if (expression instanceof ChainedMethodCallExpression) {
+            return ((ChainedMethodCallExpression) expression).getExpressions();
+        }
+        return Collections.singletonList(expression);
     }
 
     private ExpressionResult parseExpression(String string, Counter counter) throws ParseException {
@@ -67,10 +75,12 @@ public class MethodParser {
                 }
             }
 
+            if (string.startsWith(",")) {
+                break;
+            }
+
             if (string.startsWith(")")) {
-                counter.decrement();
-                string = string.substring(1);
-                continue;
+                break;
             }
 
             throw new ParseException("Invalid expression: " + string);
@@ -78,10 +88,6 @@ public class MethodParser {
 
         if (expressions.size() == 1 && expressions.get(0) instanceof NamespaceExpression) {
             throw new ParseException("Namespace without method: " + string);
-        }
-
-        if (counter.count() != 0) {
-            throw new ParseException("Invalid number of parentheses");
         }
 
         return new ExpressionResult(string, new ChainedMethodCallExpression(expressions));
@@ -104,29 +110,18 @@ public class MethodParser {
 
         while (!string.isEmpty()) {
             string = string.trim();
-            Matcher parameterMatcher = METHOD_PATTERN.matcher(string);
-            if (parameterMatcher.find()) {
-                ExpressionResult expressionResult = parseMethod(string, counter);
-                parameters.add(expressionResult.expression);
-                string = expressionResult.string;
-            } else {
-                if (string.startsWith(")")) {
-                    counter.decrement();
-                    string = string.substring(1);
-                    break;
-                }
-                if (string.startsWith(",")) {
-                    string = string.substring(1);
-                }
-                String parameterString = string.split(",")[0];
-                if (parameterString.trim().isEmpty()) {
-                    string = string.substring(parameterString.length());
-                    continue;
-                }
-                ExpressionResult expressionResult = parseExpression(string, counter);
-                parameters.add(expressionResult.expression);
-                string = expressionResult.string;
+            if (string.startsWith(")")) {
+                counter.decrement();
+                string = string.substring(1);
+                break;
             }
+            if (string.startsWith(",")) {
+                string = string.substring(1);
+                continue;
+            }
+            ExpressionResult expressionResult = parseExpression(string, counter);
+            parameters.add(expressionResult.expression);
+            string = expressionResult.string;
         }
 
         return new ExpressionResult(string, new MethodCallExpression(methodName, parameters));
