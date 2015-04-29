@@ -62,8 +62,12 @@ public class MethodParserTest {
 
     @Test
     public void methodWithParametersAsParameterAndIntegerAsParameter() throws Exception {
-        List<Expression> expressions = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
-        ;
+        Expression expression = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
+
+        assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
+
+        List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
+
         assertEquals(2, expressions.size());
         assertThat(expressions.get(0), instanceOf(NamespaceExpression.class));
         assertThat(expressions.get(1), instanceOf(MethodCallExpression.class));

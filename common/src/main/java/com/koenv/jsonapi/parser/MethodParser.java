@@ -4,7 +4,6 @@ import com.koenv.jsonapi.parser.expressions.*;
 import com.koenv.jsonapi.util.Counter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,16 +16,13 @@ public class MethodParser {
     private static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
 
-    public List<Expression> parse(String string) throws ParseException {
+    public Expression parse(String string) throws ParseException {
         Counter counter = new Counter();
         Expression expression = parseExpression(string, counter).expression;
         if (counter.count() != 0) {
             throw new ParseException("Invalid number of parentheses");
         }
-        if (expression instanceof ChainedMethodCallExpression) {
-            return ((ChainedMethodCallExpression) expression).getExpressions();
-        }
-        return Collections.singletonList(expression);
+        return expression;
     }
 
     private ExpressionResult parseExpression(String string, Counter counter) throws ParseException {

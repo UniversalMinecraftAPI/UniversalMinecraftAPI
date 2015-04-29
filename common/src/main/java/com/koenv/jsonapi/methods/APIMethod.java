@@ -16,5 +16,5 @@ public @interface APIMethod {
 
     String[] argumentDescriptions() default {};
 
-    static final class DEFAULT {};
+    final class DEFAULT {}
 }

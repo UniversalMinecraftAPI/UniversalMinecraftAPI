@@ -143,7 +143,7 @@ public class MethodInvoker {
                 Object result = invokeMethod(null, (MethodCallExpression) expression, null);
                 parameters.add(result);
             } else if (expression instanceof ChainedMethodCallExpression) {
-                Object result = invokeMethod(((ChainedMethodCallExpression) expression));
+                Object result = invokeMethod(expression);
                 parameters.add(result);
             }
         }
@@ -287,18 +287,8 @@ public class MethodInvoker {
     }
 
     private void registerDefaultParameterConverters() {
-        ParameterConverter<Double, Float> doubleToFloatConverter = new ParameterConverter<Double, Float>() {
-            @Override
-            public Float convert(Double aDouble) {
-                return aDouble.floatValue();
-            }
-        };
-        ParameterConverter<Float, Double> floatToDoubleConverter = new ParameterConverter<Float, Double>() {
-            @Override
-            public Double convert(Float aFloat) {
-                return aFloat.doubleValue();
-            }
-        };
+        ParameterConverter<Double, Float> doubleToFloatConverter = Double::floatValue;
+        ParameterConverter<Float, Double> floatToDoubleConverter = Float::doubleValue;
         registerParameterConverter(double.class, float.class, doubleToFloatConverter);
         registerParameterConverter(double.class, Float.class, doubleToFloatConverter);
         registerParameterConverter(Double.class, float.class, doubleToFloatConverter);
