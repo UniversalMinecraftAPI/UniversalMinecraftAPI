@@ -140,20 +140,28 @@ public class MethodInvoker {
 
     private Object convertParameterUntilFound(Object parameter, Parameter javaParameter) {
         boolean allowed = checkParameter(parameter, javaParameter);
+        Object previousParameter;
         while (!allowed) {
-            parameter = convertParameter(parameter, javaParameter);
+            previousParameter = parameter;
+            parameter = convertParameter(parameter, javaParameter.getType(), null);
             if (parameter == null) {
-                return null;
+                parameter = convertParameter(previousParameter, javaParameter.getType(), previousParameter.getClass().getSuperclass());
+                if (parameter == null) {
+                    return null;
+                }
             }
             allowed = checkParameter(parameter, javaParameter);
         }
         return parameter;
     }
 
-    private Object convertParameter(Object parameter, Parameter javaParameter) {
-        Map<Class<?>, ParameterConverter> toParameterMap = toFromParameterConverterMap.get(javaParameter.getType());
+    private Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
+        if (from == null && parameter != null) {
+            from = parameter.getClass();
+        }
+        Map<Class<?>, ParameterConverter> toParameterMap = toFromParameterConverterMap.get(to);
         if (toParameterMap != null) {
-            ParameterConverter parameterConverter = toParameterMap.get(parameter.getClass());
+            ParameterConverter parameterConverter = toParameterMap.get(from);
             if (parameterConverter != null) {
                 return parameterConverter.convert(parameter);
             }
@@ -190,7 +198,7 @@ public class MethodInvoker {
         }
     }
 
-    public <From, To> void registerParameterConvert(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
+    public <From, To> void registerParameterConverter(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
         if (toFromParameterConverterMap.get(to) == null) {
             toFromParameterConverterMap.put(to, new HashMap<>());
         }

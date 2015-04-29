@@ -67,6 +67,22 @@ public class MethodInvokerTest {
         assertEquals("baa3d81b-0b77-47dd-ac48-0371098d373d", buildMethodInvoker().invokeMethod(expressions));
     }
 
+    @Test
+    public void convertParameterRecursively() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("ints"));
+
+        List<Expression> parameters = new ArrayList<>();
+        List<Expression> chainedMethodCall = new ArrayList<>();
+        chainedMethodCall.add(new NamespaceExpression("objects"));
+        chainedMethodCall.add(new MethodCallExpression("getObjectExtension", new ArrayList<>()));
+        parameters.add(new ChainedMethodCallExpression(chainedMethodCall));
+        expressions.add(new MethodCallExpression("getInt", parameters));
+
+        // ints.getInt(objects.getObjectExtension())
+        assertEquals(19, buildMethodInvoker().invokeMethod(expressions));
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void invokeMethodWithWrongIntParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
@@ -92,10 +108,17 @@ public class MethodInvokerTest {
     private MethodInvoker buildMethodInvoker() {
         MethodInvoker methodInvoker = new MethodInvoker();
         methodInvoker.registerMethods(new MethodInvokerTestClass());
-        methodInvoker.registerParameterConvert(String.class, UUID.class, new ParameterConverter<String, UUID>() {
+        methodInvoker.registerParameterConverter(String.class, UUID.class, new ParameterConverter<String, UUID>() {
             @Override
             public UUID convert(String s) {
                 return UUID.fromString(s);
+            }
+        });
+        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestObject.class, int.class, new ParameterConverter<MethodInvokerTestClass.MethodInvokerTestObject, Integer>() {
+
+            @Override
+            public Integer convert(MethodInvokerTestClass.MethodInvokerTestObject methodInvokerTestObject) {
+                return methodInvokerTestObject.getInt();
             }
         });
 
@@ -124,6 +147,11 @@ public class MethodInvokerTest {
         }
 
         @APIMethod(namespace = "objects")
+        public static MethodInvokerTestObjectExtension getObjectExtension() {
+            return new MethodInvokerTestObjectExtension();
+        }
+
+        @APIMethod(namespace = "objects")
         public static String getUUID(UUID uuid) {
             return uuid.toString();
         }
@@ -136,6 +164,12 @@ public class MethodInvokerTest {
         private static class MethodInvokerTestObject {
             public int getInt() {
                 return 18;
+            }
+        }
+
+        private static class MethodInvokerTestObjectExtension extends MethodInvokerTestObject {
+            public int getInt() {
+                return 19;
             }
         }
     }
