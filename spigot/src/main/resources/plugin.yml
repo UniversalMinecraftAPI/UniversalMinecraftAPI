@@ -1,0 +1,9 @@
+name: JSONAPI
+main: com.koenv.jsonapi.spigot.SpigotJSONAPI
+version: 0.1-SNAPSHOT
+commands:
+   jsonapi:
+      description: The JSONAPI base command
+      usage: /<command>
+      permission: jsonapi.all
+      permission-message: You don't have <permission>
