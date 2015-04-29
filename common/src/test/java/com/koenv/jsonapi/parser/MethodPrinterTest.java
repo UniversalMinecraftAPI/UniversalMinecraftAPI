@@ -32,10 +32,48 @@ public class MethodPrinterTest {
     }
 
     @Test
-    public void escapedStringPrint() throws Exception {
-        assertEquals("Escape double quotes", "\"\"hey\"\"", MethodPrinter.printStringParameter(new StringExpression("\"hey\"")));
+    public void recursiveMethodPrint() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("ints"));
 
-        assertEquals("Escape null byte", "\"\b0\"", MethodPrinter.printStringParameter(new StringExpression("\b0")));
+        List<Expression> parameters = new ArrayList<>();
+        List<Expression> chainedMethodCall = new ArrayList<>();
+        chainedMethodCall.add(new NamespaceExpression("objects"));
+        chainedMethodCall.add(new MethodCallExpression("getObjectExtension", new ArrayList<>()));
+        parameters.add(new ChainedMethodCallExpression(chainedMethodCall));
+        expressions.add(new MethodCallExpression("getInt", parameters));
+
+        assertEquals("ints.getInt(objects.getObjectExtension())", MethodPrinter.printExpressions(expressions));
+    }
+
+    @Test
+    public void methodWithManyDifferentParametersPrint() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("test"));
+
+        List<Expression> firstParameters = new ArrayList<>();
+
+        List<Expression> secondParameters = new ArrayList<>();
+        secondParameters.add(new IntegerExpression(12));
+        secondParameters.add(new StringExpression("get"));
+
+        List<Expression> firstParameter = new ArrayList<>();
+        firstParameter.add(new NamespaceExpression("test"));
+        firstParameter.add(new MethodCallExpression("getThat", secondParameters));
+
+        firstParameters.add(new ChainedMethodCallExpression(firstParameter));
+        firstParameters.add(new DoubleExpression(67.23));
+
+        expressions.add(new MethodCallExpression("getThat", firstParameters));
+
+        assertEquals("test.getThat(test.getThat(12, \"get\"), 67.23)", MethodPrinter.printExpressions(expressions));
+    }
+
+    @Test
+    public void escapedStringPrint() throws Exception {
+        assertEquals("Escape double quotes", "\"\"hey\"\"", MethodPrinter.printStringExpression(new StringExpression("\"hey\"")));
+
+        assertEquals("Escape null byte", "\"\b0\"", MethodPrinter.printStringExpression(new StringExpression("\b0")));
     }
 
     @Test

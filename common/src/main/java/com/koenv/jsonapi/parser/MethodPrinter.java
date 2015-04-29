@@ -27,9 +27,11 @@ public final class MethodPrinter {
         } else if (expression instanceof NamespaceExpression) {
             return printNamespaceExpression((NamespaceExpression) expression);
         } else if (expression instanceof StringExpression) {
-            return printStringParameter((StringExpression) expression);
+            return printStringExpression((StringExpression) expression);
         } else if (expression instanceof IntegerExpression) {
-            return printIntegerParameter((IntegerExpression) expression);
+            return printIntegerExpression((IntegerExpression) expression);
+        } else if (expression instanceof DoubleExpression) {
+            return printDoubleExpression((DoubleExpression) expression);
         } else if (expression instanceof ChainedMethodCallExpression) {
             return printChainedMethodCallExpression((ChainedMethodCallExpression) expression);
         } else {
@@ -59,11 +61,15 @@ public final class MethodPrinter {
         return namespaceExpression.getName();
     }
 
-    public static String printIntegerParameter(IntegerExpression integerParameter) {
-        return Integer.toString(integerParameter.getValue());
+    public static String printIntegerExpression(IntegerExpression integerExpression) {
+        return Integer.toString(integerExpression.getValue());
     }
 
-    public static String printStringParameter(StringExpression stringParameter) {
-        return '"' + stringParameter.getValue() + '"';
+    public static String printDoubleExpression(DoubleExpression doubleExpression) {
+        return Double.toString(doubleExpression.getValue());
+    }
+
+    public static String printStringExpression(StringExpression stringExpression) {
+        return '"' + stringExpression.getValue() + '"';
     }
 }
