@@ -1,19 +1,19 @@
 package com.koenv.jsonapi.methods;
 
 public class Method {
-    private String namespace;
     private String name;
+    private java.lang.reflect.Method javaMethod;
 
-    public Method(String namespace, String name) {
-        this.namespace = namespace;
+    public Method(String name, java.lang.reflect.Method javaMethod) {
         this.name = name;
-    }
-
-    public String getNamespace() {
-        return namespace;
+        this.javaMethod = javaMethod;
     }
 
     public String getName() {
         return name;
+    }
+
+    public java.lang.reflect.Method getJavaMethod() {
+        return javaMethod;
     }
 }

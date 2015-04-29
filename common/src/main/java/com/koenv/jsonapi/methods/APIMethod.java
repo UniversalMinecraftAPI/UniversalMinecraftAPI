@@ -9,9 +9,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface APIMethod {
     String namespace() default "";
+    Class<?> operatesOn() default DEFAULT.class;
     String description() default "";
 
     String returnDescription() default "";
 
     String[] argumentDescriptions() default {};
+
+    static final class DEFAULT {};
 }
