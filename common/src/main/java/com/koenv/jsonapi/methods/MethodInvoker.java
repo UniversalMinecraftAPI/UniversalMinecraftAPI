@@ -105,7 +105,7 @@ public class MethodInvoker {
     }
 
     private Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
-        Method method;
+        Method method = null;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
             if (namespaceMethods == null) {
@@ -117,10 +117,27 @@ public class MethodInvoker {
             }
         } else {
             Map<String, ClassMethod> classMethods = getClassMethodsMap(lastResult.getClass());
-            if (classMethods == null) {
-                throw new MethodInvocationException("No methods registered for class " + lastResult.getClass().getName());
+            if (classMethods != null) {
+                method = getClassMethod(classMethods, methodCallExpression.getMethodName());
             }
-            method = getClassMethod(classMethods, methodCallExpression.getMethodName());
+            if (method == null) {
+                classMethods = getClassMethodsMap(lastResult.getClass().getSuperclass());
+                if (classMethods != null) {
+                    method = getClassMethod(classMethods, methodCallExpression.getMethodName());
+                }
+            }
+            if (method == null) {
+                for (Class<?> interfaceClass : lastResult.getClass().getInterfaces()) {
+                    classMethods = getClassMethodsMap(interfaceClass);
+                    if (classMethods != null) {
+                        method = getClassMethod(classMethods, methodCallExpression.getMethodName());
+                    }
+                    if (method != null) {
+                        break;
+                    }
+                }
+            }
+
             if (method == null) {
                 throw new MethodInvocationException("No method named " + methodCallExpression.getMethodName() + " for class " + lastResult.getClass().getName());
             }
@@ -213,7 +230,15 @@ public class MethodInvoker {
             if (parameter == null) {
                 parameter = convertParameter(previousParameter, javaParameter.getType(), previousParameter.getClass().getSuperclass());
                 if (parameter == null) {
-                    return null;
+                    for (Class<?> interfaceClass : previousParameter.getClass().getInterfaces()) {
+                        parameter = convertParameter(previousParameter, javaParameter.getType(), interfaceClass);
+                        if (parameter != null) {
+                            break;
+                        }
+                    }
+                    if (parameter == null) {
+                        return null;
+                    }
                 }
             }
             allowed = checkParameter(parameter, javaParameter);

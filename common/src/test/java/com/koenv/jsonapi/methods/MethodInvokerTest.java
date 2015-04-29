@@ -84,6 +84,22 @@ public class MethodInvokerTest {
     }
 
     @Test
+    public void convertParameterRecursivelyInterface() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("booleans"));
+
+        List<Expression> parameters = new ArrayList<>();
+        List<Expression> chainedMethodCall = new ArrayList<>();
+        chainedMethodCall.add(new NamespaceExpression("objects"));
+        chainedMethodCall.add(new MethodCallExpression("getObjectExtension", new ArrayList<>()));
+        parameters.add(new ChainedMethodCallExpression(chainedMethodCall));
+        expressions.add(new MethodCallExpression("getBoolean", parameters));
+
+        // booleans.getBoolean(objects.getObjectExtension())
+        assertEquals(false, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
     public void testLong() throws Exception {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new NamespaceExpression("longs"));
@@ -150,19 +166,9 @@ public class MethodInvokerTest {
     private MethodInvoker buildMethodInvoker() {
         MethodInvoker methodInvoker = new MethodInvoker();
         methodInvoker.registerMethods(new MethodInvokerTestClass());
-        methodInvoker.registerParameterConverter(String.class, UUID.class, new ParameterConverter<String, UUID>() {
-            @Override
-            public UUID convert(String s) {
-                return UUID.fromString(s);
-            }
-        });
-        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestObject.class, int.class, new ParameterConverter<MethodInvokerTestClass.MethodInvokerTestObject, Integer>() {
-
-            @Override
-            public Integer convert(MethodInvokerTestClass.MethodInvokerTestObject methodInvokerTestObject) {
-                return methodInvokerTestObject.getInt();
-            }
-        });
+        methodInvoker.registerParameterConverter(String.class, UUID.class, UUID::fromString);
+        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestObject.class, int.class, MethodInvokerTestClass.MethodInvokerTestObject::getInt);
+        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestInterface.class, boolean.class, MethodInvokerTestClass.MethodInvokerTestInterface::getBoolean);
 
         return methodInvoker;
     }
@@ -219,15 +225,24 @@ public class MethodInvokerTest {
         }
 
         private static class MethodInvokerTestObject {
-            public int getInt() {
+            public Integer getInt() {
                 return 18;
             }
         }
 
-        private static class MethodInvokerTestObjectExtension extends MethodInvokerTestObject {
-            public int getInt() {
+        private static class MethodInvokerTestObjectExtension extends MethodInvokerTestObject implements MethodInvokerTestInterface {
+            public Integer getInt() {
                 return 19;
             }
+
+            @Override
+            public boolean getBoolean() {
+                return false;
+            }
+        }
+
+        private interface MethodInvokerTestInterface {
+            boolean getBoolean();
         }
     }
 }
