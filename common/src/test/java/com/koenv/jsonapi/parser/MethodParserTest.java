@@ -87,13 +87,13 @@ public class MethodParserTest {
         assertThat(secondMethodCall.getParameters().get(1), instanceOf(StringExpression.class));
 
         IntegerExpression secondMethodCallParameter1 = (IntegerExpression) secondMethodCall.getParameters().get(0);
-        assertEquals(12, secondMethodCallParameter1.getValue());
+        assertEquals(12, (int) secondMethodCallParameter1.getValue());
 
         StringExpression secondMethodCallParameter2 = (StringExpression) secondMethodCall.getParameters().get(1);
         assertEquals("test", secondMethodCallParameter2.getValue());
 
         IntegerExpression firstMethodCallParameter2 = (IntegerExpression) firstMethodCall.getParameters().get(1);
-        assertEquals(12, firstMethodCallParameter2.getValue());
+        assertEquals(12, (int) firstMethodCallParameter2.getValue());
     }
 
     @Test(expected = ParseException.class)

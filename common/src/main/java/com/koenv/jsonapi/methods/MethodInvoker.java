@@ -17,35 +17,91 @@ public class MethodInvoker {
     private static Map<Class<?>, List<Class<?>>> alsoAllowed = new HashMap<>();
 
     static {
-        alsoAllowed.put(Integer.class, Arrays.asList(int.class));
-        alsoAllowed.put(int.class, Arrays.asList(Integer.class));
+        alsoAllowed.put(Integer.class, Arrays.asList(int.class, long.class, Long.class, short.class, Short.class));
+        alsoAllowed.put(int.class, Arrays.asList(Integer.class, long.class, Long.class, short.class, Short.class));
+        alsoAllowed.put(Short.class, Arrays.asList(short.class, int.class, Integer.class, long.class, Long.class));
+        alsoAllowed.put(short.class, Arrays.asList(Short.class, int.class, Integer.class, long.class, Long.class));
+        alsoAllowed.put(Long.class, Arrays.asList(long.class, int.class, Integer.class, short.class, Short.class));
+        alsoAllowed.put(long.class, Arrays.asList(Long.class, int.class, Integer.class, short.class, Short.class));
+        alsoAllowed.put(Double.class, Arrays.asList(double.class));
+        alsoAllowed.put(double.class, Arrays.asList(Double.class));
+        alsoAllowed.put(Float.class, Arrays.asList(float.class));
+        alsoAllowed.put(float.class, Arrays.asList(Float.class));
+        alsoAllowed.put(Boolean.class, Arrays.asList(boolean.class));
+        alsoAllowed.put(boolean.class, Arrays.asList(Boolean.class));
     }
 
     public MethodInvoker() {
         this.namespaceMethodsMap = new HashMap<>();
         this.classMethodsMap = new HashMap<>();
         this.toFromParameterConverterMap = new HashMap<>();
+        registerDefaultParameterConverters();
     }
 
-    public Object invokeMethod(List<Expression> expressions) throws MethodInvocationException {
-        String namespace = null;
-        Object lastResult = null;
-        for (int i = 0; i < expressions.size(); i++) {
-            Expression expression = expressions.get(i);
-            if (expression instanceof NamespaceExpression) {
-                if (i != 0) {
-                    throw new MethodInvocationException("Namespace can only be in first position");
-                }
-                namespace = ((NamespaceExpression) expression).getName();
-            } else if (expression instanceof MethodCallExpression) {
-                if (i == 0 || (i == 1 && namespace != null)) {
-                    lastResult = invokeMethod(namespace, (MethodCallExpression) expression, lastResult);
-                } else {
-                    lastResult = invokeMethod(null, (MethodCallExpression) expression, lastResult);
+    public Object invokeMethod(Expression expression) throws MethodInvocationException {
+        if (expression instanceof ChainedMethodCallExpression) {
+            List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
+            String namespace = null;
+            Object lastResult = null;
+            for (int i = 0; i < expressions.size(); i++) {
+                Expression innerExpression = expressions.get(i);
+                if (innerExpression instanceof NamespaceExpression) {
+                    if (i != 0) {
+                        throw new MethodInvocationException("Namespace can only be in first position");
+                    }
+                    namespace = ((NamespaceExpression) innerExpression).getName();
+                } else if (innerExpression instanceof MethodCallExpression) {
+                    if (i == 0 || (i == 1 && namespace != null)) {
+                        lastResult = invokeMethod(namespace, (MethodCallExpression) innerExpression, lastResult);
+                    } else {
+                        lastResult = invokeMethod(null, (MethodCallExpression) innerExpression, lastResult);
+                    }
                 }
             }
+            return lastResult;
+        } else if (expression instanceof MethodCallExpression) {
+            return invokeMethod(null, (MethodCallExpression) expression, null);
+        } else if (expression instanceof ValueExpression) {
+            return ((ValueExpression) expression).getValue();
+        } else {
+            throw new MethodInvocationException("Unable to invoke non-existent expression");
         }
-        return lastResult;
+    }
+
+    public void registerMethods(Object object) {
+        for (java.lang.reflect.Method objectMethod : object.getClass().getMethods()) {
+            APIMethod annotation = objectMethod.getAnnotation(APIMethod.class);
+            if (annotation == null) {
+                continue;
+            }
+            if (!Modifier.isPublic(objectMethod.getModifiers())) {
+                throw new MethodRegistrationException("All registered API methods must be public: " + objectMethod.getName());
+            }
+            if (!Modifier.isStatic(objectMethod.getModifiers())) {
+                throw new MethodRegistrationException("All registered API methods must be static: " + objectMethod.getName());
+            }
+            if (!APIMethod.DEFAULT.class.equals(annotation.operatesOn())) {
+                if (objectMethod.getParameterCount() < 1) {
+                    throw new MethodRegistrationException("API methods which operate on an object need to have at least 1 parameter: " + objectMethod.getName());
+                }
+                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[0].getType())) {
+                    throw new MethodRegistrationException("API methods which operate on an object need to have the operatesOn class as first parameter: " + objectMethod.getName());
+                }
+                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod);
+                registerClassMethod(classMethod);
+                continue;
+            }
+            String namespace = getNamespaceName(annotation.namespace());
+            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod);
+            registerMethod(method);
+        }
+    }
+
+    public <From, To> void registerParameterConverter(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
+        if (toFromParameterConverterMap.get(to) == null) {
+            toFromParameterConverterMap.put(to, new HashMap<>());
+        }
+        toFromParameterConverterMap.get(to).put(from, parameterConverter);
     }
 
     private Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
@@ -87,7 +143,7 @@ public class MethodInvoker {
                 Object result = invokeMethod(null, (MethodCallExpression) expression, null);
                 parameters.add(result);
             } else if (expression instanceof ChainedMethodCallExpression) {
-                Object result = invokeMethod(((ChainedMethodCallExpression) expression).getExpressions());
+                Object result = invokeMethod(((ChainedMethodCallExpression) expression));
                 parameters.add(result);
             }
         }
@@ -169,42 +225,6 @@ public class MethodInvoker {
         return null;
     }
 
-    public void registerMethods(Object object) {
-        for (java.lang.reflect.Method objectMethod : object.getClass().getMethods()) {
-            APIMethod annotation = objectMethod.getAnnotation(APIMethod.class);
-            if (annotation == null) {
-                continue;
-            }
-            if (!Modifier.isPublic(objectMethod.getModifiers())) {
-                throw new MethodRegistrationException("All registered API methods must be public: " + objectMethod.getName());
-            }
-            if (!Modifier.isStatic(objectMethod.getModifiers())) {
-                throw new MethodRegistrationException("All registered API methods must be static: " + objectMethod.getName());
-            }
-            if (!APIMethod.DEFAULT.class.equals(annotation.operatesOn())) {
-                if (objectMethod.getParameterCount() < 1) {
-                    throw new MethodRegistrationException("API methods which operate on an object need to have at least 1 parameter: " + objectMethod.getName());
-                }
-                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[0].getType())) {
-                    throw new MethodRegistrationException("API methods which operate on an object need to have the operatesOn class as first parameter: " + objectMethod.getName());
-                }
-                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod);
-                registerClassMethod(classMethod);
-                continue;
-            }
-            String namespace = getNamespaceName(annotation.namespace());
-            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod);
-            registerMethod(method);
-        }
-    }
-
-    public <From, To> void registerParameterConverter(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
-        if (toFromParameterConverterMap.get(to) == null) {
-            toFromParameterConverterMap.put(to, new HashMap<>());
-        }
-        toFromParameterConverterMap.get(to).put(from, parameterConverter);
-    }
-
     private void registerMethod(NamespacedMethod method) {
         if (namespaceMethodsMap.get(method.getNamespace()) == null) {
             namespaceMethodsMap.put(method.getNamespace(), new HashMap<>());
@@ -264,5 +284,29 @@ public class MethodInvoker {
         }
         stringBuilder.append(")");
         return stringBuilder.toString();
+    }
+
+    private void registerDefaultParameterConverters() {
+        ParameterConverter<Double, Float> doubleToFloatConverter = new ParameterConverter<Double, Float>() {
+            @Override
+            public Float convert(Double aDouble) {
+                return aDouble.floatValue();
+            }
+        };
+        ParameterConverter<Float, Double> floatToDoubleConverter = new ParameterConverter<Float, Double>() {
+            @Override
+            public Double convert(Float aFloat) {
+                return aFloat.doubleValue();
+            }
+        };
+        registerParameterConverter(double.class, float.class, doubleToFloatConverter);
+        registerParameterConverter(double.class, Float.class, doubleToFloatConverter);
+        registerParameterConverter(Double.class, float.class, doubleToFloatConverter);
+        registerParameterConverter(Double.class, Float.class, doubleToFloatConverter);
+
+        registerParameterConverter(float.class, double.class, floatToDoubleConverter);
+        registerParameterConverter(float.class, Double.class, floatToDoubleConverter);
+        registerParameterConverter(Float.class, double.class, floatToDoubleConverter);
+        registerParameterConverter(Float.class, Double.class, floatToDoubleConverter);
     }
 }

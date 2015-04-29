@@ -7,7 +7,7 @@ public class DoubleExpression extends NumberExpression {
         this.value = value;
     }
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 }

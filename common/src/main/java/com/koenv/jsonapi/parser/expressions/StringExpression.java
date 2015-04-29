@@ -1,6 +1,6 @@
 package com.koenv.jsonapi.parser.expressions;
 
-public class StringExpression extends Expression {
+public class StringExpression extends ValueExpression {
     private String value;
 
     public StringExpression(String value) {

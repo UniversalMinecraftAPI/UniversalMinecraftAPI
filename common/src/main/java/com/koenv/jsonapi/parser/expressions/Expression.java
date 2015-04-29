@@ -1,4 +1,4 @@
 package com.koenv.jsonapi.parser.expressions;
 
-public class Expression {
+public abstract class Expression {
 }

@@ -16,7 +16,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getIt", new ArrayList<>()));
 
         // getIt()
-        assertEquals(12, buildMethodInvoker().invokeMethod(expressions));
+        assertEquals(12, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
     @Test
@@ -26,7 +26,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getThat", new ArrayList<>()));
 
         // test.getThat()
-        buildMethodInvoker().invokeMethod(expressions);
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getInt", parameters));
 
         // ints.getInt(getIt())
-        assertEquals(12, buildMethodInvoker().invokeMethod(expressions));
+        assertEquals(12, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getInt", new ArrayList<>()));
 
         // objects.getObject().getInt()
-        assertEquals(18, buildMethodInvoker().invokeMethod(expressions));
+        assertEquals(18, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getUUID", parameters));
 
         // objects.getUUID("baa3d81b-0b77-47dd-ac48-0371098d373d")
-        assertEquals("baa3d81b-0b77-47dd-ac48-0371098d373d", buildMethodInvoker().invokeMethod(expressions));
+        assertEquals("baa3d81b-0b77-47dd-ac48-0371098d373d", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
     @Test
@@ -80,7 +80,35 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getInt", parameters));
 
         // ints.getInt(objects.getObjectExtension())
-        assertEquals(19, buildMethodInvoker().invokeMethod(expressions));
+        assertEquals(19, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void testLong() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("longs"));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new MethodCallExpression("getIt", new ArrayList<>()));
+
+        expressions.add(new MethodCallExpression("getLong", parameters));
+
+        // longs.getLong(getIt())
+        assertEquals(12L, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void testFloat() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("floats"));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new DoubleExpression(12.67));
+
+        expressions.add(new MethodCallExpression("getFloat", parameters));
+
+        // floats.getFloat(12.67)
+        assertEquals(12.67f, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
     @Test(expected = MethodInvocationException.class)
@@ -91,7 +119,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("getInt", parameters));
 
         // getInt(12.67)
-        buildMethodInvoker().invokeMethod(expressions);
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
     }
 
     @Test(expected = MethodInvocationException.class)
@@ -102,7 +130,7 @@ public class MethodInvokerTest {
         expressions.add(new MethodCallExpression("testIt", new ArrayList<>()));
 
         // getIt().test.testIt()
-        buildMethodInvoker().invokeMethod(expressions);
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
     }
 
     private MethodInvoker buildMethodInvoker() {
@@ -138,6 +166,16 @@ public class MethodInvokerTest {
 
         @APIMethod(namespace = "ints")
         public static int getInt(int arg) {
+            return arg;
+        }
+
+        @APIMethod(namespace = "longs")
+        public static long getLong(long arg) {
+            return arg;
+        }
+
+        @APIMethod(namespace = "floats")
+        public static float getFloat(float arg) {
             return arg;
         }
 

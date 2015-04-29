@@ -7,7 +7,7 @@ public class IntegerExpression extends NumberExpression {
         this.value = value;
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 }
