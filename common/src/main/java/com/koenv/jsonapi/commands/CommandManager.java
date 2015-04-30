@@ -1,16 +1,16 @@
 package com.koenv.jsonapi.commands;
 
 import com.koenv.jsonapi.ChatColor;
-import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIInterface;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CommandManager {
-    private JSONAPI jsonapi;
+    private JSONAPIInterface jsonapi;
     private Map<String, Command> commands = new HashMap<>();
 
-    public CommandManager(JSONAPI jsonapi) {
+    public CommandManager(JSONAPIInterface jsonapi) {
         this.jsonapi = jsonapi;
     }
 

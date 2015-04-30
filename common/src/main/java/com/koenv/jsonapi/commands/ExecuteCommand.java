@@ -1,14 +1,14 @@
 package com.koenv.jsonapi.commands;
 
 import com.koenv.jsonapi.ChatColor;
-import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.parser.ParseException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 
 public class ExecuteCommand extends Command {
     @Override
-    public boolean onCommand(JSONAPI jsonapi, CommandSource source, String[] args) {
+    public boolean onCommand(JSONAPIInterface jsonapi, CommandSource source, String[] args) {
         if (args.length < 1) {
             source.sendMessage(ChatColor.RED, "Please specify the expression.");
             return true;

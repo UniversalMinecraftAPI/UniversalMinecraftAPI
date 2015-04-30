@@ -5,7 +5,7 @@ import com.koenv.jsonapi.commands.ExecuteCommand;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 
-public class JSONAPI {
+public class JSONAPI implements JSONAPIInterface {
     private JSONAPIProvider provider;
     private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
@@ -15,6 +15,7 @@ public class JSONAPI {
         this.provider = provider;
     }
 
+    @Override
     public void setup() {
         expressionParser = new ExpressionParser();
         methodInvoker = new MethodInvoker();
@@ -26,14 +27,17 @@ public class JSONAPI {
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
     }
 
+    @Override
     public ExpressionParser getExpressionParser() {
         return expressionParser;
     }
 
+    @Override
     public MethodInvoker getMethodInvoker() {
         return methodInvoker;
     }
 
+    @Override
     public CommandManager getCommandManager() {
         return commandManager;
     }

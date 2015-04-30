@@ -1,7 +1,7 @@
 package com.koenv.jsonapi.commands;
 
-import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIInterface;
 
 public abstract class Command {
-    public abstract boolean onCommand(JSONAPI jsonapi, CommandSource commandSource, String[] args);
+    public abstract boolean onCommand(JSONAPIInterface jsonapi, CommandSource commandSource, String[] args);
 }
