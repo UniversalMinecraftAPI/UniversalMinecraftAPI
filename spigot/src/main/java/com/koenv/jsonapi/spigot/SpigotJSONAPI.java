@@ -3,7 +3,7 @@ package com.koenv.jsonapi.spigot;
 import com.koenv.jsonapi.methods.APIMethod;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
-import com.koenv.jsonapi.parser.MethodParser;
+import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.parser.ParseException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 import org.bukkit.Bukkit;
@@ -12,12 +12,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SpigotJSONAPI extends JavaPlugin {
-    private MethodParser methodParser;
+    private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
 
     @Override
     public void onEnable() {
-        methodParser = new MethodParser();
+        expressionParser = new ExpressionParser();
         methodInvoker = new MethodInvoker();
 
         methodInvoker.registerMethods(this);
@@ -42,7 +42,7 @@ public class SpigotJSONAPI extends JavaPlugin {
                     execStringBuilder.append(" ");
                 }
                 try {
-                    Expression expression = methodParser.parse(execStringBuilder.toString());
+                    Expression expression = expressionParser.parse(execStringBuilder.toString());
                     Object result = methodInvoker.invokeMethod(expression);
                     sender.sendMessage(ChatColor.GREEN + String.valueOf(result));
                     return true;

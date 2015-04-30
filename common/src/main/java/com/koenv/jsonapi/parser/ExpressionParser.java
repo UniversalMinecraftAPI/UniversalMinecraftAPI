@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MethodParser {
+public class ExpressionParser {
     private static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
     private static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\(");
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");

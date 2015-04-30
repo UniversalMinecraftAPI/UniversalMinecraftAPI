@@ -8,13 +8,13 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class MethodPrinterTest {
+public class ExpressionPrinterTest {
     @Test
     public void oneMethodPrint() throws Exception {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new MethodCallExpression("getIt", new ArrayList<>()));
 
-        assertEquals("getIt()", MethodPrinter.printExpressions(expressions));
+        assertEquals("getIt()", ExpressionPrinter.printExpressions(expressions));
     }
 
     @Test
@@ -28,7 +28,7 @@ public class MethodPrinterTest {
         parameters.add(new StringExpression("name"));
         expressions.add(new MethodCallExpression("filterBy", parameters));
 
-        assertEquals("this.getPlayers().filterBy(12, \"name\")", MethodPrinter.printExpressions(expressions));
+        assertEquals("this.getPlayers().filterBy(12, \"name\")", ExpressionPrinter.printExpressions(expressions));
     }
 
     @Test
@@ -43,7 +43,7 @@ public class MethodPrinterTest {
         parameters.add(new ChainedMethodCallExpression(chainedMethodCall));
         expressions.add(new MethodCallExpression("getInt", parameters));
 
-        assertEquals("ints.getInt(objects.getObjectExtension())", MethodPrinter.printExpressions(expressions));
+        assertEquals("ints.getInt(objects.getObjectExtension())", ExpressionPrinter.printExpressions(expressions));
     }
 
     @Test
@@ -66,14 +66,14 @@ public class MethodPrinterTest {
 
         expressions.add(new MethodCallExpression("getThat", firstParameters));
 
-        assertEquals("test.getThat(test.getThat(12, \"get\"), 67.23)", MethodPrinter.printExpressions(expressions));
+        assertEquals("test.getThat(test.getThat(12, \"get\"), 67.23)", ExpressionPrinter.printExpressions(expressions));
     }
 
     @Test
     public void escapedStringPrint() throws Exception {
-        assertEquals("Escape double quotes", "\"\"hey\"\"", MethodPrinter.printStringExpression(new StringExpression("\"hey\"")));
+        assertEquals("Escape double quotes", "\"\"hey\"\"", ExpressionPrinter.printStringExpression(new StringExpression("\"hey\"")));
 
-        assertEquals("Escape null byte", "\"\b0\"", MethodPrinter.printStringExpression(new StringExpression("\b0")));
+        assertEquals("Escape null byte", "\"\b0\"", ExpressionPrinter.printStringExpression(new StringExpression("\b0")));
     }
 
     @Test
@@ -86,6 +86,6 @@ public class MethodPrinterTest {
         parameters.add(new ChainedMethodCallExpression(chainedExpressions));
         expressions.add(new MethodCallExpression("getIt", parameters));
 
-        assertEquals("getIt(12, getIt())", MethodPrinter.printExpressions(expressions));
+        assertEquals("getIt(12, getIt())", ExpressionPrinter.printExpressions(expressions));
     }
 }

@@ -4,8 +4,8 @@ import com.koenv.jsonapi.parser.expressions.*;
 
 import java.util.List;
 
-public final class MethodPrinter {
-    private MethodPrinter() {
+public final class ExpressionPrinter {
+    private ExpressionPrinter() {
 
     }
 

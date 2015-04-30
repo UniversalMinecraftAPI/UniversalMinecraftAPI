@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.koenv.jsonapi.methods.APIMethod;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
-import com.koenv.jsonapi.parser.MethodParser;
+import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.parser.ParseException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 import org.spongepowered.api.Game;
@@ -26,12 +26,12 @@ import java.util.List;
 public class SpongeJSONAPI {
     private static Game game;
 
-    private MethodParser methodParser;
+    private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
 
     @Subscribe
     public void onServerStart(ServerStartedEvent event) {
-        methodParser = new MethodParser();
+        expressionParser = new ExpressionParser();
         methodInvoker = new MethodInvoker();
 
         methodInvoker.registerMethods(this);
@@ -61,7 +61,7 @@ public class SpongeJSONAPI {
                         execStringBuilder.append(" ");
                     }
                     try {
-                        Expression expression = methodParser.parse(execStringBuilder.toString());
+                        Expression expression = expressionParser.parse(execStringBuilder.toString());
                         Object result = methodInvoker.invokeMethod(expression);
                         source.sendMessage(Texts.of(String.valueOf(result)));
                         return Optional.of(CommandResult.success());

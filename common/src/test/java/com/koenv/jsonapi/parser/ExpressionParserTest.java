@@ -9,65 +9,65 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class MethodParserTest {
+public class ExpressionParserTest {
     @Test
     public void oneMethod() throws Exception {
-        new MethodParser().parse("getIt()");
+        new ExpressionParser().parse("getIt()");
     }
 
     @Test
     public void chainedMethods() throws Exception {
-        new MethodParser().parse("getIt().getIt()");
+        new ExpressionParser().parse("getIt().getIt()");
     }
 
     @Test
     public void integerAsParameter() throws Exception {
-        new MethodParser().parse("getIt(12)");
+        new ExpressionParser().parse("getIt(12)");
     }
 
     @Test
     public void stringAsParameter() throws Exception {
-        new MethodParser().parse("getIt(\"test\")");
+        new ExpressionParser().parse("getIt(\"test\")");
     }
 
     @Test
     public void doubleAsParameter() throws Exception {
-        new MethodParser().parse("getIt(12.67)");
+        new ExpressionParser().parse("getIt(12.67)");
     }
 
     @Test
     public void booleanAsParameter() throws Exception{
-        new MethodParser().parse("getIt(true)");
+        new ExpressionParser().parse("getIt(true)");
     }
 
     @Test
     public void methodAsParameter() throws Exception {
-        new MethodParser().parse("getIt(getIt())");
+        new ExpressionParser().parse("getIt(getIt())");
     }
 
     @Test
     public void methodWithParametersAsParameter() throws Exception {
-        new MethodParser().parse("getIt(getThat(12, \"test\"))");
+        new ExpressionParser().parse("getIt(getThat(12, \"test\"))");
     }
 
     @Test
     public void simpleNamespace() throws Exception {
-        new MethodParser().parse("test.getThat()");
+        new ExpressionParser().parse("test.getThat()");
     }
 
     @Test
     public void multipleNamespaces() throws Exception {
-        new MethodParser().parse("test.getThat(test.getThat())");
+        new ExpressionParser().parse("test.getThat(test.getThat())");
     }
 
     @Test
     public void methodWithManyDifferentParameters() throws Exception {
-        new MethodParser().parse("test.getThat(test.getThat(12, \"get\"), 67.23)");
+        new ExpressionParser().parse("test.getThat(test.getThat(12, \"get\"), 67.23)");
     }
 
     @Test
     public void methodWithParametersAsParameterAndIntegerAsParameter() throws Exception {
-        Expression expression = new MethodParser().parse("it.getIt(getThat(12, \"test\"), 12)");
+        Expression expression = new ExpressionParser().parse("it.getIt(getThat(12, \"test\"), 12)");
 
         assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
 
@@ -107,26 +107,26 @@ public class MethodParserTest {
 
     @Test(expected = ParseException.class)
     public void constantAsParameterThrowsParseException() throws Exception {
-        new MethodParser().parse("getIt(name)");
+        new ExpressionParser().parse("getIt(name)");
     }
 
     @Test(expected = ParseException.class)
     public void invalidMethodThrowsParseException() throws Exception {
-        new MethodParser().parse("namespace.getIt(name)as");
+        new ExpressionParser().parse("namespace.getIt(name)as");
     }
 
     @Test(expected = ParseException.class)
     public void invalidNumberExpressionThrowsParseException() throws Exception {
-        new MethodParser().parse("getIt().12.67");
+        new ExpressionParser().parse("getIt().12.67");
     }
 
     @Test(expected = ParseException.class)
     public void invalidNumberOfParenthesesThrowsParseException() throws Exception {
-        new MethodParser().parse("getIt(getIt()");
+        new ExpressionParser().parse("getIt(getIt()");
     }
 
     @Test(expected = ParseException.class)
     public void invalidNamespacesThrowsParseException() throws Exception {
-        new MethodParser().parse("test.getThat().test.getThat()");
+        new ExpressionParser().parse("test.getThat().test.getThat()");
     }
 }
