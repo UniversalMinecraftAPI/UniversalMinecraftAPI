@@ -1,12 +1,9 @@
 package com.koenv.jsonapi.sponge;
 
 import com.google.common.base.Optional;
+import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.methods.APIMethod;
-import com.koenv.jsonapi.methods.MethodInvocationException;
-import com.koenv.jsonapi.methods.MethodInvoker;
-import com.koenv.jsonapi.parser.ExpressionParser;
-import com.koenv.jsonapi.parser.ParseException;
-import com.koenv.jsonapi.parser.expressions.Expression;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.Subscribe;
@@ -14,6 +11,7 @@ import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.command.CommandCallable;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
@@ -23,18 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Plugin(id = "JSONAPI", name = "JSONAPI", version="0.1-SNAPSHOT")
-public class SpongeJSONAPI {
+public class SpongeJSONAPI implements JSONAPIProvider {
     private static Game game;
 
-    private ExpressionParser expressionParser;
-    private MethodInvoker methodInvoker;
+    private JSONAPI jsonapi;
 
     @Subscribe
     public void onServerStart(ServerStartedEvent event) {
-        expressionParser = new ExpressionParser();
-        methodInvoker = new MethodInvoker();
-
-        methodInvoker.registerMethods(this);
+        jsonapi = new JSONAPI(this);
+        jsonapi.setup();
 
         game = event.getGame();
 
@@ -43,34 +38,10 @@ public class SpongeJSONAPI {
             public Optional<CommandResult> process(CommandSource source, String arguments) throws CommandException {
                 String[] args = arguments.split(" ");
                 if (args.length < 1) {
-                    source.sendMessage(Texts.of("This plugin needs at least 1 parameter."));
+                    source.sendMessage(Texts.builder("This plugin needs at least 1 parameter.").color(TextColors.RED).build());
                     return Optional.of(CommandResult.empty());
                 }
-                String subCommand = args[0];
-                if (subCommand.equals("execute") || subCommand.equals("exec")) {
-                    if (args.length < 2) {
-                        source.sendMessage(Texts.of("Please specify the command."));
-                        return Optional.of(CommandResult.empty());
-                    }
-                    StringBuilder execStringBuilder = new StringBuilder();
-                    for (int i = 0; i < args.length; i++) {
-                        if (i == 0) {
-                            continue;
-                        }
-                        execStringBuilder.append(args[i]);
-                        execStringBuilder.append(" ");
-                    }
-                    try {
-                        Expression expression = expressionParser.parse(execStringBuilder.toString());
-                        Object result = methodInvoker.invokeMethod(expression);
-                        source.sendMessage(Texts.of(String.valueOf(result)));
-                        return Optional.of(CommandResult.success());
-                    } catch (ParseException | MethodInvocationException e) {
-                        source.sendMessage(Texts.of("Failed to execute command: " + e.getMessage()));
-                        e.printStackTrace();
-                        return Optional.of(CommandResult.empty());
-                    }
-                }
+                jsonapi.getCommandManager().handle(new SpongeCommandSource(source), args);
                 return Optional.of(CommandResult.empty());
             }
 
