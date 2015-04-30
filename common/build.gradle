@@ -8,6 +8,10 @@ task sourcesJar(type: Jar) {
     classifier = 'src'
 }
 
+javadoc.options {
+    links 'http://docs.oracle.com/javase/8/docs/api/'
+}
+
 dependencies {
     testCompile 'junit:junit:4.12'
 }
