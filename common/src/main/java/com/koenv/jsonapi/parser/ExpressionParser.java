@@ -25,7 +25,7 @@ public class ExpressionParser {
      *
      * @param string The expression specified as a string
      * @return The parsed expression.
-     * @throws ParseException
+     * @throws ParseException Thrown when the expression cannot be parsed
      */
     public Expression parse(String string) throws ParseException {
         Counter bracketsCounter = new Counter();
@@ -42,7 +42,7 @@ public class ExpressionParser {
      * @param string          The expression
      * @param bracketsCounter A counter for the number of brackets
      * @return The parsed expression
-     * @throws ParseException
+     * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseExpression(String string, Counter bracketsCounter) throws ParseException {
         string = string.trim();
@@ -76,7 +76,7 @@ public class ExpressionParser {
      * @param string          The expression
      * @param bracketsCounter A counter for the number of brackets
      * @return The parsed expression
-     * @throws ParseException
+     * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseChainedMethodCallExpression(String string, Counter bracketsCounter) throws ParseException {
         List<Expression> expressions = new ArrayList<>();
@@ -126,7 +126,7 @@ public class ExpressionParser {
      *
      * @param string The namespace expression, such as `players`
      * @return The parsed expression.
-     * @throws ParseException
+     * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected NamespaceExpression parseNamespace(String string) throws ParseException {
         return new NamespaceExpression(string);
@@ -138,7 +138,7 @@ public class ExpressionParser {
      * @param string          The method expression
      * @param bracketsCounter A counter for the number of brackets
      * @return The parsed expression
-     * @throws ParseException
+     * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseMethod(String string, Counter bracketsCounter) throws ParseException {
         Matcher matcher = METHOD_PATTERN.matcher(string);

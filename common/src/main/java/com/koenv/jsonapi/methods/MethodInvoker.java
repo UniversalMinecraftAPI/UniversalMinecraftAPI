@@ -61,7 +61,7 @@ public class MethodInvoker {
      *
      * @param expression Valid expression that has been created manually or has been created by {@link com.koenv.jsonapi.parser.ExpressionParser}
      * @return The return of the method, after everything has been called.
-     * @throws MethodInvocationException
+     * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
     public Object invokeMethod(Expression expression) throws MethodInvocationException {
         if (expression instanceof ChainedMethodCallExpression) {
@@ -161,7 +161,7 @@ public class MethodInvoker {
      * @param methodCallExpression The expression of the method call.
      * @param lastResult           The object on which to operate. Is usually null when namespace is not null.
      * @return The result returned by the last method in the methodCallExpression.
-     * @throws MethodInvocationException
+     * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
     protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
         Method method = null;
@@ -356,7 +356,7 @@ public class MethodInvoker {
     /**
      * Registers a single method which operates on an object into {@link #classMethodsMap}
      *
-     * @param method
+     * @param method Method to register
      */
     protected void registerClassMethod(ClassMethod method) {
         if (classMethodsMap.get(method.getOperatesOn()) == null) {
