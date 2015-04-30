@@ -2,6 +2,9 @@ package com.koenv.jsonapi.parser.expressions;
 
 import java.util.List;
 
+/**
+ * Chained method call expression, such as `players.getPlayer("koesie10").getUUID()`.
+ */
 public class ChainedMethodCallExpression extends Expression {
     private List<Expression> expressions;
 

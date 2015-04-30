@@ -8,25 +8,43 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parses expressions
+ */
 public class ExpressionParser {
-    private static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
-    private static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\(");
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");
-    private static final Pattern DOUBLE_PATTERN = Pattern.compile("^[0-9]+\\.[0-9]+");
-    private static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
-    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
-    private static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
+    protected static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
+    protected static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\(");
+    protected static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");
+    protected static final Pattern DOUBLE_PATTERN = Pattern.compile("^[0-9]+\\.[0-9]+");
+    protected static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
+    protected static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
+    protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
 
+    /**
+     * Parse expressions from a string
+     *
+     * @param string The expression specified as a string
+     * @return The parsed expression.
+     * @throws ParseException
+     */
     public Expression parse(String string) throws ParseException {
-        Counter counter = new Counter();
-        Expression expression = parseExpression(string, counter).expression;
-        if (counter.count() != 0) {
+        Counter bracketsCounter = new Counter();
+        Expression expression = parseExpression(string, bracketsCounter).expression;
+        if (bracketsCounter.count() != 0) {
             throw new ParseException("Invalid number of parentheses");
         }
         return expression;
     }
 
-    private ExpressionResult parseExpression(String string, Counter counter) throws ParseException {
+    /**
+     * Parses a single expression, recursively parsing any expressions in that expression.
+     *
+     * @param string          The expression
+     * @param bracketsCounter A counter for the number of brackets
+     * @return The parsed expression
+     * @throws ParseException
+     */
+    protected ExpressionResult parseExpression(String string, Counter bracketsCounter) throws ParseException {
         string = string.trim();
         Matcher matcher = BOOLEAN_PATTERN.matcher(string);
         if (matcher.find()) {
@@ -49,10 +67,18 @@ public class ExpressionParser {
             return new ExpressionResult(string, parseStringExpression(matcher.group(0)));
         }
 
-        return parseChainedMethodCallExpression(string, counter);
+        return parseChainedMethodCallExpression(string, bracketsCounter);
     }
 
-    public ExpressionResult parseChainedMethodCallExpression(String string, Counter counter) throws ParseException {
+    /**
+     * Parses a chained method call, such as `players.getPlayer("koesie10").getUUID()`
+     *
+     * @param string          The expression
+     * @param bracketsCounter A counter for the number of brackets
+     * @return The parsed expression
+     * @throws ParseException
+     */
+    protected ExpressionResult parseChainedMethodCallExpression(String string, Counter bracketsCounter) throws ParseException {
         List<Expression> expressions = new ArrayList<>();
         for (int i = 0; !string.isEmpty(); i++) {
             string = string.trim();
@@ -62,7 +88,7 @@ public class ExpressionParser {
             }
             Matcher matcher = METHOD_PATTERN.matcher(string);
             if (matcher.find()) {
-                ExpressionResult expressionResult = parseMethod(string, counter);
+                ExpressionResult expressionResult = parseMethod(string, bracketsCounter);
                 expressions.add(expressionResult.expression);
                 string = expressionResult.string;
                 continue;
@@ -95,16 +121,31 @@ public class ExpressionParser {
         return new ExpressionResult(string, new ChainedMethodCallExpression(expressions));
     }
 
-    private NamespaceExpression parseNamespace(String string) throws ParseException {
+    /**
+     * Parses a namespace.
+     *
+     * @param string The namespace expression, such as `players`
+     * @return The parsed expression.
+     * @throws ParseException
+     */
+    protected NamespaceExpression parseNamespace(String string) throws ParseException {
         return new NamespaceExpression(string);
     }
 
-    private ExpressionResult parseMethod(String string, Counter counter) throws ParseException {
+    /**
+     * Parses a method.
+     *
+     * @param string          The method expression
+     * @param bracketsCounter A counter for the number of brackets
+     * @return The parsed expression
+     * @throws ParseException
+     */
+    protected ExpressionResult parseMethod(String string, Counter bracketsCounter) throws ParseException {
         Matcher matcher = METHOD_PATTERN.matcher(string);
         if (!matcher.find()) {
             throw new ParseException("Unable to parse method " + string);
         }
-        counter.increment();
+        bracketsCounter.increment();
         String methodName = matcher.group(1);
         string = matcher.replaceFirst("");
 
@@ -113,7 +154,7 @@ public class ExpressionParser {
         while (!string.isEmpty()) {
             string = string.trim();
             if (string.startsWith(")")) {
-                counter.decrement();
+                bracketsCounter.decrement();
                 string = string.substring(1);
                 break;
             }
@@ -121,7 +162,7 @@ public class ExpressionParser {
                 string = string.substring(1);
                 continue;
             }
-            ExpressionResult expressionResult = parseExpression(string, counter);
+            ExpressionResult expressionResult = parseExpression(string, bracketsCounter);
             parameters.add(expressionResult.expression);
             string = expressionResult.string;
         }
@@ -129,24 +170,57 @@ public class ExpressionParser {
         return new ExpressionResult(string, new MethodCallExpression(methodName, parameters));
     }
 
-    private IntegerExpression parseIntegerExpression(String string) {
+    /**
+     * Parses an integer expression.
+     *
+     * @param string Integer expression, such as `21`
+     * @return The parsed expression
+     */
+    protected IntegerExpression parseIntegerExpression(String string) {
         return new IntegerExpression(Integer.parseInt(string));
     }
 
-    private StringExpression parseStringExpression(String string) {
+    /**
+     * Parses a string expression.
+     *
+     * @param string String expression, such as `"test"`
+     * @return The parsed expression
+     */
+    protected StringExpression parseStringExpression(String string) {
         return new StringExpression(string.substring(1, string.length() - 1).replaceAll("\\\\", ""));
     }
 
-    private DoubleExpression parseDoubleExpression(String string) {
+    /**
+     * Parses a double expression.
+     *
+     * @param string Double expression, such as `12.67`
+     * @return The parsed expression
+     */
+    protected DoubleExpression parseDoubleExpression(String string) {
         return new DoubleExpression(Double.parseDouble(string));
     }
 
-    private BooleanExpression parseBooleanExpression(String string) {
+    /**
+     * Parses a boolean expression.
+     *
+     * @param string Boolean expression, `true` will yield true, everything else will yield false
+     * @return The parsed expression
+     */
+    protected BooleanExpression parseBooleanExpression(String string) {
         return new BooleanExpression(string.equalsIgnoreCase("true"));
     }
 
-    private class ExpressionResult {
+    /**
+     * A result of the expression.
+     */
+    protected class ExpressionResult {
+        /**
+         * The remaining string of the expression.
+         */
         String string;
+        /**
+         * The last parsed expression.
+         */
         Expression expression;
 
         ExpressionResult(String string, Expression expression) {

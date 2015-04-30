@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.methods;
 
+/**
+ * A saved API method.
+ */
 public class Method {
     private String name;
     private java.lang.reflect.Method javaMethod;

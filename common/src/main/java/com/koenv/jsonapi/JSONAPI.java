@@ -5,6 +5,9 @@ import com.koenv.jsonapi.commands.ExecuteCommand;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 
+/**
+ * The main JSONAPI delegate which must be called in implementations.
+ */
 public class JSONAPI implements JSONAPIInterface {
     private JSONAPIProvider provider;
     private ExpressionParser expressionParser;

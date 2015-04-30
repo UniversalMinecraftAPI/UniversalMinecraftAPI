@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.methods;
 
+/**
+ * A saved API method that does not operate on objects.
+ */
 public class NamespacedMethod extends Method {
     private String namespace;
 

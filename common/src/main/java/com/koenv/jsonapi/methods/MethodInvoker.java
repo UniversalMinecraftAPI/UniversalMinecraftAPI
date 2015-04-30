@@ -6,15 +6,33 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+/**
+ * Invokes methods from expressions that have been created manually or have been parsed by {@link com.koenv.jsonapi.parser.ExpressionParser}.
+ */
 public class MethodInvoker {
-    private static final String DEFAULT_NAMESPACE = "this";
+    /**
+     * The default namespace for methods, which can be omitted on an annotation and when calling the method.
+     */
+    protected static final String DEFAULT_NAMESPACE = "this";
 
-    private Map<String, Map<String, NamespacedMethod>> namespaceMethodsMap;
-    private Map<Class<?>, Map<String, ClassMethod>> classMethodsMap;
+    /**
+     * Map of method names that do not operate on objects to their methods.
+     */
+    protected Map<String, Map<String, NamespacedMethod>> namespaceMethodsMap;
+    /**
+     * Map of method names that do operate on objects to their methods.
+     */
+    protected Map<Class<?>, Map<String, ClassMethod>> classMethodsMap;
 
-    private Map<Class<?>, Map<Class<?>, ParameterConverter>> toFromParameterConverterMap;
+    /**
+     * Map of from and to classes to their {@link ParameterConverter}.
+     */
+    protected Map<Class<?>, Map<Class<?>, ParameterConverter>> toFromParameterConverterMap;
 
-    private static Map<Class<?>, List<Class<?>>> alsoAllowed = new HashMap<>();
+    /**
+     * Parameters that will be converted by Java automatically, such as an `int` to {@link Integer}
+     */
+    protected static Map<Class<?>, List<Class<?>>> alsoAllowed = new HashMap<>();
 
     static {
         alsoAllowed.put(Integer.class, Arrays.asList(int.class, long.class, Long.class, short.class, Short.class));
@@ -38,6 +56,13 @@ public class MethodInvoker {
         registerDefaultParameterConverters();
     }
 
+    /**
+     * Invokes a method that is in an expression
+     *
+     * @param expression Valid expression that has been created manually or has been created by {@link com.koenv.jsonapi.parser.ExpressionParser}
+     * @return The return of the method, after everything has been called.
+     * @throws MethodInvocationException
+     */
     public Object invokeMethod(Expression expression) throws MethodInvocationException {
         if (expression instanceof ChainedMethodCallExpression) {
             List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
@@ -68,8 +93,24 @@ public class MethodInvoker {
         }
     }
 
+    /**
+     * Registers methods that have been annotated with {@link APIMethod}.
+     * <p>
+     * This method calls {@link #registerMethods(Class)} internally by getting the class of the object passed in.
+     *
+     * @param object An object that contains methods.
+     */
     public void registerMethods(Object object) {
-        for (java.lang.reflect.Method objectMethod : object.getClass().getMethods()) {
+        registerMethods(object.getClass());
+    }
+
+    /**
+     * Registers methods that have been annotated with {@link APIMethod}.
+     *
+     * @param clazz Class for which to register methods.
+     */
+    public void registerMethods(Class<?> clazz) {
+        for (java.lang.reflect.Method objectMethod : clazz.getMethods()) {
             APIMethod annotation = objectMethod.getAnnotation(APIMethod.class);
             if (annotation == null) {
                 continue;
@@ -97,6 +138,15 @@ public class MethodInvoker {
         }
     }
 
+    /**
+     * Registers a parameter converter.
+     *
+     * @param from               From which class to convert
+     * @param to                 To which class to convert
+     * @param parameterConverter The parameter converter
+     * @param <From>             From which class to convert
+     * @param <To>               To which class to convert
+     */
     public <From, To> void registerParameterConverter(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
         if (toFromParameterConverterMap.get(to) == null) {
             toFromParameterConverterMap.put(to, new HashMap<>());
@@ -104,7 +154,16 @@ public class MethodInvoker {
         toFromParameterConverterMap.get(to).put(from, parameterConverter);
     }
 
-    private Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
+    /**
+     * Invokes a single method
+     *
+     * @param namespace            Namespace of the method. Is usually null when lastResult is not null.
+     * @param methodCallExpression The expression of the method call.
+     * @param lastResult           The object on which to operate. Is usually null when namespace is not null.
+     * @return The result returned by the last method in the methodCallExpression.
+     * @throws MethodInvocationException
+     */
+    protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
         Method method = null;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
@@ -207,7 +266,14 @@ public class MethodInvoker {
         return result;
     }
 
-    private boolean checkParameter(Object parameter, Parameter javaParameter) {
+    /**
+     * Checks whether an object is valid for a Java parameter
+     *
+     * @param parameter     Desired parameter to method
+     * @param javaParameter The parameter of the method
+     * @return Whether this object can be passed to the parameter as is.
+     */
+    protected boolean checkParameter(Object parameter, Parameter javaParameter) {
         if (javaParameter.getType().isInstance(parameter)) {
             return true;
         }
@@ -221,7 +287,14 @@ public class MethodInvoker {
         return false;
     }
 
-    private Object convertParameterUntilFound(Object parameter, Parameter javaParameter) {
+    /**
+     * Converts a parameter until a valid parameter is found as specified by {@link #checkParameter(Object, Parameter)}
+     *
+     * @param parameter     Desired parameter of the method
+     * @param javaParameter The parameter of the method
+     * @return Null if this parameter cannot be converted to the parameter type of the method. The converted parameter otherwise.
+     */
+    protected Object convertParameterUntilFound(Object parameter, Parameter javaParameter) {
         boolean allowed = checkParameter(parameter, javaParameter);
         Object previousParameter;
         while (!allowed) {
@@ -246,7 +319,15 @@ public class MethodInvoker {
         return parameter;
     }
 
-    private Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
+    /**
+     * Converts a parameter from one type to another
+     *
+     * @param parameter The parameter to convert
+     * @param to        To which class to convert
+     * @param from      From which class to convert, which is usually the class of from, from's superclass or one of from's interfaces
+     * @return The converted parameter. Null if it cannot be converted.
+     */
+    protected Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
         if (from == null && parameter != null) {
             from = parameter.getClass();
         }
@@ -260,44 +341,94 @@ public class MethodInvoker {
         return null;
     }
 
-    private void registerMethod(NamespacedMethod method) {
+    /**
+     * Registers a single namespaced method into {@link #namespaceMethodsMap}
+     *
+     * @param method Method to register
+     */
+    protected void registerMethod(NamespacedMethod method) {
         if (namespaceMethodsMap.get(method.getNamespace()) == null) {
             namespaceMethodsMap.put(method.getNamespace(), new HashMap<>());
         }
         namespaceMethodsMap.get(method.getNamespace()).put(method.getName(), method);
     }
 
-    private void registerClassMethod(ClassMethod method) {
+    /**
+     * Registers a single method which operates on an object into {@link #classMethodsMap}
+     *
+     * @param method
+     */
+    protected void registerClassMethod(ClassMethod method) {
         if (classMethodsMap.get(method.getOperatesOn()) == null) {
             classMethodsMap.put(method.getOperatesOn(), new HashMap<>());
         }
         classMethodsMap.get(method.getOperatesOn()).put(method.getName(), method);
     }
 
-    private String getNamespaceName(String namespace) {
+    /**
+     * Gets the actual namespace name.
+     * <p>
+     * If the name of the namespace is empty, this returns {@link #DEFAULT_NAMESPACE}
+     *
+     * @param namespace Namespace name
+     * @return The actual namespace name
+     */
+    protected String getNamespaceName(String namespace) {
         if (namespace == null || namespace.isEmpty()) {
             return DEFAULT_NAMESPACE;
         }
         return namespace;
     }
 
-    private Map<String, NamespacedMethod> getNamespace(String namespace) {
+    /**
+     * Gets a namespace from the {@link #namespaceMethodsMap}
+     *
+     * @param namespace Actual namespace name, as converted by {@link #getNamespaceName(String)}
+     * @return A map of methods in the namespace and the methods itself
+     */
+    protected Map<String, NamespacedMethod> getNamespace(String namespace) {
         return namespaceMethodsMap.get(getNamespaceName(namespace));
     }
 
-    private NamespacedMethod getMethod(Map<String, NamespacedMethod> methods, String methodName) {
+    /**
+     * Gets a method from a namespace.
+     *
+     * @param methods    Usually the result of {@link #getNamespace(String)}
+     * @param methodName Name of the desired method
+     * @return The method if found, null otherwise
+     */
+    protected NamespacedMethod getMethod(Map<String, NamespacedMethod> methods, String methodName) {
         return methods.get(methodName);
     }
 
-    private Map<String, ClassMethod> getClassMethodsMap(Class<?> operatesOn) {
+    /**
+     * Gets methods for the operated on class.
+     *
+     * @param operatesOn Class for which to return methods
+     * @return A map of method names to the actual methods
+     */
+    protected Map<String, ClassMethod> getClassMethodsMap(Class<?> operatesOn) {
         return classMethodsMap.get(operatesOn);
     }
 
-    private ClassMethod getClassMethod(Map<String, ClassMethod> methods, String methodName) {
+    /**
+     * Gets a method from a map of method names to methods.
+     *
+     * @param methods    Usually the result of {@link #getClassMethodsMap(Class)}
+     * @param methodName Name of the desired method
+     * @return The method if found, null otherwise
+     */
+    protected ClassMethod getClassMethod(Map<String, ClassMethod> methods, String methodName) {
         return methods.get(methodName);
     }
 
-    private String getMethodDeclaration(Method method) {
+    /**
+     * Gets a method declaration. This will be in the format: `methodName(methodParameters)`
+     *
+     * @param method Method for which to get the method declaration.
+     * @return A string representation of the method.
+     */
+    protected String getMethodDeclaration(Method method) {
         StringBuilder stringBuilder = new StringBuilder();
         if (method instanceof NamespacedMethod) {
             stringBuilder.append(((NamespacedMethod) method).getNamespace());
@@ -321,7 +452,10 @@ public class MethodInvoker {
         return stringBuilder.toString();
     }
 
-    private void registerDefaultParameterConverters() {
+    /**
+     * Registers all default parameter converters, such as from float to double and the reverse.
+     */
+    protected void registerDefaultParameterConverters() {
         ParameterConverter<Double, Float> doubleToFloatConverter = Double::floatValue;
         ParameterConverter<Float, Double> floatToDoubleConverter = Float::doubleValue;
         registerParameterConverter(double.class, float.class, doubleToFloatConverter);

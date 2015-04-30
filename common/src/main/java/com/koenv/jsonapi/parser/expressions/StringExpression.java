@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.parser.expressions;
 
+/**
+ * A string expression, such as `"test"`.
+ */
 public class StringExpression extends ValueExpression {
     private String value;
 

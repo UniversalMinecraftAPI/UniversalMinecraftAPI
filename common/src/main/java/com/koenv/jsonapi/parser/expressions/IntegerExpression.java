@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.parser.expressions;
 
+/**
+ * An integer expression, such as `21`.
+ */
 public class IntegerExpression extends NumberExpression {
     private int value;
 

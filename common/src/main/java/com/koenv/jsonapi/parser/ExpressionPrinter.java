@@ -4,11 +4,20 @@ import com.koenv.jsonapi.parser.expressions.*;
 
 import java.util.List;
 
+/**
+ * Prints expressions, basically the reverse of {@link ExpressionParser}
+ */
 public final class ExpressionPrinter {
     private ExpressionPrinter() {
 
     }
 
+    /**
+     * Prints a sequence of expressions.
+     *
+     * @param expressions Expressions to print
+     * @return The sequence of expressions
+     */
     public static String printExpressions(List<Expression> expressions) {
         StringBuilder builder = new StringBuilder();
         for (Expression expression : expressions) {
@@ -21,6 +30,12 @@ public final class ExpressionPrinter {
         return builder.toString();
     }
 
+    /**
+     * Prints a single expression.
+     *
+     * @param expression Expression to print
+     * @return The printed expression
+     */
     public static String printExpression(Expression expression) {
         if (expression instanceof MethodCallExpression) {
             return printMethodCallExpression((MethodCallExpression) expression);
@@ -39,10 +54,22 @@ public final class ExpressionPrinter {
         }
     }
 
+    /**
+     * Prints a chained method call expression, by passing it to {@link #printExpressions(List)}.
+     *
+     * @param chainedMethodCallExpression The expression to print
+     * @return The printed expression
+     */
     public static String printChainedMethodCallExpression(ChainedMethodCallExpression chainedMethodCallExpression) {
         return printExpressions(chainedMethodCallExpression.getExpressions());
     }
 
+    /**
+     * Prints method call.
+     *
+     * @param methodCallExpression The expression to print
+     * @return The printed expression
+     */
     public static String printMethodCallExpression(MethodCallExpression methodCallExpression) {
         StringBuilder builder = new StringBuilder();
         builder.append(methodCallExpression.getMethodName());
@@ -57,18 +84,42 @@ public final class ExpressionPrinter {
         return builder.toString();
     }
 
+    /**
+     * Prints a namespace expression.
+     *
+     * @param namespaceExpression The expression to print
+     * @return The printed expression
+     */
     public static String printNamespaceExpression(NamespaceExpression namespaceExpression) {
         return namespaceExpression.getName();
     }
 
+    /**
+     * Prints an integer expression.
+     *
+     * @param integerExpression The expression to print
+     * @return The printed expression
+     */
     public static String printIntegerExpression(IntegerExpression integerExpression) {
         return Integer.toString(integerExpression.getValue());
     }
 
+    /**
+     * Prints a double expression.
+     *
+     * @param doubleExpression The expression to print
+     * @return The printed expression
+     */
     public static String printDoubleExpression(DoubleExpression doubleExpression) {
         return Double.toString(doubleExpression.getValue());
     }
 
+    /**
+     * Prints a string expression.
+     *
+     * @param stringExpression The expression to print
+     * @return The printed expression
+     */
     public static String printStringExpression(StringExpression stringExpression) {
         return '"' + stringExpression.getValue() + '"';
     }

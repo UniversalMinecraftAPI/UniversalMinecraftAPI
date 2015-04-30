@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.parser.expressions;
 
+/**
+ * Boolean expression, such as `true` or `false`.
+ */
 public class BooleanExpression extends ValueExpression {
     private boolean value;
 

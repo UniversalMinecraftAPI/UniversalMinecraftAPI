@@ -1,6 +1,8 @@
 package com.koenv.jsonapi.methods;
 
-
+/**
+ * A saved API method that operates on objects.
+ */
 public class ClassMethod extends Method {
     private Class<?> operatesOn;
 

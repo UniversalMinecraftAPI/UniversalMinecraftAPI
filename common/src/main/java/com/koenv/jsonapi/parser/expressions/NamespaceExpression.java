@@ -1,5 +1,8 @@
 package com.koenv.jsonapi.parser.expressions;
 
+/**
+ * A namespace expression, such as `players`.
+ */
 public class NamespaceExpression extends Expression {
     private String name;
 
