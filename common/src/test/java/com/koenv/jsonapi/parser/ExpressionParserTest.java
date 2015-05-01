@@ -26,6 +26,11 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void negativeIntegerAsParameter() throws Exception {
+        new ExpressionParser().parse("getIt(-12)");
+    }
+
+    @Test
     public void stringAsParameter() throws Exception {
         new ExpressionParser().parse("getIt(\"test\")");
     }
@@ -33,6 +38,11 @@ public class ExpressionParserTest {
     @Test
     public void doubleAsParameter() throws Exception {
         new ExpressionParser().parse("getIt(12.67)");
+    }
+
+    @Test
+    public void negativeDoubleAsParameter() throws Exception {
+        new ExpressionParser().parse("getIt(-12.67)");
     }
 
     @Test

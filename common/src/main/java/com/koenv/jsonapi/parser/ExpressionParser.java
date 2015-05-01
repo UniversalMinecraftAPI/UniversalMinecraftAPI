@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
 public class ExpressionParser {
     protected static final Pattern NAMESPACE_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*");
     protected static final Pattern METHOD_PATTERN = Pattern.compile("^(\\w+)\\s*\\(");
-    protected static final Pattern INTEGER_PATTERN = Pattern.compile("^[0-9]+");
-    protected static final Pattern DOUBLE_PATTERN = Pattern.compile("^[0-9]+\\.[0-9]+");
+    protected static final Pattern INTEGER_PATTERN = Pattern.compile("^-?[0-9]+");
+    protected static final Pattern DOUBLE_PATTERN = Pattern.compile("^-?[0-9]+\\.[0-9]+");
     protected static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
     protected static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
