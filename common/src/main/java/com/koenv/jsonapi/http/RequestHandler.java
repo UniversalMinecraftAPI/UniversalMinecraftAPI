@@ -26,16 +26,15 @@ public class RequestHandler {
         try {
             requests = JsonRequest.fromJson(request);
             for (JsonRequest jsonRequest : requests) {
-                Expression expression = null;
-                try {
-                    expression = expressionParser.parse(jsonRequest.getName());
-                } catch (ParseException e) {
-
-                }
+                Expression expression = expressionParser.parse(jsonRequest.getName());
                 methodInvoker.invokeMethod(expression);
             }
         } catch (JSONException e) {
             responses.add(createErrorResponse("Failed to parse JSON"));
+        } catch (MethodInvocationException e) {
+            responses.add(createErrorResponse("Error while invoking method: " + e.getMessage()));
+        } catch (ParseException e) {
+            responses.add(createErrorResponse("Error while parsing method: " + e.getMessage()));
         }
 
         return responses; // TODO: Change this to something useful

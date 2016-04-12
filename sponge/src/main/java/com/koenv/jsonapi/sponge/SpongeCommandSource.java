@@ -2,22 +2,22 @@ package com.koenv.jsonapi.sponge;
 
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.commands.CommandSource;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 
 public class SpongeCommandSource implements CommandSource {
-    private org.spongepowered.api.util.command.CommandSource commandSource;
+    private org.spongepowered.api.command.CommandSource commandSource;
 
-    public SpongeCommandSource(org.spongepowered.api.util.command.CommandSource commandSource) {
+    public SpongeCommandSource(org.spongepowered.api.command.CommandSource commandSource) {
         this.commandSource = commandSource;
     }
 
     @Override
     public void sendMessage(String text) {
-        commandSource.sendMessage(Texts.of(text));
+        commandSource.sendMessage(Text.of(text));
     }
 
     @Override
     public void sendMessage(ChatColor color, String text) {
-        commandSource.sendMessage(Texts.builder(text).color(SpongeUtils.getTextColor(color)).build());
+        commandSource.sendMessage(Text.builder(text).color(SpongeUtils.getTextColor(color)).build());
     }
 }

@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
 	fatJar
@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     fatJar project(':common')
-    compile 'org.spigotmc:spigot-api:1.8.3-R0.1-SNAPSHOT'
+    compile 'org.spigotmc:spigot-api:1.9.2-R0.1-SNAPSHOT'
 }
 
 task sourcesJar(type: Jar) {

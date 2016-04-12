@@ -41,12 +41,12 @@ public class MethodInvoker {
         alsoAllowed.put(short.class, Arrays.asList(Short.class, int.class, Integer.class, long.class, Long.class));
         alsoAllowed.put(Long.class, Arrays.asList(long.class, int.class, Integer.class, short.class, Short.class));
         alsoAllowed.put(long.class, Arrays.asList(Long.class, int.class, Integer.class, short.class, Short.class));
-        alsoAllowed.put(Double.class, Arrays.asList(double.class));
-        alsoAllowed.put(double.class, Arrays.asList(Double.class));
-        alsoAllowed.put(Float.class, Arrays.asList(float.class));
-        alsoAllowed.put(float.class, Arrays.asList(Float.class));
-        alsoAllowed.put(Boolean.class, Arrays.asList(boolean.class));
-        alsoAllowed.put(boolean.class, Arrays.asList(Boolean.class));
+        alsoAllowed.put(Double.class, Collections.singletonList(double.class));
+        alsoAllowed.put(double.class, Collections.singletonList(Double.class));
+        alsoAllowed.put(Float.class, Collections.singletonList(float.class));
+        alsoAllowed.put(float.class, Collections.singletonList(Float.class));
+        alsoAllowed.put(Boolean.class, Collections.singletonList(boolean.class));
+        alsoAllowed.put(boolean.class, Collections.singletonList(Boolean.class));
     }
 
     public MethodInvoker() {
@@ -95,7 +95,7 @@ public class MethodInvoker {
 
     /**
      * Registers methods that have been annotated with {@link APIMethod}.
-     * <p>
+     * <p/>
      * This method calls {@link #registerMethods(Class)} internally by getting the class of the object passed in.
      *
      * @param object An object that contains methods.
@@ -367,7 +367,7 @@ public class MethodInvoker {
 
     /**
      * Gets the actual namespace name.
-     * <p>
+     * <p/>
      * If the name of the namespace is empty, this returns {@link #DEFAULT_NAMESPACE}
      *
      * @param namespace Namespace name

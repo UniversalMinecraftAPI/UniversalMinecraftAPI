@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
 	fatJar
@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     fatJar project(':common')
-    compile 'org.spongepowered:spongeapi:2.0'
+    compile 'org.spongepowered:spongeapi:4.0.3'
 }
 
 task sourcesJar(type: Jar) {
