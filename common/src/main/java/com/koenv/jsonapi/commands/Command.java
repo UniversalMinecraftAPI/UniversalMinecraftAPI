@@ -16,4 +16,8 @@ public abstract class Command {
      * @return Whether the command succeeded
      */
     public abstract boolean onCommand(JSONAPIInterface jsonapi, CommandSource commandSource, String[] args);
+
+    public boolean hasPermission(CommandSource commandSource) {
+        return true;
+    }
 }

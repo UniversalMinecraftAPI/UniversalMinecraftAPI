@@ -45,7 +45,12 @@ public class CommandManager {
         String[] args = new String[input.length - 1];
         System.arraycopy(input, 1, args, 0, input.length - 1);
         if (commands.containsKey(command)) {
-            handle(commands.get(command), source, args);
+            Command commandObject = commands.get(command);
+            if (!commandObject.hasPermission(source)) {
+                source.sendMessage(ChatColor.RED, "You don't have permission.");
+                return;
+            }
+            handle(commandObject, source, args);
             return;
         }
 

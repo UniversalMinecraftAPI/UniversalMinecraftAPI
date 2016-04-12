@@ -20,4 +20,9 @@ public class SpigotCommandSource implements CommandSource {
     public void sendMessage(ChatColor color, String text) {
         this.commandSender.sendMessage(SpigotUtils.getChatColor(color) + text);
     }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return commandSender.hasPermission(permission);
+    }
 }

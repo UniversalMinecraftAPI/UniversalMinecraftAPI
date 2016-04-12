@@ -20,4 +20,9 @@ public class SpongeCommandSource implements CommandSource {
     public void sendMessage(ChatColor color, String text) {
         commandSource.sendMessage(Text.builder(text).color(SpongeUtils.getTextColor(color)).build());
     }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return commandSource.hasPermission(permission);
+    }
 }

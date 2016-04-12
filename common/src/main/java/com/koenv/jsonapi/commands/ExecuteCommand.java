@@ -30,4 +30,9 @@ public class ExecuteCommand extends Command {
             return true;
         }
     }
+
+    @Override
+    public boolean hasPermission(CommandSource commandSource) {
+        return super.hasPermission(commandSource);
+    }
 }

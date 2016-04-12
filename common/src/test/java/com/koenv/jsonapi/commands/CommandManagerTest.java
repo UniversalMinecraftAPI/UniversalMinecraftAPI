@@ -45,6 +45,11 @@ public class CommandManagerTest {
             assertEquals(expectedMessage, text);
             assertEquals(expectedColor, color);
         }
+
+        @Override
+        public boolean hasPermission(String permission) {
+            return true;
+        }
     }
 
     private static class TestJSONAPI implements JSONAPIInterface {

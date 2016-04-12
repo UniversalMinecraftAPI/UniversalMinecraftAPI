@@ -15,8 +15,17 @@ public interface CommandSource {
 
     /**
      * Send a colored message
+     *
      * @param color Color of the message
-     * @param text Message to send
+     * @param text  Message to send
      */
     void sendMessage(ChatColor color, String text);
+
+    /**
+     * Checks whether this command source has a permission
+     *
+     * @param permission Permission string
+     * @return Whether this command source has the permission
+     */
+    boolean hasPermission(String permission);
 }
