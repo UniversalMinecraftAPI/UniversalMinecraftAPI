@@ -1,6 +1,7 @@
 package com.koenv.jsonapi;
 
 import com.koenv.jsonapi.commands.CommandManager;
+import com.koenv.jsonapi.commands.CreateApiDocCommand;
 import com.koenv.jsonapi.commands.ExecuteCommand;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
@@ -28,6 +29,7 @@ public class JSONAPI implements JSONAPIInterface {
         methodInvoker.registerMethods(provider);
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
+        commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
     }
 
     @Override

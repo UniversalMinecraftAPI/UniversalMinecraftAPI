@@ -1,5 +1,6 @@
 package com.koenv.jsonapi.sponge;
 
+import com.google.common.collect.ImmutableMap;
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.methods.APIMethod;
@@ -37,10 +38,29 @@ public class SpongeJSONAPI implements JSONAPIProvider {
                 .executor(executor::executeExecCommand)
                 .build();
 
+        CommandSpec createApiDocCommandSpec = CommandSpec.builder()
+                .description(Text.of("Create the API documentation"))
+                .permission("jsonapi.command.createapidoc")
+                .arguments(
+                        GenericArguments.optional(
+                                GenericArguments.choices(
+                                        Text.of("format"),
+                                        ImmutableMap.<String, String>builder()
+                                                .put("json", "json")
+                                                .put("markdown", "markdown")
+                                                .put("md", "markdown")
+                                                .build()
+                                )
+                        )
+                )
+                .executor(executor::executeCreateApiDocCommand)
+                .build();
+
         CommandSpec mainCommandSpec = CommandSpec.builder()
                 .permission("jsonapi.command")
                 .description(Text.of("Main JSONAPI command"))
                 .child(execCommandSpec, "exec", "execute", "e")
+                .child(createApiDocCommandSpec, "createapidoc", "create_api_doc")
                 .build();
 
         Sponge.getCommandManager().register(this, mainCommandSpec, "jsonapi");

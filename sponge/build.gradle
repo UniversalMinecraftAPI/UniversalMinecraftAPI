@@ -46,3 +46,6 @@ task dist() {
 	dependsOn sourcesJar
 	dependsOn allJar
 }
+
+compileJava.options.compilerArgs.add '-parameters'
+compileTestJava.options.compilerArgs.add '-parameters'

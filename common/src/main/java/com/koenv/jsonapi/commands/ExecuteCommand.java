@@ -33,6 +33,6 @@ public class ExecuteCommand extends Command {
 
     @Override
     public boolean hasPermission(CommandSource commandSource) {
-        return super.hasPermission(commandSource);
+        return commandSource.hasPermission("jsonapi.command.execute");
     }
 }

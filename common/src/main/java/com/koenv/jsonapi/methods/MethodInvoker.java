@@ -19,6 +19,7 @@ public class MethodInvoker {
      * Map of method names that do not operate on objects to their methods.
      */
     protected Map<String, Map<String, NamespacedMethod>> namespaceMethodsMap;
+
     /**
      * Map of method names that do operate on objects to their methods.
      */
@@ -95,7 +96,7 @@ public class MethodInvoker {
 
     /**
      * Registers methods that have been annotated with {@link APIMethod}.
-     * <p/>
+     * <p>
      * This method calls {@link #registerMethods(Class)} internally by getting the class of the object passed in.
      *
      * @param object An object that contains methods.
@@ -367,7 +368,7 @@ public class MethodInvoker {
 
     /**
      * Gets the actual namespace name.
-     * <p/>
+     * <p>
      * If the name of the namespace is empty, this returns {@link #DEFAULT_NAMESPACE}
      *
      * @param namespace Namespace name
@@ -387,7 +388,7 @@ public class MethodInvoker {
      * @return A map of methods in the namespace and the methods itself
      */
     protected Map<String, NamespacedMethod> getNamespace(String namespace) {
-        return namespaceMethodsMap.get(getNamespaceName(namespace));
+        return Collections.unmodifiableMap(namespaceMethodsMap.get(getNamespaceName(namespace)));
     }
 
     /**
@@ -420,6 +421,14 @@ public class MethodInvoker {
      */
     protected ClassMethod getClassMethod(Map<String, ClassMethod> methods, String methodName) {
         return methods.get(methodName);
+    }
+
+    public Map<String, Map<String, NamespacedMethod>> getNamespaces() {
+        return Collections.unmodifiableMap(namespaceMethodsMap);
+    }
+
+    public Map<Class<?>, Map<String, ClassMethod>> getClasses() {
+        return Collections.unmodifiableMap(classMethodsMap);
     }
 
     /**

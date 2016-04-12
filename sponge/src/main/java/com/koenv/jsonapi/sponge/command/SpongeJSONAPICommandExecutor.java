@@ -25,4 +25,14 @@ public class SpongeJSONAPICommandExecutor {
         plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args.toArray(new String[args.size()]));
         return CommandResult.success();
     }
+
+    public CommandResult executeCreateApiDocCommand(CommandSource source, CommandContext arguments) {
+        List<String> args = new ArrayList<>();
+        args.add("createapidoc");
+        if (arguments.hasAny("format")) {
+            args.add(arguments.<String>getOne("format").orElse(""));
+        }
+        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args.toArray(new String[args.size()]));
+        return CommandResult.success();
+    }
 }
