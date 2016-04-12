@@ -29,6 +29,7 @@ public class SpongeJSONAPICommandExecutor {
     public CommandResult executeCreateApiDocCommand(CommandSource source, CommandContext arguments) {
         List<String> args = new ArrayList<>();
         args.add("createapidoc");
+        args.add(arguments.<String>getOne("file").orElse(""));
         if (arguments.hasAny("format")) {
             args.add(arguments.<String>getOne("format").orElse(""));
         }

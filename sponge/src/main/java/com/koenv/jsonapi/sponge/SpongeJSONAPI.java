@@ -42,6 +42,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
                 .description(Text.of("Create the API documentation"))
                 .permission("jsonapi.command.createapidoc")
                 .arguments(
+                        GenericArguments.string(Text.of("file")),
                         GenericArguments.optional(
                                 GenericArguments.choices(
                                         Text.of("format"),
