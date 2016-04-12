@@ -6,25 +6,23 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
-public class SpongeJSONAPICommandExecutor implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class SpongeJSONAPICommandExecutor {
     private SpongeJSONAPI plugin;
 
     public SpongeJSONAPICommandExecutor(SpongeJSONAPI plugin) {
         this.plugin = plugin;
     }
 
-    @Override
-    public CommandResult execute(CommandSource source, CommandContext arguments) throws CommandException {
-        String[] args = arguments.<String>getOne("arguments").orElse("").split(" ");
-        if (args.length < 1) {
-            source.sendMessage(Text.builder("This plugin needs at least 1 parameter.").color(TextColors.RED).build());
-            return CommandResult.empty();
-        }
-        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args);
-        return CommandResult.empty();
+    public CommandResult executeExecCommand(CommandSource source, CommandContext arguments) throws CommandException {
+        List<String> args = new ArrayList<>();
+        args.add("exec");
+        args.addAll(Arrays.asList(arguments.<String>getOne("expression").orElse("").split(" ")));
+        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args.toArray(new String[args.size()]));
+        return CommandResult.success();
     }
 }

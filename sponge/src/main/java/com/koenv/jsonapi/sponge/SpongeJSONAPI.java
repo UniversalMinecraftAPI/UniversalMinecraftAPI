@@ -22,10 +22,25 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         jsonapi = new JSONAPI(this);
         jsonapi.setup();
 
+        registerCommands();
+    }
+
+    private void registerCommands() {
+        SpongeJSONAPICommandExecutor executor = new SpongeJSONAPICommandExecutor(this);
+
+        CommandSpec execCommandSpec = CommandSpec.builder()
+                .description(Text.of("Execute a JSONAPI expression and return the result"))
+                .permission("jsonapi.command.execute")
+                .arguments(
+                        GenericArguments.remainingJoinedStrings(Text.of("expression"))
+                )
+                .executor(executor::executeExecCommand)
+                .build();
+
         CommandSpec mainCommandSpec = CommandSpec.builder()
+                .permission("jsonapi.command")
                 .description(Text.of("Main JSONAPI command"))
-                .arguments(GenericArguments.remainingJoinedStrings(Text.of("arguments")))
-                .executor(new SpongeJSONAPICommandExecutor(this))
+                .child(execCommandSpec, "exec", "execute", "e")
                 .build();
 
         Sponge.getCommandManager().register(this, mainCommandSpec, "jsonapi");
