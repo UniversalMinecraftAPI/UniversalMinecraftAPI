@@ -1,11 +1,71 @@
 allprojects {
-	repositories {
-		mavenCentral()
-		jcenter()
-	}
-	allprojects {
-		tasks.withType(Javadoc) {
-			options.addStringOption('Xdoclint:none', '-quiet')
-		}
-	}
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+    }
+}
+
+configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    configurations {
+        fatJar
+        compile.extendsFrom fatJar
+    }
+
+    dependencies {
+        fatJar project(':common')
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.java.srcDirs
+        classifier = 'src'
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    shadowJar {
+        configurations = [project.configurations.fatJar]
+
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'about.html'
+
+        relocate 'javax.servlet', 'com.koenv.jsonapi.thirdparty.javax.servlet'
+        relocate 'org.eclipse.jetty', 'com.koenv.jsonapi.thirdparty.org.eclipse.jetty'
+        relocate 'org.slf4j', 'com.koenv.jsonapi.thirdparty.org.slf4j'
+        relocate 'spark', 'com.koenv.jsonapi.thirdparty.spark'
+    }
+
+    task dist() {
+        dependsOn javadocJar
+        dependsOn sourcesJar
+        dependsOn shadowJar
+    }
+
+    compileJava.options.compilerArgs.add '-parameters'
+    compileTestJava.options.compilerArgs.add '-parameters'
 }

@@ -13,6 +13,7 @@ javadoc.options {
 }
 
 dependencies {
+    compile 'com.sparkjava:spark-core:2.3'
     testCompile 'junit:junit:4.12'
 }
 
