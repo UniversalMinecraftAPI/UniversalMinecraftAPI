@@ -3,7 +3,7 @@ package com.koenv.jsonapi.http.websocket;
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.http.model.JsonRequest;
-import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONValue;
 import org.eclipse.jetty.websocket.api.Session;
@@ -27,7 +27,7 @@ public class JSONAPIWebSocket {
     public void message(Session session, String message) throws IOException {
         List<JsonRequest> requests = JsonRequest.fromJson(message);
 
-        List<JsonResponse> responses = requestHandler.handle(requests, new WebSocketInvoker(session));
+        List<JsonSerializable> responses = requestHandler.handle(requests, new WebSocketInvoker(session));
 
         JSONValue response = (JSONValue) serializerManager.serialize(responses);
         if (session.isOpen()) {

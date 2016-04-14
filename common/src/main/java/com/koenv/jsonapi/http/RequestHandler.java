@@ -22,7 +22,7 @@ public class RequestHandler {
         this.methodInvoker = methodInvoker;
     }
 
-    public JsonResponse handle(JsonRequest request, Invoker invoker) {
+    public JsonSerializable handle(JsonRequest request, Invoker invoker) {
         try {
             Expression expression = expressionParser.parse(request.getExpression());
             Object value = methodInvoker.invokeMethod(expression, new HttpInvokerParameters(invoker, request));
@@ -36,11 +36,11 @@ public class RequestHandler {
         }
     }
 
-    public List<JsonResponse> handle(List<JsonRequest> requests, Invoker invoker) {
+    public List<JsonSerializable> handle(List<JsonRequest> requests, Invoker invoker) {
         return requests.stream().map(jsonRequest -> handle(jsonRequest, invoker)).collect(Collectors.toList());
     }
 
-    public List<JsonResponse> handle(String request, Invoker invoker) {
+    public List<JsonSerializable> handle(String request, Invoker invoker) {
         try {
             return handle(JsonRequest.fromJson(request), invoker);
         } catch (JSONException | IllegalArgumentException e) {

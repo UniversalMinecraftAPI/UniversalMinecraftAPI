@@ -7,6 +7,7 @@ import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.methods.APIMethod;
 import com.koenv.jsonapi.sponge.command.SpongeJSONAPICommandExecutor;
+import com.koenv.jsonapi.sponge.listeners.ChatStreamListener;
 import com.koenv.jsonapi.sponge.serializer.PlayerSerializer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -84,6 +85,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
         registerSerializers();
         registerCommands();
+        registerListeners();
     }
 
     @Listener
@@ -135,6 +137,10 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
     private void registerSerializers() {
         jsonapi.getSerializerManager().registerSerializer(Player.class, new PlayerSerializer());
+    }
+
+    private void registerListeners() {
+        Sponge.getEventManager().registerListeners(this, new ChatStreamListener(jsonapi.getStreamManager()));
     }
 
     @APIMethod(namespace = "players")

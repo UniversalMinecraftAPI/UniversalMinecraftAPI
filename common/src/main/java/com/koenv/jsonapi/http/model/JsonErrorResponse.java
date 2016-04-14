@@ -3,7 +3,7 @@ package com.koenv.jsonapi.http.model;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONObject;
 
-public class JsonErrorResponse implements JsonResponse {
+public class JsonErrorResponse implements JsonSerializable {
     private int code;
     private String message;
     private String tag;

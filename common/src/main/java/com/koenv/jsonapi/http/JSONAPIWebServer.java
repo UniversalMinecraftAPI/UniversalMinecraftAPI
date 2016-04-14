@@ -4,7 +4,7 @@ import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
-import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.http.model.WebServerInvoker;
 import com.koenv.jsonapi.http.websocket.JSONAPIWebSocket;
 import com.koenv.jsonapi.serializer.SerializerManager;
@@ -66,7 +66,7 @@ public class JSONAPIWebServer {
 
             WebServerInvoker invoker = new WebServerInvoker(req, res);
 
-            List<JsonResponse> responses = requestHandler.handle(req.body(), invoker);
+            List<JsonSerializable> responses = requestHandler.handle(req.body(), invoker);
 
             res.header("Content-Type", "application/json");
             JSONValue response = (JSONValue) serializerManager.serialize(responses);

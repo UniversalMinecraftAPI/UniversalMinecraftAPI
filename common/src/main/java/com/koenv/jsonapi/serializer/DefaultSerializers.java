@@ -1,6 +1,6 @@
 package com.koenv.jsonapi.serializer;
 
-import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.serializer.defaults.CollectionSerializer;
 import com.koenv.jsonapi.serializer.defaults.JsonResponseSerializer;
 
@@ -23,7 +23,7 @@ public class DefaultSerializers {
 
     static {
         SERIALIZERS = new HashMap<>();
-        SERIALIZERS.put(JsonResponse.class, new JsonResponseSerializer());
+        SERIALIZERS.put(JsonSerializable.class, new JsonResponseSerializer());
         SERIALIZERS.put(Collection.class, new CollectionSerializer());
         SERIALIZERS.put(boolean.class, BOOLEAN_SERIALIZER);
         SERIALIZERS.put(Boolean.class, BOOLEAN_SERIALIZER);

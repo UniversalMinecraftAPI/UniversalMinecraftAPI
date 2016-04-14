@@ -1,10 +1,10 @@
 package com.koenv.jsonapi.streams;
 
-import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONObject;
 
-public class StreamMessage implements JsonResponse {
+public class StreamMessage implements JsonSerializable {
     private Object value;
     private String tag;
     private String stream;
