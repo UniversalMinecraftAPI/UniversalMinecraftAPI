@@ -5,6 +5,7 @@ import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.methods.ClassMethod;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.methods.NamespacedMethod;
+import com.koenv.jsonapi.util.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,31 +46,52 @@ public class CreateApiDocCommand extends Command {
             }
         }
 
-        StringBuilder builder = new StringBuilder();
+        MethodInvoker methodInvoker = jsonapi.getMethodInvoker();
 
+        StringBuilder builder = new StringBuilder();
         switch (format) {
             case MARKDOWN:
-                MethodInvoker methodInvoker = jsonapi.getMethodInvoker();
-
                 builder.append("# Namespaces\n\n");
 
-                for (Map.Entry<String, Map<String, NamespacedMethod>> entry : methodInvoker.getNamespaces().entrySet()) {
+                methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> {
                     builder.append("## ").append(findFirst(entry.getValue()).getNamespace());
                     builder.append("\n\n");
 
-                    addMethods(builder, entry.getValue());
-                }
+                    addMethodsToMarkdown(builder, entry.getValue());
+                });
 
                 builder.append("# Objects\n\n");
 
-                methodInvoker.getClasses().entrySet().stream().filter(entry -> entry.getValue().values().size() > 0).forEach(entry -> {
+                methodInvoker.getClasses().entrySet().stream().forEach(entry -> {
                     builder.append("## ").append(findFirst(entry.getValue()).getOperatesOn().getSimpleName());
                     builder.append("\n\n");
 
-                    addMethods(builder, entry.getValue());
+                    addMethodsToMarkdown(builder, entry.getValue());
                 });
 
                 System.out.println(builder.toString());
+                break;
+            case JSON:
+                JSONObject root = new JSONObject();
+
+                JSONObject namespaces = new JSONObject();
+
+                methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> {
+                    namespaces.put(findFirst(entry.getValue()).getNamespace(), getJsonMethods(entry.getValue()));
+                });
+
+                root.put("namespaces", namespaces);
+
+                JSONObject objects = new JSONObject();
+
+                methodInvoker.getClasses().entrySet().stream().forEach(entry -> {
+                    objects.put(findFirst(entry.getValue()).getOperatesOn().getSimpleName(), getJsonMethods(entry.getValue()));
+                });
+
+                root.put("objects", objects);
+
+                builder.append(root.toString(4));
+
                 break;
         }
 
@@ -86,7 +108,7 @@ public class CreateApiDocCommand extends Command {
         return true;
     }
 
-    private void addMethods(StringBuilder builder, Map<String, ? extends com.koenv.jsonapi.methods.Method> map) {
+    private void addMethodsToMarkdown(StringBuilder builder, Map<String, ? extends com.koenv.jsonapi.methods.Method> map) {
         for (Map.Entry<String, ? extends com.koenv.jsonapi.methods.Method> methodEntry : map.entrySet()) {
             builder.append("### ").append(methodEntry.getValue().getName());
             builder.append("\n\n");
@@ -131,6 +153,42 @@ public class CreateApiDocCommand extends Command {
             builder.append(joiner.toString());
             builder.append(")\n\n");
         }
+    }
+
+    private JSONObject getJsonMethods(Map<String, ? extends com.koenv.jsonapi.methods.Method> map) {
+        JSONObject root = new JSONObject();
+        for (Map.Entry<String, ? extends com.koenv.jsonapi.methods.Method> methodEntry : map.entrySet()) {
+            JSONObject jsonMethod = new JSONObject();
+
+            Method method = methodEntry.getValue().getJavaMethod();
+
+            int parameterCount = method.getParameters().length;
+            Stream<Parameter> stream = Arrays.stream(method.getParameters());
+            if (methodEntry.getValue() instanceof ClassMethod) {
+                stream = stream.skip(1);
+                parameterCount--;
+            }
+
+            if (parameterCount > 0) {
+                JSONObject arguments = new JSONObject();
+                stream.forEach(parameter -> {
+                    arguments.put(parameter.getName(), parameter.getType().getSimpleName());
+                });
+                jsonMethod.put("arguments", arguments);
+            }
+
+            jsonMethod.put("returns", method.getReturnType().getSimpleName());
+
+            if (methodEntry.getValue() instanceof ClassMethod) {
+                jsonMethod.put("operatesOn", ((ClassMethod) methodEntry.getValue()).getOperatesOn().getSimpleName());
+            } else if (methodEntry.getValue() instanceof NamespacedMethod) {
+                jsonMethod.put("namespace", ((NamespacedMethod) methodEntry.getValue()).getNamespace());
+            }
+
+            root.put(methodEntry.getValue().getName(), jsonMethod);
+        }
+
+        return root;
     }
 
     private <T extends com.koenv.jsonapi.methods.Method> T findFirst(Map<String, T> map) {
