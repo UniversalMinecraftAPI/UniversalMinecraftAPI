@@ -12,6 +12,8 @@ import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.DefaultSerializers;
 import com.koenv.jsonapi.serializer.SerializerManager;
+import com.koenv.jsonapi.streams.StreamManager;
+import com.koenv.jsonapi.streams.StreamMethods;
 
 /**
  * The main JSONAPI delegate which must be called in implementations.
@@ -32,6 +34,7 @@ public class JSONAPI implements JSONAPIInterface {
     private CommandManager commandManager;
     private SerializerManager serializerManager;
     private RequestHandler requestHandler;
+    private StreamManager streamManager;
 
     private JSONAPIWebServer webServer;
 
@@ -51,11 +54,14 @@ public class JSONAPI implements JSONAPIInterface {
         DefaultSerializers.register(serializerManager);
 
         requestHandler = new RequestHandler(getExpressionParser(), getMethodInvoker());
+        streamManager = new StreamManager();
+        streamManager.registerStream("console");
 
         webServer = new JSONAPIWebServer(this);
 
         methodInvoker.registerMethods(this);
         methodInvoker.registerMethods(provider);
+        methodInvoker.registerMethods(StreamMethods.class);
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
@@ -96,6 +102,11 @@ public class JSONAPI implements JSONAPIInterface {
     @Override
     public RequestHandler getRequestHandler() {
         return requestHandler;
+    }
+
+    @Override
+    public StreamManager getStreamManager() {
+        return streamManager;
     }
 
     @APIMethod(namespace = "jsonapi")

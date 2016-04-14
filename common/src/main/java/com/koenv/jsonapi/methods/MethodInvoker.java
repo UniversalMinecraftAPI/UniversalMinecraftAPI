@@ -2,6 +2,7 @@ package com.koenv.jsonapi.methods;
 
 import com.koenv.jsonapi.parser.expressions.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -77,7 +78,7 @@ public class MethodInvoker {
      * @return The return of the method, after everything has been called.
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
-    public Object invokeMethod(Expression expression, Invoker invoker) throws MethodInvocationException {
+    public Object invokeMethod(Expression expression, InvokeParameters invoker) throws MethodInvocationException {
         if (expression instanceof ChainedMethodCallExpression) {
             List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
             String namespace = null;
@@ -135,25 +136,19 @@ public class MethodInvoker {
             if (!Modifier.isStatic(objectMethod.getModifiers())) {
                 throw new MethodRegistrationException("All registered API methods must be static: " + objectMethod.getName());
             }
-            boolean invokerPassed = false;
-            int selfAt = 0;
-            if (Invoker.class.isAssignableFrom(objectMethod.getParameters()[0].getType())) {
-                selfAt = 1;
-                invokerPassed = true;
-            }
             if (!APIMethod.DEFAULT.class.equals(annotation.operatesOn())) {
                 if (objectMethod.getParameterCount() < 1) {
                     throw new MethodRegistrationException("API methods which operate on an object need to have at least 1 parameter: " + objectMethod.getName());
                 }
-                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[selfAt].getType())) {
+                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[0].getType())) {
                     throw new MethodRegistrationException("API methods which operate on an object need to have the operatesOn class as first parameter: " + objectMethod.getName());
                 }
-                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod, invokerPassed);
+                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod);
                 registerClassMethod(classMethod);
                 continue;
             }
             String namespace = getNamespaceName(annotation.namespace());
-            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod, invokerPassed);
+            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod);
             registerMethod(method);
         }
     }
@@ -184,7 +179,7 @@ public class MethodInvoker {
      * @return The result returned by the last method in the methodCallExpression.
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
-    protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult, Invoker invoker) throws MethodInvocationException {
+    protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult, InvokeParameters invoker) throws MethodInvocationException {
         AbstractMethod method = null;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
@@ -224,10 +219,6 @@ public class MethodInvoker {
         }
         List<Object> parameters = new ArrayList<>();
 
-        if (method.isInvokerPassed()) {
-            parameters.add(invoker);
-        }
-
         if (method instanceof ClassMethod) {
             parameters.add(lastResult);
         }
@@ -253,39 +244,62 @@ public class MethodInvoker {
             }
         }
 
-        if (method.getJavaMethod().getParameterCount() != parameters.size()) {
-            throw new MethodInvocationException("Method " + getMethodDeclaration(method) + " requires " +
-                    method.getJavaMethod().getParameterCount() +
-                    " parameters, received " + parameters.size());
-        }
-
         Parameter[] javaParameters = method.getJavaMethod().getParameters();
         List<Object> convertedParameters = new ArrayList<>();
 
-        for (int i = 0; i < javaParameters.length; i++) {
-            Parameter javaParameter = javaParameters[i];
-            Object parameter = parameters.get(i);
+        int requiredParameters = method.getJavaMethod().getParameterCount();
+
+        int j = 0;
+        for (Parameter javaParameter : javaParameters) {
+            if (j >= parameters.size()) {
+                Object invokerObject = invoker.get(javaParameter.getType());
+                if (invokerObject != null) {
+                    convertedParameters.add(invokerObject);
+                    requiredParameters--;
+                    continue;
+                }
+                break;
+            }
+            Object parameter = parameters.get(j);
             boolean allowed = checkParameter(parameter, javaParameter);
             if (!allowed) {
                 Object convertedParameter = convertParameterUntilFound(parameter, javaParameter);
                 if (convertedParameter == null) {
+                    Object invokerObject = invoker.get(javaParameter.getType());
+                    if (invokerObject != null) {
+                        convertedParameters.add(invokerObject);
+                        requiredParameters--;
+                        continue;
+                    }
                     throw new MethodInvocationException(
-                            "Wrong type of parameter for place " + i +
-                                    ": got " + parameters.get(i).getClass().getSimpleName() +
+                            "Wrong type of parameter for place " + j +
+                                    ": got " + parameters.get(j).getClass().getSimpleName() +
                                     ", expected " + javaParameter.getType().getSimpleName());
                 }
                 convertedParameters.add(convertedParameter);
                 continue;
             }
             convertedParameters.add(parameter);
+            j++;
+        }
+
+        if (j != requiredParameters || j < parameters.size()) {
+            throw new MethodInvocationException("Method " + getMethodDeclaration(method) + " requires " +
+                    requiredParameters +
+                    " parameters, received " + parameters.size());
         }
 
         Object result;
 
         try {
             result = method.getJavaMethod().invoke(null, convertedParameters.toArray());
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException && e.getCause() instanceof RethrowableException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new MethodInvocationException("Unable to invoke method: " + getMethodDeclaration(method) + ": " + e.getCause().getMessage());
         } catch (Exception e) {
-            throw new MethodInvocationException("Unable to invoke method " + getMethodDeclaration(method), e);
+            throw new MethodInvocationException("Unable to invoke method " + getMethodDeclaration(method) + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
         }
 
         return result;
@@ -474,13 +488,11 @@ public class MethodInvoker {
         stringBuilder.append(method.getName());
         stringBuilder.append("(");
         Parameter[] parameters = method.getJavaMethod().getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            Parameter parameter = parameters[i];
-            stringBuilder.append(parameter.getType().getSimpleName());
-            if (i != parameters.length - 1) {
-                stringBuilder.append(", ");
-            }
-        }
+        StringJoiner joiner = new StringJoiner(", ");
+        Arrays.asList(parameters).stream().filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter)).forEach(parameter -> {
+            joiner.add(parameter.getType().getSimpleName());
+        });
+        stringBuilder.append(joiner.toString());
         stringBuilder.append(")");
         return stringBuilder.toString();
     }

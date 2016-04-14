@@ -1,9 +1,6 @@
 package com.koenv.jsonapi.http;
 
-import com.koenv.jsonapi.http.model.JsonErrorResponse;
-import com.koenv.jsonapi.http.model.JsonRequest;
-import com.koenv.jsonapi.http.model.JsonResponse;
-import com.koenv.jsonapi.http.model.JsonSuccessResponse;
+import com.koenv.jsonapi.http.model.*;
 import com.koenv.jsonapi.methods.Invoker;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
@@ -28,12 +25,14 @@ public class RequestHandler {
     public JsonResponse handle(JsonRequest request, Invoker invoker) {
         try {
             Expression expression = expressionParser.parse(request.getExpression());
-            Object value = methodInvoker.invokeMethod(expression, invoker);
+            Object value = methodInvoker.invokeMethod(expression, new HttpInvokerParameters(invoker, request));
             return createSuccessResponse(value, request);
         } catch (MethodInvocationException e) {
             return createErrorResponse(2, "Error while invoking method: " + e.getMessage(), request);
         } catch (ParseException e) {
             return createErrorResponse(3, "Error while parsing method: " + e.getMessage(), request);
+        } catch (APIException e) {
+            return createErrorResponse(e.getCode(), e.getMessage(), request);
         }
     }
 

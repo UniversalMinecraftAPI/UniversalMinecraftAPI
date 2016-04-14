@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 public class ClassMethod extends AbstractMethod {
     private Class<?> operatesOn;
 
-    public ClassMethod(Class<?> operatesOn, String name, Method javaMethod, boolean invokerPassed) {
-        super(name, javaMethod, invokerPassed);
+    public ClassMethod(Class<?> operatesOn, String name, Method javaMethod) {
+        super(name, javaMethod);
         this.operatesOn = operatesOn;
     }
 

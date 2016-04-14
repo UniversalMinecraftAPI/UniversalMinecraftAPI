@@ -1,5 +1,6 @@
 package com.koenv.jsonapi.http.model;
 
+import com.koenv.jsonapi.methods.ExcludeFromDoc;
 import com.koenv.jsonapi.util.json.JSONArray;
 import com.koenv.jsonapi.util.json.JSONException;
 import com.koenv.jsonapi.util.json.JSONObject;
@@ -8,6 +9,7 @@ import com.koenv.jsonapi.util.json.JSONTokener;
 import java.util.ArrayList;
 import java.util.List;
 
+@ExcludeFromDoc
 public class JsonRequest {
     private String expression;
     private String tag;

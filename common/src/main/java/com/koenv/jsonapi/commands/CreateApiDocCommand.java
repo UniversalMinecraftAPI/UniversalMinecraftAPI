@@ -2,10 +2,7 @@ package com.koenv.jsonapi.commands;
 
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.JSONAPIInterface;
-import com.koenv.jsonapi.methods.AbstractMethod;
-import com.koenv.jsonapi.methods.ClassMethod;
-import com.koenv.jsonapi.methods.MethodInvoker;
-import com.koenv.jsonapi.methods.NamespacedMethod;
+import com.koenv.jsonapi.methods.*;
 import com.koenv.jsonapi.util.json.JSONObject;
 
 import java.io.File;
@@ -123,7 +120,11 @@ public class CreateApiDocCommand extends Command {
 
             if (parameterCount > 0) {
                 builder.append("Arguments:\n\n");
-                stream.forEach(parameter -> builder.append("* ").append(parameter.getName()).append(": `").append(parameter.getType().getSimpleName()).append("`\n"));
+                stream
+                        .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                        .forEach(parameter -> {
+                            builder.append("* ").append(parameter.getName()).append(": `").append(parameter.getType().getSimpleName()).append("`\n");
+                        });
             }
 
             builder.append("\n\n");
@@ -171,9 +172,11 @@ public class CreateApiDocCommand extends Command {
 
             if (parameterCount > 0) {
                 JSONObject arguments = new JSONObject();
-                stream.forEach(parameter -> {
-                    arguments.put(parameter.getName(), parameter.getType().getSimpleName());
-                });
+                stream
+                        .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                        .forEach(parameter -> {
+                            arguments.put(parameter.getName(), parameter.getType().getSimpleName());
+                        });
                 jsonMethod.put("arguments", arguments);
             }
 
