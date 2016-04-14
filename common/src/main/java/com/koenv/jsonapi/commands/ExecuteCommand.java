@@ -18,7 +18,6 @@ public class ExecuteCommand extends Command {
             execStringBuilder.append(arg);
             execStringBuilder.append(" ");
         }
-        System.out.println(execStringBuilder.toString());
         try {
             Expression expression = jsonapi.getExpressionParser().parse(execStringBuilder.toString());
             Object result = jsonapi.getMethodInvoker().invokeMethod(expression);

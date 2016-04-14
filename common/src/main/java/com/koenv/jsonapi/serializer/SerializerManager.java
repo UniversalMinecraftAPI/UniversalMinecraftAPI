@@ -17,7 +17,6 @@ public class SerializerManager {
     }
 
     private <T> Object serialize(T object, Class<? extends T> clazz, boolean within) {
-        System.out.println("Serializing " + object + " with class " + clazz.getName());
         if (serializers.containsKey(clazz)) {
             Serializer<T> serializer = (Serializer<T>) serializers.get(clazz);
             return serializer.toJson(object, this);

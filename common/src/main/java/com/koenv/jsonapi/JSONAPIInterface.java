@@ -4,6 +4,7 @@ import com.koenv.jsonapi.commands.CommandManager;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
+import com.koenv.jsonapi.serializer.SerializerManager;
 
 /**
  * The interface of the JSONAPI, so it can be used in tests.
@@ -28,4 +29,9 @@ public interface JSONAPIInterface {
      * @return The currently in use {@link CommandManager}
      */
     CommandManager getCommandManager();
+
+    /**
+     * @return The currently in use {@link SerializerManager}
+     */
+    SerializerManager getSerializerManager();
 }

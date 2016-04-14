@@ -64,4 +64,9 @@ public class JSONAPI implements JSONAPIInterface {
     public CommandManager getCommandManager() {
         return commandManager;
     }
+
+    @Override
+    public SerializerManager getSerializerManager() {
+        return serializerManager;
+    }
 }

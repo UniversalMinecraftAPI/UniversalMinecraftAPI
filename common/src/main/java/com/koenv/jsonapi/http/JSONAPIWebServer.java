@@ -62,7 +62,6 @@ public class JSONAPIWebServer {
                 halt(400, "Invalid content type");
             }
             List<JsonResponse> responses = requestHandler.handle(req.body());
-            System.out.println("Responses: " + responses.size());
 
             res.header("Content-Type", "application/json");
             JSONValue response = (JSONValue) serializerManager.serialize(responses);

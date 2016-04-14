@@ -70,7 +70,6 @@ public class CreateApiDocCommand extends Command {
                     addMethodsToMarkdown(builder, entry.getValue());
                 });
 
-                System.out.println(builder.toString());
                 break;
             case JSON:
                 JSONObject root = new JSONObject();
