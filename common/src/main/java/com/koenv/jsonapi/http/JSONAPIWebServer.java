@@ -5,6 +5,7 @@ import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.WebServerInvoker;
 import com.koenv.jsonapi.http.websocket.JSONAPIWebSocket;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONValue;
@@ -62,7 +63,10 @@ public class JSONAPIWebServer {
             if (!req.contentType().contains("application/json")) {
                 halt(400, "Invalid content type");
             }
-            List<JsonResponse> responses = requestHandler.handle(req.body());
+
+            WebServerInvoker invoker = new WebServerInvoker(req, res);
+
+            List<JsonResponse> responses = requestHandler.handle(req.body(), invoker);
 
             res.header("Content-Type", "application/json");
             JSONValue response = (JSONValue) serializerManager.serialize(responses);

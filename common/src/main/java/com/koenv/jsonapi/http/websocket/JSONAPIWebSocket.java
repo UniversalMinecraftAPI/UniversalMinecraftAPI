@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 @WebSocket
 public class JSONAPIWebSocket {
@@ -44,18 +43,12 @@ public class JSONAPIWebSocket {
     @OnWebSocketMessage
     public void message(Session session, String message) throws IOException {
         List<JsonRequest> requests = JsonRequest.fromJson(message);
-        List<JsonRequest> webSocketRequests = requests.stream().filter(jsonRequest -> jsonRequest.getExpression().startsWith("websocket:")).collect(Collectors.toList());
-        requests.removeAll(webSocketRequests);
 
-        List<JsonResponse> responses = requestHandler.handle(requests);
+        List<JsonResponse> responses = requestHandler.handle(requests, new WebSocketInvoker(session));
 
         JSONValue response = (JSONValue) serializerManager.serialize(responses);
         if (session.isOpen()) {
             session.getRemote().sendString(response.toString());
-        }
-
-        for (JsonRequest request : webSocketRequests) {
-            // TODO: handle websocket request
         }
     }
 }

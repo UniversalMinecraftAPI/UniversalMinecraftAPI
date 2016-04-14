@@ -64,7 +64,20 @@ public class MethodInvoker {
      * @return The return of the method, after everything has been called.
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
+
     public Object invokeMethod(Expression expression) throws MethodInvocationException {
+        return invokeMethod(expression, null);
+    }
+
+    /**
+     * Invokes a method that is in an expression
+     *
+     * @param expression Valid expression that has been created manually or has been created by {@link com.koenv.jsonapi.parser.ExpressionParser}
+     * @param invoker    The invoker which can be used as a tag
+     * @return The return of the method, after everything has been called.
+     * @throws MethodInvocationException Thrown when the method cannot be invoked
+     */
+    public Object invokeMethod(Expression expression, Invoker invoker) throws MethodInvocationException {
         if (expression instanceof ChainedMethodCallExpression) {
             List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
             String namespace = null;
@@ -78,15 +91,15 @@ public class MethodInvoker {
                     namespace = ((NamespaceExpression) innerExpression).getName();
                 } else if (innerExpression instanceof MethodCallExpression) {
                     if (i == 0 || (i == 1 && namespace != null)) {
-                        lastResult = invokeMethod(namespace, (MethodCallExpression) innerExpression, lastResult);
+                        lastResult = invokeMethod(namespace, (MethodCallExpression) innerExpression, lastResult, invoker);
                     } else {
-                        lastResult = invokeMethod(null, (MethodCallExpression) innerExpression, lastResult);
+                        lastResult = invokeMethod(null, (MethodCallExpression) innerExpression, lastResult, invoker);
                     }
                 }
             }
             return lastResult;
         } else if (expression instanceof MethodCallExpression) {
-            return invokeMethod(null, (MethodCallExpression) expression, null);
+            return invokeMethod(null, (MethodCallExpression) expression, null, invoker);
         } else if (expression instanceof ValueExpression) {
             return ((ValueExpression) expression).getValue();
         } else {
@@ -122,19 +135,25 @@ public class MethodInvoker {
             if (!Modifier.isStatic(objectMethod.getModifiers())) {
                 throw new MethodRegistrationException("All registered API methods must be static: " + objectMethod.getName());
             }
+            boolean invokerPassed = false;
+            int selfAt = 0;
+            if (Invoker.class.isAssignableFrom(objectMethod.getParameters()[0].getType())) {
+                selfAt = 1;
+                invokerPassed = true;
+            }
             if (!APIMethod.DEFAULT.class.equals(annotation.operatesOn())) {
                 if (objectMethod.getParameterCount() < 1) {
                     throw new MethodRegistrationException("API methods which operate on an object need to have at least 1 parameter: " + objectMethod.getName());
                 }
-                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[0].getType())) {
+                if (!annotation.operatesOn().isAssignableFrom(objectMethod.getParameters()[selfAt].getType())) {
                     throw new MethodRegistrationException("API methods which operate on an object need to have the operatesOn class as first parameter: " + objectMethod.getName());
                 }
-                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod);
+                ClassMethod classMethod = new ClassMethod(annotation.operatesOn(), objectMethod.getName(), objectMethod, invokerPassed);
                 registerClassMethod(classMethod);
                 continue;
             }
             String namespace = getNamespaceName(annotation.namespace());
-            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod);
+            NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod, invokerPassed);
             registerMethod(method);
         }
     }
@@ -161,10 +180,11 @@ public class MethodInvoker {
      * @param namespace            Namespace of the method. Is usually null when lastResult is not null.
      * @param methodCallExpression The expression of the method call.
      * @param lastResult           The object on which to operate. Is usually null when namespace is not null.
+     * @param invoker              The invoker which can be used as a tag
      * @return The result returned by the last method in the methodCallExpression.
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
-    protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
+    protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult, Invoker invoker) throws MethodInvocationException {
         AbstractMethod method = null;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
@@ -204,6 +224,10 @@ public class MethodInvoker {
         }
         List<Object> parameters = new ArrayList<>();
 
+        if (method.isInvokerPassed()) {
+            parameters.add(invoker);
+        }
+
         if (method instanceof ClassMethod) {
             parameters.add(lastResult);
         }
@@ -219,7 +243,7 @@ public class MethodInvoker {
             } else if (expression instanceof StringExpression) {
                 parameters.add(((StringExpression) expression).getValue());
             } else if (expression instanceof MethodCallExpression) {
-                Object result = invokeMethod(null, (MethodCallExpression) expression, null);
+                Object result = invokeMethod(null, (MethodCallExpression) expression, null, invoker);
                 parameters.add(result);
             } else if (expression instanceof ChainedMethodCallExpression) {
                 Object result = invokeMethod(expression);

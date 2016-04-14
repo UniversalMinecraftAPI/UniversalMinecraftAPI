@@ -6,6 +6,8 @@ import com.koenv.jsonapi.commands.ExecuteCommand;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.http.RequestHandler;
+import com.koenv.jsonapi.methods.APIMethod;
+import com.koenv.jsonapi.methods.Invoker;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.DefaultSerializers;
@@ -94,5 +96,10 @@ public class JSONAPI implements JSONAPIInterface {
     @Override
     public RequestHandler getRequestHandler() {
         return requestHandler;
+    }
+
+    @APIMethod(namespace = "jsonapi")
+    public static String getInvoker(Invoker invoker) {
+        return invoker.toString();
     }
 }

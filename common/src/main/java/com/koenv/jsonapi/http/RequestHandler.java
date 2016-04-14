@@ -4,6 +4,7 @@ import com.koenv.jsonapi.http.model.JsonErrorResponse;
 import com.koenv.jsonapi.http.model.JsonRequest;
 import com.koenv.jsonapi.http.model.JsonResponse;
 import com.koenv.jsonapi.http.model.JsonSuccessResponse;
+import com.koenv.jsonapi.methods.Invoker;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
@@ -24,10 +25,10 @@ public class RequestHandler {
         this.methodInvoker = methodInvoker;
     }
 
-    public JsonResponse handle(JsonRequest request) {
+    public JsonResponse handle(JsonRequest request, Invoker invoker) {
         try {
             Expression expression = expressionParser.parse(request.getExpression());
-            Object value = methodInvoker.invokeMethod(expression);
+            Object value = methodInvoker.invokeMethod(expression, invoker);
             return createSuccessResponse(value, request);
         } catch (MethodInvocationException e) {
             return createErrorResponse(2, "Error while invoking method: " + e.getMessage(), request);
@@ -36,13 +37,13 @@ public class RequestHandler {
         }
     }
 
-    public List<JsonResponse> handle(List<JsonRequest> requests) {
-        return requests.stream().map(this::handle).collect(Collectors.toList());
+    public List<JsonResponse> handle(List<JsonRequest> requests, Invoker invoker) {
+        return requests.stream().map(jsonRequest -> handle(jsonRequest, invoker)).collect(Collectors.toList());
     }
 
-    public List<JsonResponse> handle(String request) {
+    public List<JsonResponse> handle(String request, Invoker invoker) {
         try {
-            return handle(JsonRequest.fromJson(request));
+            return handle(JsonRequest.fromJson(request), invoker);
         } catch (JSONException | IllegalArgumentException e) {
             return Collections.singletonList(createErrorResponse(1, "Invalid content, must be a JSON object or array", null));
         }
