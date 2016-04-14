@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
-import com.koenv.jsonapi.methods.APIMethod;
 import com.koenv.jsonapi.sponge.command.SpongeJSONAPICommandExecutor;
 import com.koenv.jsonapi.sponge.listeners.ChatStreamListener;
+import com.koenv.jsonapi.sponge.methods.PlayerMethods;
 import com.koenv.jsonapi.sponge.serializer.PlayerSerializer;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -86,6 +86,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         registerSerializers();
         registerCommands();
         registerListeners();
+        registerMethods();
     }
 
     @Listener
@@ -143,14 +144,8 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         Sponge.getEventManager().registerListeners(this, new ChatStreamListener(jsonapi.getStreamManager()));
     }
 
-    @APIMethod(namespace = "players")
-    public static Player getPlayer(String name) {
-        return Sponge.getServer().getPlayer(name).orElse(null);
-    }
-
-    @APIMethod(operatesOn = Player.class)
-    public static String getUUID(Player self) {
-        return self.getUniqueId().toString();
+    private void registerMethods() {
+        jsonapi.getMethodInvoker().registerMethods(PlayerMethods.class);
     }
 
     public JSONAPI getJSONAPI() {

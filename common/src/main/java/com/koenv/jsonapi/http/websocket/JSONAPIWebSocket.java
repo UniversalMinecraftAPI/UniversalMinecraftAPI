@@ -5,8 +5,10 @@ import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.http.model.JsonRequest;
 import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.serializer.SerializerManager;
+import com.koenv.jsonapi.streams.StreamManager;
 import com.koenv.jsonapi.util.json.JSONValue;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
@@ -17,10 +19,17 @@ import java.util.List;
 public class JSONAPIWebSocket {
     private RequestHandler requestHandler;
     private SerializerManager serializerManager;
+    private StreamManager streamManager;
 
     public JSONAPIWebSocket() {
         this.requestHandler = JSONAPI.getInstance().getRequestHandler();
         this.serializerManager = JSONAPI.getInstance().getSerializerManager();
+        this.streamManager = JSONAPI.getInstance().getStreamManager();
+    }
+
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        streamManager.unsubscribe(new WebSocketStreamSubscriber(session));
     }
 
     @OnWebSocketMessage

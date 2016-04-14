@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StreamManager {
     private List<StreamSubscription> subscriptions = new CopyOnWriteArrayList<>();
@@ -20,19 +21,47 @@ public class StreamManager {
         if (!streams.contains(stream)) {
             throw new InvalidStreamException();
         }
+        if (findSubscription(stream, subscriber).findAny().isPresent()) {
+            throw new DuplicateSubscriptionException();
+        }
         subscriptions.add(new StreamSubscription(subscriber, tag, stream));
     }
 
-    public int unsubscribe(String stream, StreamSubscriber subscriber, String tag) {
-        List<StreamSubscription> removeSubscriptions = subscriptions.stream()
-                .filter(subscription -> Objects.equals(subscription.getTag(), tag))
+    public Stream<StreamSubscription> findSubscription(String stream, StreamSubscriber subscriber) {
+        return subscriptions.stream()
                 .filter(subscription -> Objects.equals(subscription.getStream(), stream))
-                .filter(subscription -> subscription.getSubscriber().matches(subscriber))
+                .filter(subscription -> subscription.getSubscriber().matches(subscriber));
+    }
+
+    public Stream<StreamSubscription> findSubscription(String stream, StreamSubscriber subscriber, String tag) {
+        return findSubscription(stream, subscriber).filter(subscription -> Objects.equals(subscription.getTag(), tag));
+    }
+
+    public int unsubscribe(String stream, StreamSubscriber subscriber, String tag) {
+        List<StreamSubscription> removeSubscriptions = findSubscription(stream, subscriber, tag)
                 .collect(Collectors.toList());
+
         if (subscriptions.removeAll(removeSubscriptions)) {
             return removeSubscriptions.size();
         }
+
         return 0;
+    }
+
+    public int unsubscribe(StreamSubscriber subscriber) {
+        List<StreamSubscription> removeSubscriptions = subscriptions.stream()
+                .filter(subscription -> subscription.getSubscriber().matches(subscriber))
+                .collect(Collectors.toList());
+
+        if (subscriptions.removeAll(removeSubscriptions)) {
+            return removeSubscriptions.size();
+        }
+
+        return 0;
+    }
+
+    public int getSubscriptionCount() {
+        return subscriptions.size();
     }
 
     public void registerStream(String stream) {

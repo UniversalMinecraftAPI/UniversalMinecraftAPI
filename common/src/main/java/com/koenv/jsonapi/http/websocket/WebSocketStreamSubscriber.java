@@ -5,6 +5,7 @@ import com.koenv.jsonapi.streams.StreamSubscriber;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebSocketStreamSubscriber implements StreamSubscriber {
     private Session session;
@@ -22,5 +23,18 @@ public class WebSocketStreamSubscriber implements StreamSubscriber {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public boolean matches(StreamSubscriber other) {
+        if (!(other instanceof WebSocketStreamSubscriber)) {
+            return false;
+        }
+        WebSocketStreamSubscriber subscriber = (WebSocketStreamSubscriber) other;
+        return Objects.equals(getSession(), subscriber.getSession());
     }
 }

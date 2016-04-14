@@ -11,14 +11,14 @@ import java.util.Map;
 public class DefaultSerializers {
     public static final Map<Class<?>, Serializer<?>> SERIALIZERS;
 
-    static final Serializer<Boolean> BOOLEAN_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Byte> BYTE_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Character> CHARACTER_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Double> DOUBLE_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Float> FLOAT_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Integer> INTEGER_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Long> LONG_SERIALIZER = (object, serializerManager) -> object.toString();
-    static final Serializer<Short> SHORT_SERIALIZER = (object, serializerManager) -> object.toString();
+    static final Serializer<Boolean> BOOLEAN_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Byte> BYTE_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Character> CHARACTER_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Double> DOUBLE_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Float> FLOAT_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Integer> INTEGER_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Long> LONG_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Short> SHORT_SERIALIZER = (object, serializerManager) -> object;
     static final Serializer<String> STRING_SERIALIZER = (object, serializerManager) -> object;
 
     static {

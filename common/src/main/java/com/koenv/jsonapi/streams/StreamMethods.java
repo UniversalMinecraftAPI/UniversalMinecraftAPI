@@ -27,13 +27,35 @@ public class StreamMethods {
             JSONAPI.getInstance().getStreamManager().subscribe(stream, streamSubscriber, request.getTag());
         } catch (InvalidStreamException e) {
             throw new APIException("Invalid stream: " + stream, 13);
+        } catch (DuplicateSubscriptionException e) {
+            final String[] tag = {null};
+            JSONAPI.getInstance().getStreamManager().findSubscription(stream, streamSubscriber).findFirst().ifPresent(subscription -> tag[0] = subscription.getTag());
+            throw new APIException("Duplicate stream for: " + stream + " with tag " + tag[0], 13);
         }
 
         return true;
     }
 
+    @APIMethod(returnDescription = "Returns the unsubscribed subscriptions, usually 1")
+    public static int unsubscribe(Invoker invoker, JsonRequest request, String stream) {
+        if (!(invoker instanceof WebSocketInvoker)) {
+            throw new APIException("Subscriptions only work while connected to a web socket", 12);
+        }
+
+        WebSocketInvoker webSocketInvoker = (WebSocketInvoker) invoker;
+
+        StreamSubscriber streamSubscriber = new WebSocketStreamSubscriber(webSocketInvoker.getSession());
+
+        return JSONAPI.getInstance().getStreamManager().unsubscribe(stream, streamSubscriber, request.getTag());
+    }
+
     @APIMethod
     public static List<String> listStreams() {
         return JSONAPI.getInstance().getStreamManager().getStreams();
+    }
+
+    @APIMethod
+    public static int subscriptionCount() {
+        return JSONAPI.getInstance().getStreamManager().getSubscriptionCount();
     }
 }
