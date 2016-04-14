@@ -147,7 +147,14 @@ public class MethodInvoker {
                 registerClassMethod(classMethod);
                 continue;
             }
-            String namespace = getNamespaceName(annotation.namespace());
+            String namespace = annotation.namespace();
+            if (namespace.isEmpty()) {
+                APINamespace apiNamespace = clazz.getAnnotation(APINamespace.class);
+                if (apiNamespace != null) {
+                    namespace = apiNamespace.value();
+                }
+            }
+            namespace = getNamespaceName(namespace);
             NamespacedMethod method = new NamespacedMethod(namespace, objectMethod.getName(), objectMethod);
             registerMethod(method);
         }

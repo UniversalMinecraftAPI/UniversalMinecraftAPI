@@ -1,5 +1,7 @@
 package com.koenv.jsonapi.methods;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,7 +21,7 @@ public @interface APIMethod {
      *
      * @return The namespace of the command
      */
-    String namespace() default "";
+    @NotNull String namespace() default "";
 
     /**
      * The class this method operates on, if any. When this is used, {@link #namespace()} cannot be used.
