@@ -21,7 +21,7 @@ public class JSONAPIWebServer {
             port(port);
         }
 
-        webSocket("/api/v1/websocket", JSONAPIWebSocket.class);
+        webSocket("/api/v1/websocket", JSONAPIWebSocket.class); // this needs to be first otherwise the web socket doesn't work
 
         before("/api/v1/*", (request, response) -> {
             // halt(401, "Unauthorized");
