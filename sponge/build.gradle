@@ -7,3 +7,10 @@ repositories {
 dependencies {
     compile 'org.spongepowered:spongeapi:4.0.3'
 }
+
+shadowJar {
+    dependencies {
+        exclude(dependency('org.slf4j:slf4j-api'))
+        exclude(dependency('org.slf4j:slf4j-simple'))
+    }
+}

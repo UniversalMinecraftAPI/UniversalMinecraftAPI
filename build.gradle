@@ -56,9 +56,9 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
 
         relocate 'javax.servlet', 'com.koenv.jsonapi.thirdparty.javax.servlet'
         relocate 'org.eclipse.jetty', 'com.koenv.jsonapi.thirdparty.org.eclipse.jetty'
-        relocate 'org.slf4j', 'com.koenv.jsonapi.thirdparty.org.slf4j'
         relocate 'spark', 'com.koenv.jsonapi.thirdparty.spark'
         relocate 'org.jetbrains.annotations', 'com.koenv.jsonapi.thirdparty.org.jetbrains.annotations'
+        relocate 'org.intellij.lang.annotations', 'com.koenv.jsonapi.thirdparty.org.intellij.lang.annotations'
     }
 
     task dist() {

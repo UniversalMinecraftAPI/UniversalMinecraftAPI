@@ -10,3 +10,7 @@ repositories {
 dependencies {
     compile 'org.spigotmc:spigot-api:1.9.2-R0.1-SNAPSHOT'
 }
+
+shadowJar {
+    relocate 'org.slf4j', 'com.koenv.jsonapi.thirdparty.org.slf4j'
+}
