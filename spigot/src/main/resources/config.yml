@@ -1,0 +1,15 @@
+web_server:
+  ip_address: null # the IP address to bind to, null to bind to all interfaces
+  port: 20059 # the port to bind to, -1 to choose automatically
+  secure:
+    enabled: false # make the web server SSL secured
+    keystore:
+      file: "keystore"
+      password: "password"
+    truststore:
+      file: "truststore"
+      password: "password"
+  thread_pool:
+    max_threads: -1 # specify the max number of threads to use for the web server
+    min_threads: -1 # specify the min number of threads to use for the web server, only available if max_threads is also set to a number higher than 0
+    idle_timeout: -1 # specify the timeout of a thread, only available if max_threads is also set to a number higher than 0

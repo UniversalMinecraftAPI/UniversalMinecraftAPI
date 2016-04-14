@@ -388,7 +388,7 @@ public class MethodInvoker {
      * @return A map of methods in the namespace and the methods itself
      */
     protected Map<String, NamespacedMethod> getNamespace(String namespace) {
-        return Collections.unmodifiableMap(namespaceMethodsMap.get(getNamespaceName(namespace)));
+        return namespaceMethodsMap.get(getNamespaceName(namespace));
     }
 
     /**
@@ -424,11 +424,11 @@ public class MethodInvoker {
     }
 
     public Map<String, Map<String, NamespacedMethod>> getNamespaces() {
-        return Collections.unmodifiableMap(namespaceMethodsMap);
+        return namespaceMethodsMap;
     }
 
     public Map<Class<?>, Map<String, ClassMethod>> getClasses() {
-        return Collections.unmodifiableMap(classMethodsMap);
+        return classMethodsMap;
     }
 
     /**

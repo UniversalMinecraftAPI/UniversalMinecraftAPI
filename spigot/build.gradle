@@ -9,8 +9,12 @@ repositories {
 
 dependencies {
     compile 'org.spigotmc:spigot-api:1.9.2-R0.1-SNAPSHOT'
+    fatJar 'org.slf4j:slf4j-jdk14:1.7.12'
 }
 
 shadowJar {
     relocate 'org.slf4j', 'com.koenv.jsonapi.thirdparty.org.slf4j'
+    dependencies {
+        exclude(dependency('org.slf4j:slf4j-simple'))
+    }
 }

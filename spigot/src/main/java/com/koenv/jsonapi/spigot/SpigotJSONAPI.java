@@ -2,6 +2,7 @@ package com.koenv.jsonapi.spigot;
 
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIProvider;
+import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.methods.APIMethod;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -12,8 +13,13 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
+        SpigotConfigurationLoader loader = new SpigotConfigurationLoader();
+        JSONAPIConfiguration config = loader.load(getConfig());
+
         jsonapi = new JSONAPI(this);
-        jsonapi.setup();
+        jsonapi.setup(config);
 
         getCommand("jsonapi").setExecutor((sender, command, label, args) -> {
             jsonapi.getCommandManager().handle(new SpigotCommandSource(sender), args);
