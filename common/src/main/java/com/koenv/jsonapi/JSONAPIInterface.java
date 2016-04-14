@@ -1,6 +1,7 @@
 package com.koenv.jsonapi;
 
 import com.koenv.jsonapi.commands.CommandManager;
+import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 
@@ -11,7 +12,7 @@ public interface JSONAPIInterface {
     /**
      * Sets up the JSONAPIInterface by creating all required objects etc. Should usually be called when the implementation is enabled.
      */
-    void setup();
+    void setup(JSONAPIConfiguration configuration);
 
     /**
      * @return The currently in use {@link ExpressionParser}

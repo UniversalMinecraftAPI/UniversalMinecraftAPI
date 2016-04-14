@@ -3,6 +3,7 @@ package com.koenv.jsonapi;
 import com.koenv.jsonapi.commands.CommandManager;
 import com.koenv.jsonapi.commands.CreateApiDocCommand;
 import com.koenv.jsonapi.commands.ExecuteCommand;
+import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
@@ -12,6 +13,9 @@ import com.koenv.jsonapi.parser.ExpressionParser;
  */
 public class JSONAPI implements JSONAPIInterface {
     private JSONAPIProvider provider;
+
+    private JSONAPIConfiguration configuration;
+
     private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
     private CommandManager commandManager;
@@ -23,12 +27,14 @@ public class JSONAPI implements JSONAPIInterface {
     }
 
     @Override
-    public void setup() {
+    public void setup(JSONAPIConfiguration configuration) {
+        this.configuration = configuration;
+
         expressionParser = new ExpressionParser();
         methodInvoker = new MethodInvoker();
         commandManager = new CommandManager(this);
 
-        webServer = new JSONAPIWebServer();
+        webServer = new JSONAPIWebServer(configuration);
 
         methodInvoker.registerMethods(this);
         methodInvoker.registerMethods(provider);
@@ -36,7 +42,7 @@ public class JSONAPI implements JSONAPIInterface {
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
 
-        webServer.start(null, 20059);
+        webServer.start();
     }
 
     @Override

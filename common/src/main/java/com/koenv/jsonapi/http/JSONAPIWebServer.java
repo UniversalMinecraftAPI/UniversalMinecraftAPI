@@ -1,24 +1,39 @@
 package com.koenv.jsonapi.http;
 
+import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.WebServerSecureSection;
+import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.http.websocket.JSONAPIWebSocket;
-import org.jetbrains.annotations.Nullable;
 
 import static spark.Spark.*;
 
 public class JSONAPIWebServer {
+    private JSONAPIConfiguration configuration;
+
+    public JSONAPIWebServer(JSONAPIConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     /**
      * Starts the web server
-     *
-     * @param ipAddress The IP address to bind to or `null` if binding to all interfaces
-     * @param port      The port to bind to or a value less than 1 if the port should be chosen automatically
      */
-    public void start(@Nullable String ipAddress, int port) {
-        if (ipAddress != null) {
-            ipAddress(ipAddress);
+    public void start() {
+        if (configuration.getWebServer().getIpAddress() != null) {
+            ipAddress(configuration.getWebServer().getIpAddress());
         }
-        if (port > 0) {
-            port(port);
+
+        if (configuration.getWebServer().getPort() > 0) {
+            port(configuration.getWebServer().getPort());
+        }
+
+        if (configuration.getWebServer().getSecure().isEnabled()) {
+            WebServerSecureSection secure = configuration.getWebServer().getSecure();
+            secure(secure.getKeyStoreFile(), secure.getKeystorePassword(), secure.getTrustStoreFile(), secure.getTrustStorePassword());
+        }
+
+        if (configuration.getWebServer().getThreadPool().getMaxThreads() > 0) {
+            WebServerThreadPoolSection threadPool = configuration.getWebServer().getThreadPool();
+            threadPool(threadPool.getMaxThreads(), threadPool.getMinThreads(), threadPool.getIdleTimeoutMillis());
         }
 
         webSocket("/api/v1/websocket", JSONAPIWebSocket.class); // this needs to be first otherwise the web socket doesn't work
