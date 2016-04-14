@@ -9,6 +9,9 @@ public class SerializerManager {
     private Map<Class<?>, Serializer<?>> serializers = new HashMap<>();
 
     public Object serialize(Object object) {
+        if (object == null) {
+            return JSONObject.NULL;
+        }
         return serialize(object, object.getClass());
     }
 

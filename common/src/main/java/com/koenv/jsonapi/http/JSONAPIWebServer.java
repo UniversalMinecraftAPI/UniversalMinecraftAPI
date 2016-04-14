@@ -8,6 +8,7 @@ import com.koenv.jsonapi.http.model.JsonResponse;
 import com.koenv.jsonapi.http.websocket.JSONAPIWebSocket;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONValue;
+import spark.Spark;
 
 import java.util.List;
 
@@ -18,10 +19,10 @@ public class JSONAPIWebServer {
     private RequestHandler requestHandler;
     private SerializerManager serializerManager;
 
-    public JSONAPIWebServer(JSONAPI jsonapi, JSONAPIConfiguration configuration, SerializerManager serializerManager) {
-        this.configuration = configuration;
-        this.requestHandler = new RequestHandler(jsonapi.getExpressionParser(), jsonapi.getMethodInvoker());
-        this.serializerManager = serializerManager;
+    public JSONAPIWebServer(JSONAPI jsonapi) {
+        this.configuration = jsonapi.getConfiguration();
+        this.requestHandler = jsonapi.getRequestHandler();
+        this.serializerManager = jsonapi.getSerializerManager();
     }
 
     /**
@@ -69,5 +70,9 @@ public class JSONAPIWebServer {
         });
 
         init();
+    }
+
+    public void stop() {
+        Spark.stop();
     }
 }

@@ -2,8 +2,10 @@ package com.koenv.jsonapi.commands;
 
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.JSONAPIInterface;
+import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
+import com.koenv.jsonapi.serializer.SerializerManager;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -55,7 +57,7 @@ public class CommandManagerTest {
     private static class TestJSONAPI implements JSONAPIInterface {
 
         @Override
-        public void setup() {
+        public void setup(JSONAPIConfiguration configuration) {
 
         }
 
@@ -71,6 +73,11 @@ public class CommandManagerTest {
 
         @Override
         public CommandManager getCommandManager() {
+            return null;
+        }
+
+        @Override
+        public SerializerManager getSerializerManager() {
             return null;
         }
     }

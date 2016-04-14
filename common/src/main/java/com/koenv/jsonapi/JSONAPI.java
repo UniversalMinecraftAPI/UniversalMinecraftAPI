@@ -5,6 +5,7 @@ import com.koenv.jsonapi.commands.CreateApiDocCommand;
 import com.koenv.jsonapi.commands.ExecuteCommand;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
+import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.DefaultSerializers;
@@ -14,6 +15,12 @@ import com.koenv.jsonapi.serializer.SerializerManager;
  * The main JSONAPI delegate which must be called in implementations.
  */
 public class JSONAPI implements JSONAPIInterface {
+    private static JSONAPI INSTANCE;
+
+    public static JSONAPI getInstance() {
+        return INSTANCE;
+    }
+
     private JSONAPIProvider provider;
 
     private JSONAPIConfiguration configuration;
@@ -22,11 +29,13 @@ public class JSONAPI implements JSONAPIInterface {
     private MethodInvoker methodInvoker;
     private CommandManager commandManager;
     private SerializerManager serializerManager;
+    private RequestHandler requestHandler;
 
     private JSONAPIWebServer webServer;
 
     public JSONAPI(JSONAPIProvider provider) {
         this.provider = provider;
+        INSTANCE = this;
     }
 
     @Override
@@ -39,7 +48,9 @@ public class JSONAPI implements JSONAPIInterface {
         serializerManager = new SerializerManager();
         DefaultSerializers.register(serializerManager);
 
-        webServer = new JSONAPIWebServer(this, configuration, serializerManager);
+        requestHandler = new RequestHandler(getExpressionParser(), getMethodInvoker());
+
+        webServer = new JSONAPIWebServer(this);
 
         methodInvoker.registerMethods(this);
         methodInvoker.registerMethods(provider);
@@ -48,6 +59,11 @@ public class JSONAPI implements JSONAPIInterface {
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
 
         webServer.start();
+    }
+
+    @Override
+    public void destroy() {
+        webServer.stop();
     }
 
     @Override
@@ -68,5 +84,15 @@ public class JSONAPI implements JSONAPIInterface {
     @Override
     public SerializerManager getSerializerManager() {
         return serializerManager;
+    }
+
+    @Override
+    public JSONAPIConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public RequestHandler getRequestHandler() {
+        return requestHandler;
     }
 }

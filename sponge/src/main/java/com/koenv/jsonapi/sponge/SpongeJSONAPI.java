@@ -19,6 +19,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import spark.utils.IOUtils;
@@ -83,6 +84,12 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
         registerSerializers();
         registerCommands();
+    }
+
+    @Listener
+    public void onServerStop(GameStoppedServerEvent event) {
+        jsonapi.destroy();
+        jsonapi = null;
     }
 
     private void registerCommands() {

@@ -27,6 +27,13 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
         });
     }
 
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        jsonapi.destroy();
+        jsonapi = null;
+    }
+
     @APIMethod(namespace = "players")
     public static Player getPlayer(String name) {
         return Bukkit.getServer().getPlayer(name);

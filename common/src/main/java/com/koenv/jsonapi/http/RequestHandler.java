@@ -11,8 +11,9 @@ import com.koenv.jsonapi.parser.ParseException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 import com.koenv.jsonapi.util.json.JSONException;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RequestHandler {
     private ExpressionParser expressionParser;
@@ -23,26 +24,28 @@ public class RequestHandler {
         this.methodInvoker = methodInvoker;
     }
 
-    public List<JsonResponse> handle(String request) {
-        List<JsonResponse> responses = new ArrayList<>();
+    public JsonResponse handle(JsonRequest request) {
         try {
-            List<JsonRequest> requests = JsonRequest.fromJson(request);
-            for (JsonRequest jsonRequest : requests) {
-                try {
-                    Expression expression = expressionParser.parse(jsonRequest.getExpression());
-                    Object value = methodInvoker.invokeMethod(expression);
-                    responses.add(createSuccessResponse(value, jsonRequest));
-                } catch (MethodInvocationException e) {
-                    responses.add(createErrorResponse(2, "Error while invoking method: " + e.getMessage(), jsonRequest));
-                } catch (ParseException e) {
-                    responses.add(createErrorResponse(3, "Error while parsing method: " + e.getMessage(), jsonRequest));
-                }
-            }
-        } catch (JSONException | IllegalArgumentException e) {
-            responses.add(createErrorResponse(1, "Invalid content, must be a JSON object or array", null));
+            Expression expression = expressionParser.parse(request.getExpression());
+            Object value = methodInvoker.invokeMethod(expression);
+            return createSuccessResponse(value, request);
+        } catch (MethodInvocationException e) {
+            return createErrorResponse(2, "Error while invoking method: " + e.getMessage(), request);
+        } catch (ParseException e) {
+            return createErrorResponse(3, "Error while parsing method: " + e.getMessage(), request);
         }
+    }
 
-        return responses;
+    public List<JsonResponse> handle(List<JsonRequest> requests) {
+        return requests.stream().map(this::handle).collect(Collectors.toList());
+    }
+
+    public List<JsonResponse> handle(String request) {
+        try {
+            return handle(JsonRequest.fromJson(request));
+        } catch (JSONException | IllegalArgumentException e) {
+            return Collections.singletonList(createErrorResponse(1, "Invalid content, must be a JSON object or array", null));
+        }
     }
 
     private JsonErrorResponse createErrorResponse(int code, String message, JsonRequest request) {
