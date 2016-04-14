@@ -86,7 +86,7 @@ import java.util.Map.Entry;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class JSONObject {
+public class JSONObject implements JSONValue {
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
      * whilst Java's null is equivalent to the value that JavaScript calls

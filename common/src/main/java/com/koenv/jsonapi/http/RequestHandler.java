@@ -1,12 +1,15 @@
 package com.koenv.jsonapi.http;
 
+import com.koenv.jsonapi.http.model.JsonErrorResponse;
+import com.koenv.jsonapi.http.model.JsonRequest;
+import com.koenv.jsonapi.http.model.JsonResponse;
+import com.koenv.jsonapi.http.model.JsonSuccessResponse;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.parser.ParseException;
 import com.koenv.jsonapi.parser.expressions.Expression;
 import com.koenv.jsonapi.util.json.JSONException;
-import com.koenv.jsonapi.util.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,43 +23,33 @@ public class RequestHandler {
         this.methodInvoker = methodInvoker;
     }
 
-    public Object handle(String request) {
-        List<JsonRequest> requests;
-        List<JSONObject> responses = new ArrayList<>();
+    public List<JsonResponse> handle(String request) {
+        List<JsonResponse> responses = new ArrayList<>();
         try {
-            requests = JsonRequest.fromJson(request);
+            List<JsonRequest> requests = JsonRequest.fromJson(request);
             for (JsonRequest jsonRequest : requests) {
-                Expression expression = expressionParser.parse(jsonRequest.getName());
-                methodInvoker.invokeMethod(expression);
+                try {
+                    Expression expression = expressionParser.parse(jsonRequest.getExpression());
+                    Object value = methodInvoker.invokeMethod(expression);
+                    responses.add(createSuccessResponse(value, jsonRequest));
+                } catch (MethodInvocationException e) {
+                    responses.add(createErrorResponse(2, "Error while invoking method: " + e.getMessage(), jsonRequest));
+                } catch (ParseException e) {
+                    responses.add(createErrorResponse(3, "Error while parsing method: " + e.getMessage(), jsonRequest));
+                }
             }
-        } catch (JSONException e) {
-            responses.add(createErrorResponse("Failed to parse JSON"));
-        } catch (MethodInvocationException e) {
-            responses.add(createErrorResponse("Error while invoking method: " + e.getMessage()));
-        } catch (ParseException e) {
-            responses.add(createErrorResponse("Error while parsing method: " + e.getMessage()));
+        } catch (JSONException | IllegalArgumentException e) {
+            responses.add(createErrorResponse(1, "Invalid content, must be a JSON object or array", null));
         }
 
-        return responses; // TODO: Change this to something useful
+        return responses;
     }
 
-    private JSONObject createErrorResponse(JsonRequest request) {
-        JSONObject object = new JSONObject();
-        object.put("is_success", false);
-        object.put("error", request.getErrorMessage());
-        if (request.getTag() != null) {
-            object.put("tag", request.getTag());
-        }
-        if (request.getName() != null) {
-            object.put("source", request.getName());
-        }
-        return object;
+    private JsonErrorResponse createErrorResponse(int code, String message, JsonRequest request) {
+        return new JsonErrorResponse(code, message, request.getTag());
     }
 
-    private JSONObject createErrorResponse(String error) {
-        JSONObject object = new JSONObject();
-        object.put("is_success", false);
-        object.put("error", error);
-        return object;
+    private JsonSuccessResponse createSuccessResponse(Object value, JsonRequest request) {
+        return new JsonSuccessResponse(value, request.getTag());
     }
 }

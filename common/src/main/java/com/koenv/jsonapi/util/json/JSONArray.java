@@ -77,7 +77,7 @@ import java.util.Map;
  * @author JSON.org
  * @version 2014-05-03
  */
-public class JSONArray {
+public class JSONArray implements JSONValue {
 
     /**
      * The arrayList where the JSONArray's properties are kept.

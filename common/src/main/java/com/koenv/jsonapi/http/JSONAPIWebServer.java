@@ -1,17 +1,27 @@
 package com.koenv.jsonapi.http;
 
+import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
+import com.koenv.jsonapi.http.model.JsonResponse;
 import com.koenv.jsonapi.http.websocket.JSONAPIWebSocket;
+import com.koenv.jsonapi.serializer.SerializerManager;
+import com.koenv.jsonapi.util.json.JSONValue;
+
+import java.util.List;
 
 import static spark.Spark.*;
 
 public class JSONAPIWebServer {
     private JSONAPIConfiguration configuration;
+    private RequestHandler requestHandler;
+    private SerializerManager serializerManager;
 
-    public JSONAPIWebServer(JSONAPIConfiguration configuration) {
+    public JSONAPIWebServer(JSONAPI jsonapi, JSONAPIConfiguration configuration, SerializerManager serializerManager) {
         this.configuration = configuration;
+        this.requestHandler = new RequestHandler(jsonapi.getExpressionParser(), jsonapi.getMethodInvoker());
+        this.serializerManager = serializerManager;
     }
 
     /**
@@ -48,8 +58,15 @@ public class JSONAPIWebServer {
         get("/api/v1/request", (req, res) -> "Request");
 
         post("/api/v1/call", (req, res) -> {
-            req.body();
-            return "Request received";
+            if (!req.contentType().contains("application/json")) {
+                halt(400, "Invalid content type");
+            }
+            List<JsonResponse> responses = requestHandler.handle(req.body());
+            System.out.println("Responses: " + responses.size());
+
+            res.header("Content-Type", "application/json");
+            JSONValue response = (JSONValue) serializerManager.serialize(responses);
+            return response.toString(4);
         });
 
         init();

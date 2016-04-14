@@ -7,6 +7,8 @@ import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
+import com.koenv.jsonapi.serializer.DefaultSerializers;
+import com.koenv.jsonapi.serializer.SerializerManager;
 
 /**
  * The main JSONAPI delegate which must be called in implementations.
@@ -19,6 +21,7 @@ public class JSONAPI implements JSONAPIInterface {
     private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
     private CommandManager commandManager;
+    private SerializerManager serializerManager;
 
     private JSONAPIWebServer webServer;
 
@@ -33,8 +36,10 @@ public class JSONAPI implements JSONAPIInterface {
         expressionParser = new ExpressionParser();
         methodInvoker = new MethodInvoker();
         commandManager = new CommandManager(this);
+        serializerManager = new SerializerManager();
+        DefaultSerializers.register(serializerManager);
 
-        webServer = new JSONAPIWebServer(configuration);
+        webServer = new JSONAPIWebServer(this, configuration, serializerManager);
 
         methodInvoker.registerMethods(this);
         methodInvoker.registerMethods(provider);
