@@ -74,8 +74,30 @@ public class SpongeJSONAPI implements JSONAPIProvider {
             return;
         }
 
+        Path usersConfigFile = Paths.get(configDir + "/users.conf");
+
+        if (Files.notExists(usersConfigFile)) {
+            InputStream defaultConfig = getClass().getResourceAsStream("defaultUsers.conf");
+
+            try (FileWriter writer = new FileWriter(usersConfigFile.toFile())) {
+                IOUtils.copy(defaultConfig, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ConfigurationLoader<CommentedConfigurationNode> usersLoader = HoconConfigurationLoader.builder().setPath(usersConfigFile).build();
+
+        CommentedConfigurationNode usersNode;
+        try {
+            usersNode = usersLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         SpongeConfigurationLoader configurationLoader = new SpongeConfigurationLoader();
-        configuration = configurationLoader.load(node);
+        configuration = configurationLoader.load(node, usersNode);
     }
 
     @Listener

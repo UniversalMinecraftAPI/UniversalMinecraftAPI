@@ -1,0 +1,26 @@
+users:
+  admin:
+    password: changeme
+    password_type: plain
+    groups:
+      - admin
+
+groups:
+  admin:
+    permissions:
+      - players
+
+permissions:
+  players:
+    namespaces:
+      players:
+        type: blacklist
+        methods: []
+    classes:
+      Player:
+        type: blacklist
+        methods: []
+    streams:
+      type: whitelist
+      streams:
+        - chat

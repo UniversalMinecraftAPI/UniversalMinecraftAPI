@@ -14,6 +14,7 @@ import com.koenv.jsonapi.serializer.DefaultSerializers;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.streams.StreamManager;
 import com.koenv.jsonapi.streams.StreamMethods;
+import com.koenv.jsonapi.users.UserMethods;
 
 /**
  * The main JSONAPI delegate which must be called in implementations.
@@ -62,6 +63,7 @@ public class JSONAPI implements JSONAPIInterface {
         methodInvoker.registerMethods(this);
         methodInvoker.registerMethods(provider);
         methodInvoker.registerMethods(StreamMethods.class);
+        methodInvoker.registerMethods(UserMethods.class);
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());

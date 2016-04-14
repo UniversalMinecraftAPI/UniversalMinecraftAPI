@@ -3,6 +3,8 @@ package com.koenv.jsonapi.serializer;
 import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.serializer.defaults.CollectionSerializer;
 import com.koenv.jsonapi.serializer.defaults.JsonResponseSerializer;
+import com.koenv.jsonapi.util.json.JSONArray;
+import com.koenv.jsonapi.util.json.JSONObject;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ public class DefaultSerializers {
     static final Serializer<Long> LONG_SERIALIZER = (object, serializerManager) -> object;
     static final Serializer<Short> SHORT_SERIALIZER = (object, serializerManager) -> object;
     static final Serializer<String> STRING_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<JSONObject> JSON_OBJECT_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<JSONArray> JSON_ARRAY_SERIALIZER = (object, serializerManager) -> object;
 
     static {
         SERIALIZERS = new HashMap<>();
@@ -42,6 +46,8 @@ public class DefaultSerializers {
         SERIALIZERS.put(short.class, SHORT_SERIALIZER);
         SERIALIZERS.put(Short.class, SHORT_SERIALIZER);
         SERIALIZERS.put(String.class, STRING_SERIALIZER);
+        SERIALIZERS.put(JSONObject.class, JSON_OBJECT_SERIALIZER);
+        SERIALIZERS.put(JSONArray.class, JSON_ARRAY_SERIALIZER);
     }
 
     public static void register(SerializerManager manager) {
