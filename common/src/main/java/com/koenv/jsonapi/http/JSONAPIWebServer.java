@@ -23,11 +23,19 @@ public class JSONAPIWebServer {
 
         webSocket("/api/v1/websocket", JSONAPIWebSocket.class); // this needs to be first otherwise the web socket doesn't work
 
-        before("/api/v1/*", (request, response) -> {
-            // halt(401, "Unauthorized");
+        after((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+            response.header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin,");
+            response.header("Access-Control-Allow-Credentials", "true");
         });
 
         get("/api/v1/request", (req, res) -> "Request");
+
+        post("/api/v1/call", (req, res) -> {
+            req.body();
+            return "Request received";
+        });
 
         init();
     }
