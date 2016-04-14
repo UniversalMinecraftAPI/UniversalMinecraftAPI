@@ -2,6 +2,7 @@ package com.koenv.jsonapi.commands;
 
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.JSONAPIInterface;
+import com.koenv.jsonapi.methods.AbstractMethod;
 import com.koenv.jsonapi.methods.ClassMethod;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.methods.NamespacedMethod;
@@ -108,8 +109,8 @@ public class CreateApiDocCommand extends Command {
         return true;
     }
 
-    private void addMethodsToMarkdown(StringBuilder builder, Map<String, ? extends com.koenv.jsonapi.methods.Method> map) {
-        for (Map.Entry<String, ? extends com.koenv.jsonapi.methods.Method> methodEntry : map.entrySet()) {
+    private void addMethodsToMarkdown(StringBuilder builder, Map<String, ? extends AbstractMethod> map) {
+        for (Map.Entry<String, ? extends AbstractMethod> methodEntry : map.entrySet()) {
             builder.append("### ").append(methodEntry.getValue().getName());
             builder.append("\n\n");
             Method method = methodEntry.getValue().getJavaMethod();
@@ -155,9 +156,9 @@ public class CreateApiDocCommand extends Command {
         }
     }
 
-    private JSONObject getJsonMethods(Map<String, ? extends com.koenv.jsonapi.methods.Method> map) {
+    private JSONObject getJsonMethods(Map<String, ? extends AbstractMethod> map) {
         JSONObject root = new JSONObject();
-        for (Map.Entry<String, ? extends com.koenv.jsonapi.methods.Method> methodEntry : map.entrySet()) {
+        for (Map.Entry<String, ? extends AbstractMethod> methodEntry : map.entrySet()) {
             JSONObject jsonMethod = new JSONObject();
 
             Method method = methodEntry.getValue().getJavaMethod();
@@ -191,7 +192,7 @@ public class CreateApiDocCommand extends Command {
         return root;
     }
 
-    private <T extends com.koenv.jsonapi.methods.Method> T findFirst(Map<String, T> map) {
+    private <T extends AbstractMethod> T findFirst(Map<String, T> map) {
         return map.values().stream().findFirst().orElseThrow(NullPointerException::new);
     }
 

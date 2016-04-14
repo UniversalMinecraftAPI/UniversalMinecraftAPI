@@ -165,7 +165,7 @@ public class MethodInvoker {
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
     protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult) throws MethodInvocationException {
-        Method method = null;
+        AbstractMethod method = null;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
             if (namespaceMethods == null) {
@@ -437,7 +437,7 @@ public class MethodInvoker {
      * @param method Method for which to get the method declaration.
      * @return A string representation of the method.
      */
-    protected String getMethodDeclaration(Method method) {
+    protected String getMethodDeclaration(AbstractMethod method) {
         StringBuilder stringBuilder = new StringBuilder();
         if (method instanceof NamespacedMethod) {
             stringBuilder.append(((NamespacedMethod) method).getNamespace());

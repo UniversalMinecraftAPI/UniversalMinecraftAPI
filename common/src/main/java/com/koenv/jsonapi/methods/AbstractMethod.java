@@ -3,11 +3,11 @@ package com.koenv.jsonapi.methods;
 /**
  * A saved API method.
  */
-public class Method {
+public abstract class AbstractMethod {
     private String name;
     private java.lang.reflect.Method javaMethod;
 
-    public Method(String name, java.lang.reflect.Method javaMethod) {
+    public AbstractMethod(String name, java.lang.reflect.Method javaMethod) {
         this.name = name;
         this.javaMethod = javaMethod;
     }
