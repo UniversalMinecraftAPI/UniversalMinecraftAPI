@@ -289,6 +289,7 @@ public class MethodInvoker {
                                     ", expected " + javaParameter.getType().getSimpleName());
                 }
                 convertedParameters.add(convertedParameter);
+                j++;
                 continue;
             }
             convertedParameters.add(parameter);

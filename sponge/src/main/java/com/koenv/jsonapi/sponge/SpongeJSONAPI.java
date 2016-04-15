@@ -32,8 +32,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Plugin(id = "com.koenv.jsonapi.sponge", name = "JSONAPI", version = "0.1-SNAPSHOT", description = "A JSON API for Sponge")
+@Plugin(id = "com.koenv.jsonapi.sponge", name = "JSONAPI", version = SpongeJSONAPI.VERSION, description = "A JSON API for Sponge")
 public class SpongeJSONAPI implements JSONAPIProvider {
+    public static final String VERSION = "0.1-SNAPSHOT";
+
     private JSONAPIInterface jsonapi;
 
     @Inject
@@ -81,6 +83,21 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         UsersConfiguration usersConfiguration = SpongeConfigurationLoader.loadUsersConfiguration(usersNode);
 
         jsonapi.getUserManager().loadConfiguration(usersConfiguration);
+    }
+
+    @Override
+    public String getJSONAPIVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public String getPlatform() {
+        return Sponge.getPlatform().getImplementation().getId();
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return Sponge.getPlatform().getImplementation().getVersion().orElse("UNKNOWN");
     }
 
     private void reloadConfig() throws IOException {

@@ -18,3 +18,8 @@ shadowJar {
         exclude(dependency('org.slf4j:slf4j-simple'))
     }
 }
+
+configure(tasks.processResources) {
+    include 'plugin.yml'
+    expand(version: project.version)
+}

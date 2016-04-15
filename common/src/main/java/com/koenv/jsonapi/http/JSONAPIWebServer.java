@@ -1,7 +1,9 @@
 package com.koenv.jsonapi.http;
 
 import com.koenv.jsonapi.ErrorCodes;
+import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIInterface;
+import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
@@ -64,7 +66,7 @@ public class JSONAPIWebServer {
             String authorizationHeader = request.headers("Authorization");
             if (authorizationHeader == null || authorizationHeader.isEmpty()) {
                 if (userManager.getUser("default").isPresent()) {
-                    request.attribute("com.koenv.jsonapi.user", "default");
+                    request.attribute("user", "default");
                 } else {
                     response.header("Content-Type", "application/json");
                     halt(401, getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "No authentication found and no default user found"));
@@ -108,7 +110,22 @@ public class JSONAPIWebServer {
             response.header("Access-Control-Allow-Credentials", "true");
         });
 
-        get("/api/v1/request", (request, response) -> "Request");
+        get("/api/v1/version", (request, response) -> {
+            System.out.println("version");
+            JSONAPIProvider provider = JSONAPI.getInstance().getProvider();
+
+            JSONObject object = new JSONObject();
+
+            object.put("version", provider.getJSONAPIVersion());
+
+            JSONObject platform = new JSONObject();
+            platform.put("name", provider.getPlatform());
+            platform.put("version", provider.getPlatformVersion());
+
+            object.put("platform", platform);
+
+            return object.toString(4);
+        });
 
         post("/api/v1/call", (request, response) -> {
             response.header("Content-Type", "application/json");
@@ -130,7 +147,7 @@ public class JSONAPIWebServer {
             return result.toString(4);
         });
 
-        init();
+        System.out.println("test");
     }
 
     public void stop() {

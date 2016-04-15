@@ -71,6 +71,21 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
         jsonapi.getUserManager().loadConfiguration(configuration);
     }
 
+    @Override
+    public String getJSONAPIVersion() {
+        return getDescription().getVersion();
+    }
+
+    @Override
+    public String getPlatform() {
+        return getServer().getName();
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return getServer().getVersion();
+    }
+
     public FileConfiguration getUserConfig() {
         File usersConfigFile = new File(getDataFolder(), "users.yml");
 

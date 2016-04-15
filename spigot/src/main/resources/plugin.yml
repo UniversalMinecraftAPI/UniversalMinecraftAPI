@@ -1,6 +1,6 @@
 name: JSONAPI
 main: com.koenv.jsonapi.spigot.SpigotJSONAPI
-version: 0.1-SNAPSHOT
+version: $version
 commands:
    jsonapi:
       description: The JSONAPI base command

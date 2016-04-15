@@ -5,4 +5,8 @@ package com.koenv.jsonapi;
  */
 public interface JSONAPIProvider {
     void reloadUsers() throws Exception;
+
+    String getJSONAPIVersion();
+    String getPlatform();
+    String getPlatformVersion();
 }

@@ -1,15 +1,3 @@
-allprojects {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    allprojects {
-        tasks.withType(Javadoc) {
-            options.addStringOption('Xdoclint:none', '-quiet')
-        }
-    }
-}
-
 buildscript {
     repositories {
         jcenter()
@@ -19,21 +7,24 @@ buildscript {
     }
 }
 
-configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
+subprojects {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
     apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
+
+    // when updating this version number, also update the version number in SpongeJSONAPI
+    version = '0.1-SNAPSHOT'
+    archivesBaseName = "$rootProject.name-$project.name"
+
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-
-    configurations {
-        fatJar
-        compile.extendsFrom fatJar
-    }
-
-    dependencies {
-        fatJar project(':common')
-    }
 
     task sourcesJar(type: Jar) {
         from sourceSets.main.java.srcDirs
@@ -43,6 +34,26 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
+    }
+
+    javadoc.options {
+        links 'http://docs.oracle.com/javase/8/docs/api/'
+    }
+
+    compileJava.options.compilerArgs.add '-parameters'
+    compileTestJava.options.compilerArgs.add '-parameters'
+}
+
+configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    configurations {
+        fatJar
+        compile.extendsFrom fatJar
+    }
+
+    dependencies {
+        fatJar project(':common')
     }
 
     shadowJar {
@@ -66,7 +77,4 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
         dependsOn sourcesJar
         dependsOn shadowJar
     }
-
-    compileJava.options.compilerArgs.add '-parameters'
-    compileTestJava.options.compilerArgs.add '-parameters'
 }

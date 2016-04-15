@@ -1,22 +1,5 @@
-apply plugin: 'java'
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.java.srcDirs
-    classifier = 'src'
-}
-
-javadoc.options {
-    links 'http://docs.oracle.com/javase/8/docs/api/'
-}
-
 dependencies {
     compile 'com.sparkjava:spark-core:2.3'
     compile 'org.jetbrains:annotations:15.0'
     testCompile 'junit:junit:4.12'
 }
-
-compileJava.options.compilerArgs.add '-parameters'
-compileTestJava.options.compilerArgs.add '-parameters'
