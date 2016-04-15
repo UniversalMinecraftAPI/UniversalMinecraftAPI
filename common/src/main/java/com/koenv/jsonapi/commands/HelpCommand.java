@@ -25,7 +25,7 @@ public class HelpCommand extends Command {
             StringJoiner aliasJoiner = new StringJoiner("|");
             cmd.stream().map(Map.Entry::getKey).forEach(aliasJoiner::add);
 
-            commandSource.sendMessage(ChatColor.BLUE, "/jsonapi " + aliasJoiner.toString() + " " + command.getUsage());
+            commandSource.sendMessage(ChatColor.AQUA, "/jsonapi " + aliasJoiner.toString() + " " + command.getUsage());
             commandSource.sendMessage(command.getDescription());
             commandSource.sendMessage(ChatColor.GREEN, "-------------------");
         }
