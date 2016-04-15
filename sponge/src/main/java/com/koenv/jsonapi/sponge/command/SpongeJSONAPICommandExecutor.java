@@ -9,6 +9,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 
+import java.util.Optional;
+
 public class SpongeJSONAPICommandExecutor implements CommandExecutor {
     private SpongeJSONAPI plugin;
 
@@ -19,7 +21,14 @@ public class SpongeJSONAPICommandExecutor implements CommandExecutor {
     @NotNull
     @Override
     public CommandResult execute(@NotNull CommandSource src, @NotNull CommandContext args) throws CommandException {
-        String[] arguments = args.<String>getOne("arguments").get().split("\\s");
+        Optional<String> optional = args.<String>getOne("arguments");
+        String[] arguments;
+        if (optional.isPresent()) {
+            arguments = optional.get().split("\\s");
+        } else {
+            arguments = new String[]{};
+        }
+
         plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(src), arguments);
         return CommandResult.empty();
     }

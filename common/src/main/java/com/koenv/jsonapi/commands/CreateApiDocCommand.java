@@ -124,4 +124,14 @@ public class CreateApiDocCommand extends Command {
     public boolean hasPermission(CommandSource commandSource) {
         return commandSource.hasPermission("jsonapi.command.createapidoc");
     }
+
+    @Override
+    public String getDescription() {
+        return "Create an API documentation file (JSON format)";
+    }
+
+    @Override
+    public String getUsage() {
+        return "<filename>";
+    }
 }

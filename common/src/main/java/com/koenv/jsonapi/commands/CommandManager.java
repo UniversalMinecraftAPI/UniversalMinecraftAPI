@@ -3,6 +3,7 @@ package com.koenv.jsonapi.commands;
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.JSONAPIInterface;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ public class CommandManager {
      */
     public void handle(CommandSource source, String[] input) {
         if (input.length < 1) {
+            showHelp(source);
+            
             source.sendMessage(ChatColor.RED, "Invalid command.");
             return;
         }
@@ -54,7 +57,16 @@ public class CommandManager {
             return;
         }
 
+        showHelp(source);
+
         source.sendMessage(ChatColor.RED, "Command not found");
+    }
+
+    private void showHelp(CommandSource source) {
+        Command helpCommand = commands.get("help");
+        if (helpCommand != null && helpCommand.hasPermission(source)) {
+            handle(helpCommand, source, new String[]{});
+        }
     }
 
     /**
@@ -77,5 +89,14 @@ public class CommandManager {
      */
     public void registerCommand(String name, Command command) {
         registerCommand(new String[]{name}, command);
+    }
+
+    /**
+     * Returns all registered commands
+     *
+     * @return An unmodifiable map of all registered commands in which a value can be seen multiple times
+     */
+    public Map<String, Command> getCommands() {
+        return Collections.unmodifiableMap(commands);
     }
 }

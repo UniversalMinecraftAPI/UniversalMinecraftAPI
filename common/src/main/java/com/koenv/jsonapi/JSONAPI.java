@@ -1,9 +1,6 @@
 package com.koenv.jsonapi;
 
-import com.koenv.jsonapi.commands.CommandManager;
-import com.koenv.jsonapi.commands.CreateApiDocCommand;
-import com.koenv.jsonapi.commands.ExecuteCommand;
-import com.koenv.jsonapi.commands.ReloadCommand;
+import com.koenv.jsonapi.commands.*;
 import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.http.RequestHandler;
@@ -74,6 +71,7 @@ public class JSONAPI implements JSONAPIInterface {
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
         commandManager.registerCommand(new String[]{"reload"}, new ReloadCommand());
+        commandManager.registerCommand(new String[]{"help"}, new HelpCommand());
 
         webServer.start();
     }

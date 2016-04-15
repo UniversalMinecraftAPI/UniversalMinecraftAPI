@@ -20,4 +20,8 @@ public abstract class Command {
     public boolean hasPermission(CommandSource commandSource) {
         return true;
     }
+
+    public abstract String getDescription();
+
+    public abstract String getUsage();
 }

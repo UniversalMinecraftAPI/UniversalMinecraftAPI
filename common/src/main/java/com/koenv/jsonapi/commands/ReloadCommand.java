@@ -49,4 +49,14 @@ public class ReloadCommand extends Command {
     public boolean hasPermission(CommandSource commandSource) {
         return commandSource.hasPermission("jsonapi.reload");
     }
+
+    @Override
+    public String getDescription() {
+        return "Reload a specific portion of JSONAPI";
+    }
+
+    @Override
+    public String getUsage() {
+        return "[global|users]";
+    }
 }

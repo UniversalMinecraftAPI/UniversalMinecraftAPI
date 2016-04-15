@@ -11,6 +11,8 @@ public class SpongeUtils {
                 return TextColors.RED;
             case GREEN:
                 return TextColors.GREEN;
+            case BLUE:
+                return TextColors.BLUE;
             default:
                 return TextColors.NONE;
         }

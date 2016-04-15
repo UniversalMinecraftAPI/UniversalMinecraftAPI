@@ -34,4 +34,14 @@ public class ExecuteCommand extends Command {
     public boolean hasPermission(CommandSource commandSource) {
         return commandSource.hasPermission("jsonapi.command.execute");
     }
+
+    @Override
+    public String getDescription() {
+        return "Execute a JSONAPI expression in the game itself";
+    }
+
+    @Override
+    public String getUsage() {
+        return "<expression...>";
+    }
 }

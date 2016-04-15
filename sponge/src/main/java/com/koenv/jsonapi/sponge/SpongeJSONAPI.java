@@ -134,7 +134,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
         CommandSpec mainCommandSpec = CommandSpec.builder()
                 .description(Text.of("Main JSONAPI command"))
-                .arguments(GenericArguments.remainingJoinedStrings(Text.of("arguments")))
+                .arguments(GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("arguments"))))
                 .executor(executor)
                 .build();
 

@@ -12,4 +12,8 @@ public enum ChatColor {
      * Represents GREEN
      */
     GREEN,
+    /**
+     * Represents BLUE
+     */
+    BLUE
 }

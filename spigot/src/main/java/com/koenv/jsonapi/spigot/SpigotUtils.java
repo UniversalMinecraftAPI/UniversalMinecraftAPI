@@ -9,6 +9,8 @@ public class SpigotUtils {
                 return org.bukkit.ChatColor.RED;
             case GREEN:
                 return org.bukkit.ChatColor.GREEN;
+            case BLUE:
+                return org.bukkit.ChatColor.BLUE;
             default:
                 return org.bukkit.ChatColor.WHITE;
         }
