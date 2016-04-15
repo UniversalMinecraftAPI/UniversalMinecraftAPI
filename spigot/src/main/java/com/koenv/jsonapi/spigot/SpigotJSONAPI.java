@@ -9,6 +9,8 @@ import com.koenv.jsonapi.config.user.UsersConfiguration;
 import com.koenv.jsonapi.spigot.listeners.ChatStreamListener;
 import com.koenv.jsonapi.spigot.methods.PlayerMethods;
 import com.koenv.jsonapi.spigot.serializer.PlayerSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -25,7 +27,15 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
     public void onEnable() {
         saveDefaultConfig();
 
-        JSONAPIRootConfiguration config = SpigotConfigurationLoader.load(getConfig());
+        JSONAPIRootConfiguration config = null;
+        try {
+            config = SpigotConfigurationLoader.load(getConfig());
+        } catch (InvalidConfigurationException e) {
+            getLogger().severe("Invalid configuration, shutting down");
+            e.printStackTrace();
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         jsonapi = new JSONAPI(this);
         jsonapi.setup(config);
@@ -48,8 +58,9 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
 
     @Override
     public void onDisable() {
-        super.onDisable();
-        jsonapi.destroy();
+        if (jsonapi != null) {
+            jsonapi.destroy();
+        }
         jsonapi = null;
     }
 

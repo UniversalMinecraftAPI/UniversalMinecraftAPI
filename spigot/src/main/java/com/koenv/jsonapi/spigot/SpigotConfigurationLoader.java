@@ -7,18 +7,23 @@ import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.config.user.*;
 import com.koenv.jsonapi.users.model.PermissionType;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SpigotConfigurationLoader {
-    public static JSONAPIRootConfiguration load(ConfigurationSection node) {
+    public static JSONAPIRootConfiguration load(ConfigurationSection node) throws InvalidConfigurationException {
         return JSONAPIRootConfiguration.builder()
                 .webServer(loadWebServer(node.getConfigurationSection("web_server")))
                 .build();
     }
 
-    private static WebServerSection loadWebServer(ConfigurationSection node) {
+    private static WebServerSection loadWebServer(ConfigurationSection node) throws InvalidConfigurationException {
+        if (node == null) {
+            throw new InvalidConfigurationException("Missing web_server section");
+        }
         return WebServerSection.builder()
                 .ipAddress(node.getString("ip_address"))
                 .port(node.getInt("port", -1))
@@ -54,6 +59,9 @@ public class SpigotConfigurationLoader {
     }
 
     private static List<UserSection> loadUsers(ConfigurationSection node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
         return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadUser).collect(Collectors.toList());
     }
 
@@ -67,6 +75,9 @@ public class SpigotConfigurationLoader {
     }
 
     private static List<GroupSection> loadGroups(ConfigurationSection node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
         return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadGroup).collect(Collectors.toList());
     }
 
@@ -78,6 +89,9 @@ public class SpigotConfigurationLoader {
     }
 
     private static List<PermissionSection> loadPermissions(ConfigurationSection node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
         return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadPermission).collect(Collectors.toList());
     }
 
@@ -91,6 +105,9 @@ public class SpigotConfigurationLoader {
     }
 
     private static List<NamespacePermissionSection> loadNamespacePermissions(ConfigurationSection node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
         return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadNamespacePermission).collect(Collectors.toList());
     }
 
@@ -103,6 +120,9 @@ public class SpigotConfigurationLoader {
     }
 
     private static List<ClassPermissionSection> loadClassPermissions(ConfigurationSection node) {
+        if (node == null) {
+            return Collections.emptyList();
+        }
         return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadClassPermission).collect(Collectors.toList());
     }
 
@@ -115,6 +135,12 @@ public class SpigotConfigurationLoader {
     }
 
     private static StreamPermissionSection loadStreamPermission(ConfigurationSection node) {
+        if (node == null) {
+            return StreamPermissionSection.builder()
+                    .type(PermissionType.WHITELIST)
+                    .streams(Collections.emptyList())
+                    .build();
+        }
         return StreamPermissionSection.builder()
                 .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
                 .streams(node.getStringList("streams"))

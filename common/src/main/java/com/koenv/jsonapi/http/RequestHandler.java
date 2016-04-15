@@ -48,7 +48,7 @@ public class RequestHandler {
         try {
             return handle(JsonRequest.fromJson(request), invoker);
         } catch (JSONException | IllegalArgumentException e) {
-            return Collections.singletonList(createErrorResponse(1, "Invalid content, must be a JSON object or array", null));
+            return Collections.singletonList(createErrorResponse(ErrorCodes.JSON_INVALID, "Invalid content, must be a JSON object or array", null));
         }
     }
 

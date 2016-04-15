@@ -4,13 +4,34 @@ users:
     password_type: plain
     groups:
       - admin
+  default:
+    password: default
+    password_type: plain
+    groups:
+      - default
 
 groups:
+  default:
+    permissions:
+      - default
   admin:
     permissions:
       - players
+      - streams
+      - jsonapi
 
 permissions:
+  default:
+    namespaces:
+      players:
+        type: whitelist
+        methods:
+          - getPlayer
+    classes:
+      Player:
+        type: whitelist
+        methods:
+          - getUUID
   players:
     namespaces:
       players:
@@ -24,3 +45,13 @@ permissions:
       type: whitelist
       streams:
         - chat
+  jsonapi:
+    namespaces:
+      jsonapi:
+        type: blacklist
+        methods: []
+  streams:
+    namespaces:
+      streams:
+        type: blacklist
+        methods: []
