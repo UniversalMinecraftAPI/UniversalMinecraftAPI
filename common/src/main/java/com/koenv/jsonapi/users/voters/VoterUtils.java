@@ -36,7 +36,6 @@ public class VoterUtils {
         }
 
         return matchedResponses.stream().allMatch(voterResponse -> {
-            System.out.println("Response: " + voterResponse.name());
             return voterResponse == VoterResponse.ALLOWED;
         });
     }
