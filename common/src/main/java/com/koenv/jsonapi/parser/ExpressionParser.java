@@ -17,6 +17,7 @@ public class ExpressionParser {
     protected static final Pattern INTEGER_PATTERN = Pattern.compile("^-?[0-9]+");
     protected static final Pattern DOUBLE_PATTERN = Pattern.compile("^-?[0-9]+\\.[0-9]+");
     protected static final Pattern STRING_PATTERN = Pattern.compile("^\"(?:\\\\.|[^\"\\\\])*\"");
+    protected static final Pattern ALTERNATE_STRING_PATTERN = Pattern.compile("^'(?:\\\\.|[^\"\\\\])*'");
     protected static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
 
@@ -62,6 +63,11 @@ public class ExpressionParser {
             return new ExpressionResult(string, parseIntegerExpression(matcher.group(0)));
         }
         matcher = STRING_PATTERN.matcher(string);
+        if (matcher.find()) {
+            string = matcher.replaceFirst("");
+            return new ExpressionResult(string, parseStringExpression(matcher.group(0)));
+        }
+        matcher = ALTERNATE_STRING_PATTERN.matcher(string);
         if (matcher.find()) {
             string = matcher.replaceFirst("");
             return new ExpressionResult(string, parseStringExpression(matcher.group(0)));
