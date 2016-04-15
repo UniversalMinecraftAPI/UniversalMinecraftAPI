@@ -4,16 +4,20 @@ package com.koenv.jsonapi;
  * All supported color values for chat
  */
 public enum ChatColor {
-    /**
-     * Represents RED
-     */
-    RED,
-    /**
-     * Represents GREEN
-     */
+    AQUA,
+    BLACK,
+    BLUE,
+    DARK_AQUA,
+    DARK_BLUE,
+    DARK_GRAY,
+    DARK_GREEN,
+    DARK_PURPLE,
+    DARK_RED,
+    GOLD,
+    GRAY,
     GREEN,
-    /**
-     * Represents BLUE
-     */
-    BLUE
+    LIGHT_PURPLE,
+    RED,
+    WHITE,
+    YELLOW
 }
