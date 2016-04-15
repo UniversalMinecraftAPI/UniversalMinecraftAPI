@@ -4,7 +4,8 @@ import com.google.common.base.Charsets;
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.JSONAPIProvider;
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
+import com.koenv.jsonapi.config.user.UsersConfiguration;
 import com.koenv.jsonapi.spigot.listeners.ChatStreamListener;
 import com.koenv.jsonapi.spigot.methods.PlayerMethods;
 import com.koenv.jsonapi.spigot.serializer.PlayerSerializer;
@@ -24,23 +25,7 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
     public void onEnable() {
         saveDefaultConfig();
 
-        File usersConfigFile = new File(getDataFolder(), "users.yml");
-
-        if (!usersConfigFile.exists()) {
-            saveResource("users.yml", false);
-        }
-        
-        FileConfiguration usersConfig = YamlConfiguration.loadConfiguration(usersConfigFile);
-
-        final InputStream defConfigStream = getResource("users.yml");
-        if (defConfigStream == null) {
-            return;
-        }
-
-        usersConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, Charsets.UTF_8)));
-
-        SpigotConfigurationLoader loader = new SpigotConfigurationLoader();
-        JSONAPIConfiguration config = loader.load(getConfig(), usersConfig);
+        JSONAPIRootConfiguration config = SpigotConfigurationLoader.load(getConfig());
 
         jsonapi = new JSONAPI(this);
         jsonapi.setup(config);
@@ -48,6 +33,12 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
         registerSerializers();
         registerListeners();
         registerMethods();
+
+        try {
+            reloadUsers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         getCommand("jsonapi").setExecutor((sender, command, label, args) -> {
             jsonapi.getCommandManager().handle(new SpigotCommandSource(sender), args);
@@ -60,6 +51,32 @@ public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
         super.onDisable();
         jsonapi.destroy();
         jsonapi = null;
+    }
+
+    @Override
+    public void reloadUsers() throws Exception {
+        UsersConfiguration configuration = SpigotConfigurationLoader.loadUsersConfiguration(getUserConfig());
+
+        jsonapi.getUserManager().loadConfiguration(configuration);
+    }
+
+    public FileConfiguration getUserConfig() {
+        File usersConfigFile = new File(getDataFolder(), "users.yml");
+
+        if (!usersConfigFile.exists()) {
+            saveResource("users.yml", false);
+        }
+
+        FileConfiguration usersConfig = YamlConfiguration.loadConfiguration(usersConfigFile);
+
+        final InputStream defConfigStream = getResource("users.yml");
+        if (defConfigStream != null) {
+            usersConfig.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, Charsets.UTF_8)));
+        } else {
+            getLogger().warning("Unable to load default configuration");
+        }
+
+        return usersConfig;
     }
 
     private void registerSerializers() {

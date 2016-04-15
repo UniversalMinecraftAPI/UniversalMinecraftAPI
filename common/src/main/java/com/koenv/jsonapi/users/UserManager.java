@@ -17,7 +17,7 @@ public class UserManager {
 
     private List<UserEncoder> encoders = new ArrayList<>();
 
-    public UserManager(UsersConfiguration configuration) {
+    public void loadConfiguration(UsersConfiguration configuration) {
         this.permissions = configuration.getPermissions().stream().map(permissionSection -> Permission.builder()
                 .name(permissionSection.getName())
                 .namespaces(

@@ -3,7 +3,8 @@ package com.koenv.jsonapi;
 import com.koenv.jsonapi.commands.CommandManager;
 import com.koenv.jsonapi.commands.CreateApiDocCommand;
 import com.koenv.jsonapi.commands.ExecuteCommand;
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.commands.ReloadCommand;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.methods.APIMethod;
@@ -30,7 +31,7 @@ public class JSONAPI implements JSONAPIInterface {
 
     private JSONAPIProvider provider;
 
-    private JSONAPIConfiguration configuration;
+    private JSONAPIRootConfiguration configuration;
 
     private ExpressionParser expressionParser;
     private MethodInvoker methodInvoker;
@@ -48,7 +49,7 @@ public class JSONAPI implements JSONAPIInterface {
     }
 
     @Override
-    public void setup(JSONAPIConfiguration configuration) {
+    public void setup(JSONAPIRootConfiguration configuration) {
         this.configuration = configuration;
 
         expressionParser = new ExpressionParser();
@@ -60,7 +61,7 @@ public class JSONAPI implements JSONAPIInterface {
         requestHandler = new RequestHandler(getExpressionParser(), getMethodInvoker());
         streamManager = new StreamManager();
 
-        userManager = new UserManager(configuration.getUsersConfiguration());
+        userManager = new UserManager();
         userManager.registerEncoder(new PlainTextEncoder());
 
         webServer = new JSONAPIWebServer(this);
@@ -72,6 +73,7 @@ public class JSONAPI implements JSONAPIInterface {
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
+        commandManager.registerCommand(new String[]{"reload"}, new ReloadCommand());
 
         webServer.start();
     }
@@ -79,6 +81,11 @@ public class JSONAPI implements JSONAPIInterface {
     @Override
     public void destroy() {
         webServer.stop();
+    }
+
+    @Override
+    public JSONAPIProvider getProvider() {
+        return provider;
     }
 
     @Override
@@ -102,7 +109,7 @@ public class JSONAPI implements JSONAPIInterface {
     }
 
     @Override
-    public JSONAPIConfiguration getConfiguration() {
+    public JSONAPIRootConfiguration getConfiguration() {
         return configuration;
     }
 

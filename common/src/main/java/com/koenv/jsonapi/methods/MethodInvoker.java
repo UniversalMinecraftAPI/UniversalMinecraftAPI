@@ -225,7 +225,7 @@ public class MethodInvoker {
             }
         }
 
-        if (!invoker.checkPermission(method)) {
+        if (invoker != null && !invoker.checkPermission(method)) {
             throw new MethodAccessDeniedException("No access to method " + getMethodDeclaration(method));
         }
 

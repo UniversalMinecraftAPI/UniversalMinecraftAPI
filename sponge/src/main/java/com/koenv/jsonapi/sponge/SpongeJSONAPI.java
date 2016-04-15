@@ -1,11 +1,11 @@
 package com.koenv.jsonapi.sponge;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.JSONAPIProvider;
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
+import com.koenv.jsonapi.config.user.UsersConfiguration;
 import com.koenv.jsonapi.sponge.command.SpongeJSONAPICommandExecutor;
 import com.koenv.jsonapi.sponge.listeners.ChatStreamListener;
 import com.koenv.jsonapi.sponge.methods.PlayerMethods;
@@ -19,7 +19,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -41,17 +40,51 @@ public class SpongeJSONAPI implements JSONAPIProvider {
     @ConfigDir(sharedRoot = false)
     private Path configDir;
 
-    private JSONAPIConfiguration configuration;
+    private CommentedConfigurationNode rootNode;
+    private CommentedConfigurationNode usersNode;
 
     @Listener
-    public void onServerInit(GameInitializationEvent event) {
-        if (!Files.exists(configDir)) {
-            try {
-                Files.createDirectories(configDir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public void onServerStart(GameStartedServerEvent event) {
+        try {
+            reloadConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
+
+        JSONAPIRootConfiguration rootConfiguration = SpongeConfigurationLoader.loadRoot(rootNode);
+
+        jsonapi = new JSONAPI(this);
+        jsonapi.setup(rootConfiguration);
+
+        registerSerializers();
+        registerCommands();
+        registerListeners();
+        registerMethods();
+
+        try {
+            reloadUsers();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Listener
+    public void onServerStop(GameStoppedServerEvent event) {
+        jsonapi.destroy();
+        jsonapi = null;
+    }
+
+    @Override
+    public void reloadUsers() throws IOException {
+        reloadUserConfig();
+        UsersConfiguration usersConfiguration = SpongeConfigurationLoader.loadUsersConfiguration(usersNode);
+
+        jsonapi.getUserManager().loadConfiguration(usersConfiguration);
+    }
+
+    private void reloadConfig() throws IOException {
+        checkConfigDir();
 
         Path configFile = Paths.get(configDir + "/config.conf");
 
@@ -67,13 +100,11 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
         ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setPath(configFile).build();
 
-        CommentedConfigurationNode node;
-        try {
-            node = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        rootNode = loader.load();
+    }
+
+    private void reloadUserConfig() throws IOException {
+        checkConfigDir();
 
         Path usersConfigFile = Paths.get(configDir + "/users.conf");
 
@@ -89,71 +120,22 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
         ConfigurationLoader<CommentedConfigurationNode> usersLoader = HoconConfigurationLoader.builder().setPath(usersConfigFile).build();
 
-        CommentedConfigurationNode usersNode;
-        try {
-            usersNode = usersLoader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
+        usersNode = usersLoader.load();
+    }
+
+    private void checkConfigDir() throws IOException {
+        if (!Files.exists(configDir)) {
+            Files.createDirectories(configDir);
         }
-
-        SpongeConfigurationLoader configurationLoader = new SpongeConfigurationLoader();
-        configuration = configurationLoader.load(node, usersNode);
-    }
-
-    @Listener
-    public void onServerStart(GameStartedServerEvent event) {
-        jsonapi = new JSONAPI(this);
-        jsonapi.setup(configuration);
-
-        registerSerializers();
-        registerCommands();
-        registerListeners();
-        registerMethods();
-    }
-
-    @Listener
-    public void onServerStop(GameStoppedServerEvent event) {
-        jsonapi.destroy();
-        jsonapi = null;
     }
 
     private void registerCommands() {
         SpongeJSONAPICommandExecutor executor = new SpongeJSONAPICommandExecutor(this);
 
-        CommandSpec execCommandSpec = CommandSpec.builder()
-                .description(Text.of("Execute a JSONAPI expression and return the result"))
-                .permission("jsonapi.command.execute")
-                .arguments(
-                        GenericArguments.remainingJoinedStrings(Text.of("expression"))
-                )
-                .executor(executor::executeExecCommand)
-                .build();
-
-        CommandSpec createApiDocCommandSpec = CommandSpec.builder()
-                .description(Text.of("Create the API documentation"))
-                .permission("jsonapi.command.createapidoc")
-                .arguments(
-                        GenericArguments.string(Text.of("file")),
-                        GenericArguments.optional(
-                                GenericArguments.choices(
-                                        Text.of("format"),
-                                        ImmutableMap.<String, String>builder()
-                                                .put("json", "json")
-                                                .put("markdown", "markdown")
-                                                .put("md", "markdown")
-                                                .build()
-                                )
-                        )
-                )
-                .executor(executor::executeCreateApiDocCommand)
-                .build();
-
         CommandSpec mainCommandSpec = CommandSpec.builder()
-                .permission("jsonapi.command")
                 .description(Text.of("Main JSONAPI command"))
-                .child(execCommandSpec, "exec", "execute", "e")
-                .child(createApiDocCommandSpec, "createapidoc", "create_api_doc")
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("arguments")))
+                .executor(executor)
                 .build();
 
         Sponge.getCommandManager().register(this, mainCommandSpec, "jsonapi");

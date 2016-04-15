@@ -2,7 +2,7 @@ package com.koenv.jsonapi.http;
 
 import com.koenv.jsonapi.ErrorCodes;
 import com.koenv.jsonapi.JSONAPIInterface;
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.http.model.JsonSerializable;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import static spark.Spark.*;
 
 public class JSONAPIWebServer {
-    private JSONAPIConfiguration configuration;
+    private JSONAPIRootConfiguration configuration;
     private RequestHandler requestHandler;
     private SerializerManager serializerManager;
     private UserManager userManager;

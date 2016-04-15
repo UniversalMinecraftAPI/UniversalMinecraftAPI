@@ -1,6 +1,6 @@
 package com.koenv.jsonapi.sponge;
 
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.config.WebServerSection;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
@@ -11,15 +11,18 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SpongeConfigurationLoader {
-    public JSONAPIConfiguration load(CommentedConfigurationNode node, CommentedConfigurationNode usersNode) {
-        return JSONAPIConfiguration.builder()
+public final class SpongeConfigurationLoader {
+    private SpongeConfigurationLoader() {
+
+    }
+
+    public static JSONAPIRootConfiguration loadRoot(CommentedConfigurationNode node) {
+        return JSONAPIRootConfiguration.builder()
                 .webServer(loadWebServer(node.getNode("web_server")))
-                .usersConfiguration(loadUsersConfiguration(usersNode))
                 .build();
     }
 
-    public WebServerSection loadWebServer(CommentedConfigurationNode node) {
+    public static WebServerSection loadWebServer(CommentedConfigurationNode node) {
         return WebServerSection.builder()
                 .ipAddress(node.getNode("ip_address").getString())
                 .port(node.getNode("port").getInt(-1))
@@ -28,7 +31,7 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private WebServerSecureSection loadWebServerSecure(CommentedConfigurationNode node) {
+    private static WebServerSecureSection loadWebServerSecure(CommentedConfigurationNode node) {
         return WebServerSecureSection.builder()
                 .enabled(node.getNode("enabled").getBoolean())
                 .keyStoreFile(node.getNode("keystore", "file").getString())
@@ -38,7 +41,7 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private WebServerThreadPoolSection loadWebServerThreadPool(CommentedConfigurationNode node) {
+    private static WebServerThreadPoolSection loadWebServerThreadPool(CommentedConfigurationNode node) {
         return WebServerThreadPoolSection.builder()
                 .maxThreads(node.getNode("max_threads").getInt(-1))
                 .minThreads(node.getNode("min_threads").getInt(-1))
@@ -46,7 +49,7 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private UsersConfiguration loadUsersConfiguration(CommentedConfigurationNode node) {
+    public static UsersConfiguration loadUsersConfiguration(CommentedConfigurationNode node) {
         return UsersConfiguration.builder()
                 .users(loadUsers(node.getNode("users")))
                 .groups(loadGroups(node.getNode("groups")))
@@ -54,11 +57,11 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private List<UserSection> loadUsers(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(this::loadUser).collect(Collectors.toList());
+    private static List<UserSection> loadUsers(CommentedConfigurationNode node) {
+        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadUser).collect(Collectors.toList());
     }
 
-    private UserSection loadUser(CommentedConfigurationNode node) {
+    private static UserSection loadUser(CommentedConfigurationNode node) {
         return UserSection.builder()
                 .username(node.getNode("username").getString())
                 .password(node.getNode("password").getString())
@@ -67,22 +70,22 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private List<GroupSection> loadGroups(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(this::loadGroup).collect(Collectors.toList());
+    private static List<GroupSection> loadGroups(CommentedConfigurationNode node) {
+        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadGroup).collect(Collectors.toList());
     }
 
-    private GroupSection loadGroup(CommentedConfigurationNode node) {
+    private static GroupSection loadGroup(CommentedConfigurationNode node) {
         return GroupSection.builder()
                 .name(node.getNode("name").getString())
                 .permissions(loadStringList(node.getNode("permissions")))
                 .build();
     }
 
-    private List<PermissionSection> loadPermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(this::loadPermission).collect(Collectors.toList());
+    private static List<PermissionSection> loadPermissions(CommentedConfigurationNode node) {
+        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadPermission).collect(Collectors.toList());
     }
 
-    private PermissionSection loadPermission(CommentedConfigurationNode node) {
+    private static PermissionSection loadPermission(CommentedConfigurationNode node) {
         return PermissionSection.builder()
                 .name(node.getNode("name").getString())
                 .namespaces(loadNamespacePermissions(node.getNode("namespaces")))
@@ -91,11 +94,11 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private List<NamespacePermissionSection> loadNamespacePermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(this::loadNamespacePermission).collect(Collectors.toList());
+    private static List<NamespacePermissionSection> loadNamespacePermissions(CommentedConfigurationNode node) {
+        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadNamespacePermission).collect(Collectors.toList());
     }
 
-    private NamespacePermissionSection loadNamespacePermission(CommentedConfigurationNode node) {
+    private static NamespacePermissionSection loadNamespacePermission(CommentedConfigurationNode node) {
         return NamespacePermissionSection.builder()
                 .name(node.getNode("name").getString())
                 .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
@@ -103,11 +106,11 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private List<ClassPermissionSection> loadClassPermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(this::loadClassPermission).collect(Collectors.toList());
+    private static List<ClassPermissionSection> loadClassPermissions(CommentedConfigurationNode node) {
+        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadClassPermission).collect(Collectors.toList());
     }
 
-    private ClassPermissionSection loadClassPermission(CommentedConfigurationNode node) {
+    private static ClassPermissionSection loadClassPermission(CommentedConfigurationNode node) {
         return ClassPermissionSection.builder()
                 .name(node.getNode("name").getString())
                 .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
@@ -115,14 +118,14 @@ public class SpongeConfigurationLoader {
                 .build();
     }
 
-    private StreamPermissionSection loadStreamPermission(CommentedConfigurationNode node) {
+    private static StreamPermissionSection loadStreamPermission(CommentedConfigurationNode node) {
         return StreamPermissionSection.builder()
                 .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
                 .streams(loadStringList(node.getNode("streams")))
                 .build();
     }
 
-    private List<String> loadStringList(CommentedConfigurationNode node) {
+    private static List<String> loadStringList(CommentedConfigurationNode node) {
         return node.getChildrenList().stream().map(CommentedConfigurationNode::getString).collect(Collectors.toList());
     }
 }

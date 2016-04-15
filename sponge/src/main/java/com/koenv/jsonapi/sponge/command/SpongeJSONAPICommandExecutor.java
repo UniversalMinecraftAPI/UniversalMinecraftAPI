@@ -2,38 +2,25 @@ package com.koenv.jsonapi.sponge.command;
 
 import com.koenv.jsonapi.sponge.SpongeCommandSource;
 import com.koenv.jsonapi.sponge.SpongeJSONAPI;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class SpongeJSONAPICommandExecutor {
+public class SpongeJSONAPICommandExecutor implements CommandExecutor {
     private SpongeJSONAPI plugin;
 
     public SpongeJSONAPICommandExecutor(SpongeJSONAPI plugin) {
         this.plugin = plugin;
     }
 
-    public CommandResult executeExecCommand(CommandSource source, CommandContext arguments) throws CommandException {
-        List<String> args = new ArrayList<>();
-        args.add("exec");
-        args.addAll(Arrays.asList(arguments.<String>getOne("expression").orElse("").split(" ")));
-        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args.toArray(new String[args.size()]));
-        return CommandResult.success();
-    }
-
-    public CommandResult executeCreateApiDocCommand(CommandSource source, CommandContext arguments) {
-        List<String> args = new ArrayList<>();
-        args.add("createapidoc");
-        args.add(arguments.<String>getOne("file").orElse(""));
-        if (arguments.hasAny("format")) {
-            args.add(arguments.<String>getOne("format").orElse(""));
-        }
-        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(source), args.toArray(new String[args.size()]));
-        return CommandResult.success();
+    @NotNull
+    @Override
+    public CommandResult execute(@NotNull CommandSource src, @NotNull CommandContext args) throws CommandException {
+        String[] arguments = args.<String>getOne("arguments").get().split("\\s");
+        plugin.getJSONAPI().getCommandManager().handle(new SpongeCommandSource(src), arguments);
+        return CommandResult.empty();
     }
 }

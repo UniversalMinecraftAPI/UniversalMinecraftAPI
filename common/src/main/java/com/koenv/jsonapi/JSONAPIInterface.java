@@ -1,7 +1,7 @@
 package com.koenv.jsonapi;
 
 import com.koenv.jsonapi.commands.CommandManager;
-import com.koenv.jsonapi.config.JSONAPIConfiguration;
+import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
@@ -16,12 +16,17 @@ public interface JSONAPIInterface {
     /**
      * Sets up the JSONAPIInterface by creating all required objects etc. Should usually be called when the implementation is enabled.
      */
-    void setup(JSONAPIConfiguration configuration);
+    void setup(JSONAPIRootConfiguration configuration);
 
     /**
      * Call when the JSONAPI is unloaded
      */
     void destroy();
+
+    /**
+     * @return The currently in use {@link JSONAPIProvider}
+     */
+    JSONAPIProvider getProvider();
 
     /**
      * @return The currently in use {@link ExpressionParser}
@@ -44,9 +49,9 @@ public interface JSONAPIInterface {
     SerializerManager getSerializerManager();
 
     /**
-     * @return The currently in use {@link JSONAPIConfiguration}
+     * @return The currently in use {@link JSONAPIRootConfiguration}
      */
-    JSONAPIConfiguration getConfiguration();
+    JSONAPIRootConfiguration getConfiguration();
 
     /**
      * @return The currently in use {@link RequestHandler}
