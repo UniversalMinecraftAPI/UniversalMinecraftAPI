@@ -73,7 +73,11 @@ public class JSONAPI implements JSONAPIInterface {
         commandManager.registerCommand(new String[]{"reload"}, new ReloadCommand());
         commandManager.registerCommand(new String[]{"help"}, new HelpCommand());
 
-        webServer.start();
+        try {
+            webServer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
