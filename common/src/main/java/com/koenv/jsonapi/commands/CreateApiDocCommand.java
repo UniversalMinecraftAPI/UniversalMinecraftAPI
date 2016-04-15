@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class CreateApiDocCommand extends Command {
@@ -64,6 +65,12 @@ public class CreateApiDocCommand extends Command {
 
             Method method = methodEntry.getValue().getJavaMethod();
 
+            APIMethod annotation = method.getAnnotation(APIMethod.class);
+
+            if (annotation != null) {
+                jsonMethod.put("description", annotation.description());
+            }
+
             int parameterCount = method.getParameters().length;
             Stream<Parameter> stream = Arrays.stream(method.getParameters());
             if (methodEntry.getValue() instanceof ClassMethod) {
@@ -73,13 +80,29 @@ public class CreateApiDocCommand extends Command {
 
             if (parameterCount > 0) {
                 JSONObject arguments = new JSONObject();
+                AtomicInteger index = new AtomicInteger();
                 stream
                         .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
-                        .forEach(parameter -> arguments.put(parameter.getName(), parameter.getType().getSimpleName()));
+                        .forEach(parameter -> {
+                            JSONObject json = new JSONObject();
+                            json.put("type", parameter.getType().getSimpleName());
+                            if (annotation != null) {
+                                if (annotation.argumentDescriptions().length > index.get()) {
+                                    json.put("description", annotation.argumentDescriptions()[index.getAndIncrement()]);
+                                }
+                            }
+                            arguments.put(parameter.getName(), json);
+                        });
                 jsonMethod.put("arguments", arguments);
             }
 
-            jsonMethod.put("returns", method.getReturnType().getSimpleName());
+            JSONObject returns = new JSONObject();
+            returns.put("type", method.getReturnType().getSimpleName());
+            if (annotation != null) {
+                returns.put("description", annotation.returnDescription());
+            }
+
+            jsonMethod.put("returns", returns);
 
             if (methodEntry.getValue() instanceof ClassMethod) {
                 jsonMethod.put("operatesOn", ((ClassMethod) methodEntry.getValue()).getOperatesOn().getSimpleName());
