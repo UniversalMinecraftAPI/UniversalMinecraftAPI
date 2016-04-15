@@ -2,6 +2,7 @@ package com.koenv.jsonapi.spigot;
 
 import com.google.common.base.Charsets;
 import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.spigot.listeners.ChatStreamListener;
@@ -17,7 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class SpigotJSONAPI extends JavaPlugin implements JSONAPIProvider {
-    private JSONAPI jsonapi;
+    private JSONAPIInterface jsonapi;
 
     @Override
     public void onEnable() {

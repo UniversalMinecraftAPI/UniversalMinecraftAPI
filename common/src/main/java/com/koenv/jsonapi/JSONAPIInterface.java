@@ -7,6 +7,7 @@ import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.streams.StreamManager;
+import com.koenv.jsonapi.users.UserManager;
 
 /**
  * The interface of the JSONAPI, so it can be used in tests.
@@ -56,4 +57,9 @@ public interface JSONAPIInterface {
      * @return The currently in use {@link StreamManager}
      */
     StreamManager getStreamManager();
+
+    /**
+     * @return The currently in use {@link UserManager}
+     */
+    UserManager getUserManager();
 }

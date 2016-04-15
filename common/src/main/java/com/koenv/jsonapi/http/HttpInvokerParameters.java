@@ -1,6 +1,7 @@
 package com.koenv.jsonapi.http;
 
 import com.koenv.jsonapi.http.model.JsonRequest;
+import com.koenv.jsonapi.methods.AbstractMethod;
 import com.koenv.jsonapi.methods.InvokeParameters;
 import com.koenv.jsonapi.methods.Invoker;
 
@@ -24,5 +25,10 @@ public class HttpInvokerParameters implements InvokeParameters {
             return jsonRequest;
         }
         return null;
+    }
+
+    @Override
+    public boolean checkPermission(AbstractMethod method) {
+        return invoker.checkPermission(method);
     }
 }

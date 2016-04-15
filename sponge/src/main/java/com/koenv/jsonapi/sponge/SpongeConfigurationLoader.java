@@ -5,6 +5,7 @@ import com.koenv.jsonapi.config.WebServerSection;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.config.user.*;
+import com.koenv.jsonapi.users.model.PermissionType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class SpongeConfigurationLoader {
         return UserSection.builder()
                 .username(node.getNode("username").getString())
                 .password(node.getNode("password").getString())
-                .passwordType(UserSection.PasswordType.valueOf(node.getNode("password_type").getString("PLAIN").toUpperCase()))
+                .passwordType(node.getNode("password_type").getString("plain"))
                 .groups(loadStringList(node.getNode("groups")))
                 .build();
     }
@@ -97,7 +98,7 @@ public class SpongeConfigurationLoader {
     private NamespacePermissionSection loadNamespacePermission(CommentedConfigurationNode node) {
         return NamespacePermissionSection.builder()
                 .name(node.getNode("name").getString())
-                .type(PermissionSection.Type.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
                 .methods(loadStringList(node.getNode("methods")))
                 .build();
     }
@@ -109,14 +110,14 @@ public class SpongeConfigurationLoader {
     private ClassPermissionSection loadClassPermission(CommentedConfigurationNode node) {
         return ClassPermissionSection.builder()
                 .name(node.getNode("name").getString())
-                .type(PermissionSection.Type.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
                 .methods(loadStringList(node.getNode("methods")))
                 .build();
     }
 
     private StreamPermissionSection loadStreamPermission(CommentedConfigurationNode node) {
         return StreamPermissionSection.builder()
-                .type(PermissionSection.Type.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
                 .streams(loadStringList(node.getNode("streams")))
                 .build();
     }

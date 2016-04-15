@@ -5,6 +5,7 @@ import com.koenv.jsonapi.config.WebServerSection;
 import com.koenv.jsonapi.config.WebServerSecureSection;
 import com.koenv.jsonapi.config.WebServerThreadPoolSection;
 import com.koenv.jsonapi.config.user.*;
+import com.koenv.jsonapi.users.model.PermissionType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -62,7 +63,7 @@ public class SpigotConfigurationLoader {
         return UserSection.builder()
                 .username(node.getName())
                 .password(node.getString("password"))
-                .passwordType(UserSection.PasswordType.valueOf(node.getString("password_type", "PLAIN").toUpperCase()))
+                .passwordType(node.getString("password_type", "plain"))
                 .groups(node.getStringList("groups"))
                 .build();
     }
@@ -98,7 +99,7 @@ public class SpigotConfigurationLoader {
     private NamespacePermissionSection loadNamespacePermission(ConfigurationSection node) {
         return NamespacePermissionSection.builder()
                 .name(node.getName())
-                .type(PermissionSection.Type.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
                 .methods(node.getStringList("methods"))
                 .build();
     }
@@ -110,14 +111,14 @@ public class SpigotConfigurationLoader {
     private ClassPermissionSection loadClassPermission(ConfigurationSection node) {
         return ClassPermissionSection.builder()
                 .name(node.getName())
-                .type(PermissionSection.Type.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
                 .methods(node.getStringList("methods"))
                 .build();
     }
 
     private StreamPermissionSection loadStreamPermission(ConfigurationSection node) {
         return StreamPermissionSection.builder()
-                .type(PermissionSection.Type.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
+                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
                 .streams(node.getStringList("streams"))
                 .build();
     }

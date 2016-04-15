@@ -1,14 +1,16 @@
-package com.koenv.jsonapi.config.user;
+package com.koenv.jsonapi.users.model;
+
+import com.koenv.jsonapi.users.voters.VoterUtils;
 
 import java.util.List;
 
-public class UserSection {
+public class User {
     private String username;
     private String password;
     private String passwordType;
-    private List<String> groups;
+    private List<Group> groups;
 
-    private UserSection(Builder builder) {
+    private User(Builder builder) {
         this.username = builder.username;
         this.password = builder.password;
         this.passwordType = builder.passwordType;
@@ -31,15 +33,27 @@ public class UserSection {
         return passwordType;
     }
 
-    public List<String> getGroups() {
+    public List<Group> getGroups() {
         return groups;
+    }
+
+    public boolean canAccessNamespaceMethod(String namespace, String method) {
+        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessNamespaceMethod(namespace, method)));
+    }
+
+    public boolean canAccessClassMethod(String clazz, String method) {
+        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessClassMethod(clazz, method)));
+    }
+
+    public boolean canAccessStream(String stream) {
+        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessStream(stream)));
     }
 
     public static class Builder {
         private String username;
         private String password;
         private String passwordType;
-        private List<String> groups;
+        private List<Group> groups;
 
         private Builder() {
         }
@@ -59,13 +73,13 @@ public class UserSection {
             return this;
         }
 
-        public Builder groups(List<String> groups) {
+        public Builder groups(List<Group> groups) {
             this.groups = groups;
             return this;
         }
 
-        public UserSection build() {
-            return new UserSection(this);
+        public User build() {
+            return new User(this);
         }
     }
 }

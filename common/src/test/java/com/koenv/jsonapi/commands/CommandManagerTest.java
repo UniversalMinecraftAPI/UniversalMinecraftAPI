@@ -8,6 +8,7 @@ import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.streams.StreamManager;
+import com.koenv.jsonapi.users.UserManager;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -100,6 +101,11 @@ public class CommandManagerTest {
 
         @Override
         public StreamManager getStreamManager() {
+            return null;
+        }
+
+        @Override
+        public UserManager getUserManager() {
             return null;
         }
     }

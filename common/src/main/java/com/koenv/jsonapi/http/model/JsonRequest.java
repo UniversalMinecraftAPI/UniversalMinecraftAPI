@@ -54,8 +54,4 @@ public class JsonRequest {
 
         return requests;
     }
-
-    public static JsonErrorResponse getErrorRequest(int code, String message, String tag) {
-        return new JsonErrorResponse(code, message, tag);
-    }
 }

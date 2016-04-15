@@ -13,41 +13,31 @@ import java.util.Map;
 public class DefaultSerializers {
     public static final Map<Class<?>, Serializer<?>> SERIALIZERS;
 
-    static final Serializer<Boolean> BOOLEAN_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Byte> BYTE_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Character> CHARACTER_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Double> DOUBLE_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Float> FLOAT_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Integer> INTEGER_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Long> LONG_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<Short> SHORT_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<String> STRING_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<JSONObject> JSON_OBJECT_SERIALIZER = (object, serializerManager) -> object;
-    static final Serializer<JSONArray> JSON_ARRAY_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Object> DEFAULT_SERIALIZER = (object, serializerManager) -> object;
 
     static {
         SERIALIZERS = new HashMap<>();
         SERIALIZERS.put(JsonSerializable.class, new JsonResponseSerializer());
         SERIALIZERS.put(Collection.class, new CollectionSerializer());
-        SERIALIZERS.put(boolean.class, BOOLEAN_SERIALIZER);
-        SERIALIZERS.put(Boolean.class, BOOLEAN_SERIALIZER);
-        SERIALIZERS.put(byte.class, BYTE_SERIALIZER);
-        SERIALIZERS.put(Byte.class, BYTE_SERIALIZER);
-        SERIALIZERS.put(char.class, CHARACTER_SERIALIZER);
-        SERIALIZERS.put(Character.class, CHARACTER_SERIALIZER);
-        SERIALIZERS.put(double.class, DOUBLE_SERIALIZER);
-        SERIALIZERS.put(Double.class, DOUBLE_SERIALIZER);
-        SERIALIZERS.put(float.class, FLOAT_SERIALIZER);
-        SERIALIZERS.put(Float.class, FLOAT_SERIALIZER);
-        SERIALIZERS.put(int.class, INTEGER_SERIALIZER);
-        SERIALIZERS.put(Integer.class, INTEGER_SERIALIZER);
-        SERIALIZERS.put(long.class, LONG_SERIALIZER);
-        SERIALIZERS.put(Long.class, LONG_SERIALIZER);
-        SERIALIZERS.put(short.class, SHORT_SERIALIZER);
-        SERIALIZERS.put(Short.class, SHORT_SERIALIZER);
-        SERIALIZERS.put(String.class, STRING_SERIALIZER);
-        SERIALIZERS.put(JSONObject.class, JSON_OBJECT_SERIALIZER);
-        SERIALIZERS.put(JSONArray.class, JSON_ARRAY_SERIALIZER);
+        SERIALIZERS.put(boolean.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Boolean.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(byte.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Byte.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(char.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Character.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(double.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Double.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(float.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Float.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(int.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Integer.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(long.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Long.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(short.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(Short.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(String.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(JSONObject.class, DEFAULT_SERIALIZER);
+        SERIALIZERS.put(JSONArray.class, DEFAULT_SERIALIZER);
     }
 
     public static void register(SerializerManager manager) {

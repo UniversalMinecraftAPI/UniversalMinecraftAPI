@@ -3,6 +3,7 @@ package com.koenv.jsonapi.sponge;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.koenv.jsonapi.JSONAPI;
+import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.JSONAPIProvider;
 import com.koenv.jsonapi.config.JSONAPIConfiguration;
 import com.koenv.jsonapi.sponge.command.SpongeJSONAPICommandExecutor;
@@ -34,7 +35,7 @@ import java.nio.file.Paths;
 
 @Plugin(id = "com.koenv.jsonapi.sponge", name = "JSONAPI", version = "0.1-SNAPSHOT", description = "A JSON API for Sponge")
 public class SpongeJSONAPI implements JSONAPIProvider {
-    private JSONAPI jsonapi;
+    private JSONAPIInterface jsonapi;
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -170,7 +171,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         jsonapi.getMethodInvoker().registerMethods(PlayerMethods.class);
     }
 
-    public JSONAPI getJSONAPI() {
+    public JSONAPIInterface getJSONAPI() {
         return jsonapi;
     }
 }

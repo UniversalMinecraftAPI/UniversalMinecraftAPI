@@ -35,11 +35,6 @@ public class PermissionSection {
         return streams;
     }
 
-    public enum Type {
-        WHITELIST,
-        BLACKLIST;
-    }
-
     public static class Builder {
         private String name;
         private List<NamespacePermissionSection> namespaces;

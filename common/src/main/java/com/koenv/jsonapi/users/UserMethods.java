@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 public class UserMethods {
     @APIMethod
     public static List<JSONObject> getUsers() {
-        return JSONAPI.getInstance().getConfiguration().getUsersConfiguration().getUsers().stream().map(section -> {
+        return JSONAPI.getInstance().getUserManager().getUsers().stream().map(user -> {
             JSONObject object = new JSONObject();
-            object.put("username", section.getUsername());
-            object.put("groups", section.getGroups());
+            object.put("username", user.getUsername());
+            object.put("groups", user.getGroups());
             return object;
         }).collect(Collectors.toList());
     }

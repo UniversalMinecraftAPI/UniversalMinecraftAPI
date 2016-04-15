@@ -1,9 +1,11 @@
 package com.koenv.jsonapi.config.user;
 
+import com.koenv.jsonapi.users.model.PermissionType;
+
 import java.util.List;
 
 public class StreamPermissionSection {
-    private PermissionSection.Type type;
+    private PermissionType type;
     private List<String> streams;
 
     private StreamPermissionSection(Builder builder) {
@@ -15,7 +17,7 @@ public class StreamPermissionSection {
         return new Builder();
     }
 
-    public PermissionSection.Type getType() {
+    public PermissionType getType() {
         return type;
     }
 
@@ -24,13 +26,13 @@ public class StreamPermissionSection {
     }
 
     public static class Builder {
-        private PermissionSection.Type type;
+        private PermissionType type;
         private List<String> streams;
 
         private Builder() {
         }
 
-        public Builder type(PermissionSection.Type type) {
+        public Builder type(PermissionType type) {
             this.type = type;
             return this;
         }

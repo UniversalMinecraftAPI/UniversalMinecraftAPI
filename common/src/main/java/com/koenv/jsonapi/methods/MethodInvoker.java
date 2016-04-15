@@ -224,6 +224,11 @@ public class MethodInvoker {
                 throw new MethodInvocationException("No method named " + methodCallExpression.getMethodName() + " for class " + lastResult.getClass().getName());
             }
         }
+
+        if (!invoker.checkPermission(method)) {
+            throw new MethodAccessDeniedException("No access to method " + getMethodDeclaration(method));
+        }
+
         List<Object> parameters = new ArrayList<>();
 
         if (method instanceof ClassMethod) {

@@ -33,6 +33,8 @@ public class SerializerManager {
                         return interfaceValue;
                     }
                 }
+            } else {
+                return value;
             }
         } else {
             for (Class<?> interfaceClazz : clazz.getInterfaces()) {

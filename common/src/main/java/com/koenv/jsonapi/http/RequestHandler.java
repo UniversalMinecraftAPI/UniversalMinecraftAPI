@@ -1,7 +1,9 @@
 package com.koenv.jsonapi.http;
 
+import com.koenv.jsonapi.ErrorCodes;
 import com.koenv.jsonapi.http.model.*;
 import com.koenv.jsonapi.methods.Invoker;
+import com.koenv.jsonapi.methods.MethodAccessDeniedException;
 import com.koenv.jsonapi.methods.MethodInvocationException;
 import com.koenv.jsonapi.methods.MethodInvoker;
 import com.koenv.jsonapi.parser.ExpressionParser;
@@ -28,9 +30,11 @@ public class RequestHandler {
             Object value = methodInvoker.invokeMethod(expression, new HttpInvokerParameters(invoker, request));
             return createSuccessResponse(value, request);
         } catch (MethodInvocationException e) {
-            return createErrorResponse(2, "Error while invoking method: " + e.getMessage(), request);
+            return createErrorResponse(ErrorCodes.METHOD_INVOCATION_EXCEPTION, "Error while invoking method: " + e.getMessage(), request);
         } catch (ParseException e) {
-            return createErrorResponse(3, "Error while parsing method: " + e.getMessage(), request);
+            return createErrorResponse(ErrorCodes.PARSE_ERROR, "Error while parsing method: " + e.getMessage(), request);
+        } catch (MethodAccessDeniedException e) {
+            return createErrorResponse(ErrorCodes.ACCESS_DENIED, e.getMessage(), request);
         } catch (APIException e) {
             return createErrorResponse(e.getCode(), e.getMessage(), request);
         }

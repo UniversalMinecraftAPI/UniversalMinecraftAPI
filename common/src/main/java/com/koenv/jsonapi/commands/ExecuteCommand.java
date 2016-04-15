@@ -21,7 +21,7 @@ public class ExecuteCommand extends Command {
         try {
             Expression expression = jsonapi.getExpressionParser().parse(execStringBuilder.toString());
             Object result = jsonapi.getMethodInvoker().invokeMethod(expression);
-            source.sendMessage(ChatColor.GREEN, String.valueOf(result));
+            source.sendMessage(ChatColor.GREEN, jsonapi.getSerializerManager().serialize(result).toString());
             return true;
         } catch (ParseException | MethodInvocationException e) {
             source.sendMessage(ChatColor.RED, "Failed to execute command: " + e.getMessage());

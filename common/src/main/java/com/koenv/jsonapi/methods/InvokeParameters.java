@@ -7,4 +7,6 @@ public interface InvokeParameters {
      * @return The object of this class
      */
     Object get(Class<?> clazz);
+
+    boolean checkPermission(AbstractMethod method);
 }

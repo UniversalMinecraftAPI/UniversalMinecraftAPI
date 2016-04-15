@@ -14,7 +14,9 @@ import com.koenv.jsonapi.serializer.DefaultSerializers;
 import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.streams.StreamManager;
 import com.koenv.jsonapi.streams.StreamMethods;
+import com.koenv.jsonapi.users.UserManager;
 import com.koenv.jsonapi.users.UserMethods;
+import com.koenv.jsonapi.users.encoders.PlainTextEncoder;
 
 /**
  * The main JSONAPI delegate which must be called in implementations.
@@ -22,7 +24,7 @@ import com.koenv.jsonapi.users.UserMethods;
 public class JSONAPI implements JSONAPIInterface {
     private static JSONAPI INSTANCE;
 
-    public static JSONAPI getInstance() {
+    public static JSONAPIInterface getInstance() {
         return INSTANCE;
     }
 
@@ -36,6 +38,7 @@ public class JSONAPI implements JSONAPIInterface {
     private SerializerManager serializerManager;
     private RequestHandler requestHandler;
     private StreamManager streamManager;
+    private UserManager userManager;
 
     private JSONAPIWebServer webServer;
 
@@ -56,7 +59,9 @@ public class JSONAPI implements JSONAPIInterface {
 
         requestHandler = new RequestHandler(getExpressionParser(), getMethodInvoker());
         streamManager = new StreamManager();
-        streamManager.registerStream("console");
+
+        userManager = new UserManager(configuration.getUsersConfiguration());
+        userManager.registerEncoder(new PlainTextEncoder());
 
         webServer = new JSONAPIWebServer(this);
 
@@ -109,6 +114,11 @@ public class JSONAPI implements JSONAPIInterface {
     @Override
     public StreamManager getStreamManager() {
         return streamManager;
+    }
+
+    @Override
+    public UserManager getUserManager() {
+        return userManager;
     }
 
     @APIMethod(namespace = "jsonapi")
