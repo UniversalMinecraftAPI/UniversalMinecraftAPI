@@ -11,9 +11,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 public class CreateApiDocCommand extends Command {
@@ -30,70 +28,24 @@ public class CreateApiDocCommand extends Command {
             return false;
         }
 
-        Format format = Format.MARKDOWN;
-
-        if (args.length > 1) {
-            try {
-                format = Format.valueOf(args[1].toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                StringJoiner validFormats = new StringJoiner(", ");
-                for (Format f : Format.values()) {
-                    validFormats.add(f.name());
-                }
-                commandSource.sendMessage(ChatColor.RED, "Invalid format. Valid formats: " + validFormats.toString());
-            }
-        }
-
         MethodInvoker methodInvoker = jsonapi.getMethodInvoker();
 
-        StringBuilder builder = new StringBuilder();
-        switch (format) {
-            case MARKDOWN:
-                builder.append("# Namespaces\n\n");
+        JSONObject root = new JSONObject();
 
-                methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> {
-                    builder.append("## ").append(findFirst(entry.getValue()).getNamespace());
-                    builder.append("\n\n");
+        JSONObject namespaces = new JSONObject();
 
-                    addMethodsToMarkdown(builder, entry.getValue());
-                });
+        methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> namespaces.put(findFirst(entry.getValue()).getNamespace(), getJsonMethods(entry.getValue())));
 
-                builder.append("# Objects\n\n");
+        root.put("namespaces", namespaces);
 
-                methodInvoker.getClasses().entrySet().stream().forEach(entry -> {
-                    builder.append("## ").append(findFirst(entry.getValue()).getOperatesOn().getSimpleName());
-                    builder.append("\n\n");
+        JSONObject objects = new JSONObject();
 
-                    addMethodsToMarkdown(builder, entry.getValue());
-                });
+        methodInvoker.getClasses().entrySet().stream().forEach(entry -> objects.put(findFirst(entry.getValue()).getOperatesOn().getSimpleName(), getJsonMethods(entry.getValue())));
 
-                break;
-            case JSON:
-                JSONObject root = new JSONObject();
-
-                JSONObject namespaces = new JSONObject();
-
-                methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> {
-                    namespaces.put(findFirst(entry.getValue()).getNamespace(), getJsonMethods(entry.getValue()));
-                });
-
-                root.put("namespaces", namespaces);
-
-                JSONObject objects = new JSONObject();
-
-                methodInvoker.getClasses().entrySet().stream().forEach(entry -> {
-                    objects.put(findFirst(entry.getValue()).getOperatesOn().getSimpleName(), getJsonMethods(entry.getValue()));
-                });
-
-                root.put("objects", objects);
-
-                builder.append(root.toString(4));
-
-                break;
-        }
+        root.put("objects", objects);
 
         try (PrintWriter printWriter = new PrintWriter(file)) {
-            printWriter.write(builder.toString());
+            printWriter.write(root.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
             commandSource.sendMessage(ChatColor.RED, "Failed to write to file: " + e.toString());
@@ -103,57 +55,6 @@ public class CreateApiDocCommand extends Command {
         commandSource.sendMessage(ChatColor.GREEN, "API documentation saved to file " + file.getPath());
 
         return true;
-    }
-
-    private void addMethodsToMarkdown(StringBuilder builder, Map<String, ? extends AbstractMethod> map) {
-        for (Map.Entry<String, ? extends AbstractMethod> methodEntry : map.entrySet()) {
-            builder.append("### ").append(methodEntry.getValue().getName());
-            builder.append("\n\n");
-            Method method = methodEntry.getValue().getJavaMethod();
-
-            int parameterCount = method.getParameters().length;
-            Stream<Parameter> stream = Arrays.stream(method.getParameters());
-            if (methodEntry.getValue() instanceof ClassMethod) {
-                stream = stream.skip(1);
-                parameterCount--;
-            }
-
-            if (parameterCount > 0) {
-                builder.append("Arguments:\n\n");
-                stream
-                        .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
-                        .forEach(parameter -> {
-                            builder.append("* ").append(parameter.getName()).append(": `").append(parameter.getType().getSimpleName()).append("`\n");
-                        });
-            }
-
-            builder.append("\n\n");
-            builder.append("Return type: `");
-            builder.append(method.getReturnType().getSimpleName());
-            builder.append("`\n\n");
-
-            builder.append("Definition:\n\n\t");
-
-            if (methodEntry.getValue() instanceof ClassMethod) {
-                builder.append(((ClassMethod) methodEntry.getValue()).getOperatesOn().getSimpleName()).append(".");
-            } else if (methodEntry.getValue() instanceof NamespacedMethod) {
-                builder.append(((NamespacedMethod) methodEntry.getValue()).getNamespace()).append(".");
-            }
-
-            builder.append(methodEntry.getValue().getName()).append("(");
-
-            StringJoiner joiner = new StringJoiner(", ");
-
-            stream = Arrays.stream(method.getParameters());
-            if (methodEntry.getValue() instanceof ClassMethod) {
-                stream = stream.skip(1);
-            }
-
-            stream.forEach(parameter -> joiner.add(parameter.getName() + ": " + parameter.getType().getSimpleName()));
-
-            builder.append(joiner.toString());
-            builder.append(")\n\n");
-        }
     }
 
     private JSONObject getJsonMethods(Map<String, ? extends AbstractMethod> map) {
@@ -174,9 +75,7 @@ public class CreateApiDocCommand extends Command {
                 JSONObject arguments = new JSONObject();
                 stream
                         .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
-                        .forEach(parameter -> {
-                            arguments.put(parameter.getName(), parameter.getType().getSimpleName());
-                        });
+                        .forEach(parameter -> arguments.put(parameter.getName(), parameter.getType().getSimpleName()));
                 jsonMethod.put("arguments", arguments);
             }
 
@@ -201,10 +100,5 @@ public class CreateApiDocCommand extends Command {
     @Override
     public boolean hasPermission(CommandSource commandSource) {
         return commandSource.hasPermission("jsonapi.command.createapidoc");
-    }
-
-    enum Format {
-        MARKDOWN,
-        JSON;
     }
 }
