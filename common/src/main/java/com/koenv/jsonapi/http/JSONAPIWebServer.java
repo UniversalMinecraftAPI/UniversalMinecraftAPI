@@ -66,7 +66,7 @@ public class JSONAPIWebServer {
             String authorizationHeader = request.headers("Authorization");
             if (authorizationHeader == null || authorizationHeader.isEmpty()) {
                 if (userManager.getUser("default").isPresent()) {
-                    request.attribute("user", "default");
+                    request.attribute("com.koenv.jsonapi.user", "default");
                 } else {
                     response.header("Content-Type", "application/json");
                     halt(401, getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "No authentication found and no default user found"));
