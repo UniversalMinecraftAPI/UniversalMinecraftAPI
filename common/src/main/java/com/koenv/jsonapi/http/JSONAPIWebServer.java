@@ -111,7 +111,6 @@ public class JSONAPIWebServer {
         });
 
         get("/api/v1/version", (request, response) -> {
-            System.out.println("version");
             JSONAPIProvider provider = JSONAPI.getInstance().getProvider();
 
             JSONObject object = new JSONObject();
@@ -147,7 +146,12 @@ public class JSONAPIWebServer {
             return result.toString(4);
         });
 
-        System.out.println("test");
+        get("/*", (request, response) -> {
+            response.header("Content-Type", "application/json");
+            halt(404, getErrorResponse(ErrorCodes.NOT_FOUND, "Not found"));
+
+            return null;
+        });
     }
 
     public void stop() {
