@@ -187,7 +187,7 @@ public class MethodInvoker {
      * @throws MethodInvocationException Thrown when the method cannot be invoked
      */
     protected Object invokeMethod(String namespace, MethodCallExpression methodCallExpression, Object lastResult, InvokeParameters invoker) throws MethodInvocationException {
-        AbstractMethod method = null;
+        AbstractMethod method;
         if (lastResult == null) {
             Map<String, NamespacedMethod> namespaceMethods = getNamespace(namespace);
             if (namespaceMethods == null) {
@@ -198,27 +198,7 @@ public class MethodInvoker {
                 throw new MethodInvocationException("Unable to find method " + methodCallExpression.getMethodName() + " in namespace " + getNamespaceName(namespace));
             }
         } else {
-            Map<String, ClassMethod> classMethods = getClassMethodsMap(lastResult.getClass());
-            if (classMethods != null) {
-                method = getClassMethod(classMethods, methodCallExpression.getMethodName());
-            }
-            if (method == null) {
-                classMethods = getClassMethodsMap(lastResult.getClass().getSuperclass());
-                if (classMethods != null) {
-                    method = getClassMethod(classMethods, methodCallExpression.getMethodName());
-                }
-            }
-            if (method == null) {
-                for (Class<?> interfaceClass : lastResult.getClass().getInterfaces()) {
-                    classMethods = getClassMethodsMap(interfaceClass);
-                    if (classMethods != null) {
-                        method = getClassMethod(classMethods, methodCallExpression.getMethodName());
-                    }
-                    if (method != null) {
-                        break;
-                    }
-                }
-            }
+            method = findClassMethod(lastResult.getClass(), methodCallExpression.getMethodName());
 
             if (method == null) {
                 throw new MethodInvocationException("No method named " + methodCallExpression.getMethodName() + " for class " + lastResult.getClass().getName());
@@ -316,6 +296,33 @@ public class MethodInvoker {
         }
 
         return result;
+    }
+
+    private ClassMethod findClassMethod(Class<?> clazz, String methodName) {
+        Map<String, ClassMethod> classMethods = getClassMethodsMap(clazz);
+        ClassMethod method = null;
+        if (classMethods != null) {
+            method = getClassMethod(classMethods, methodName);
+        }
+
+        if (method == null) {
+            if (clazz.getSuperclass() != null) {
+                method = findClassMethod(clazz.getSuperclass(), methodName);
+                if (method != null) {
+                    return method;
+                }
+            }
+            for (Class<?> interfaceClazz : clazz.getInterfaces()) {
+                method = findClassMethod(interfaceClazz, methodName);
+                if (method != null) {
+                    return method;
+                }
+            }
+        } else {
+            return method;
+        }
+
+        return null;
     }
 
     /**

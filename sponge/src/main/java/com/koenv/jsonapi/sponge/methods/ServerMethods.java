@@ -11,6 +11,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,9 +23,6 @@ public class ServerMethods {
     public static Server getServer() {
         return Sponge.getServer();
     }
-
-    /*
-    Doesn't work yet because of limitations in MethodInvoker: it needs to search for superclasses/interfaces, just like the serializer
 
     @APIMethod(operatesOn = Server.class)
     public static int getPort(Server self) {
@@ -43,7 +42,7 @@ public class ServerMethods {
     @APIMethod(operatesOn = Server.class)
     public static String getMotd(Server self) {
         return self.getMotd().toPlain();
-    }*/
+    }
 
     @APIMethod
     public static boolean broadcast(String message) {
