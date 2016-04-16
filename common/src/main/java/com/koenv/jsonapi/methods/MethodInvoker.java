@@ -495,7 +495,9 @@ public class MethodInvoker {
      * @param method Method for which to get the method declaration.
      * @return A string representation of the method.
      */
-    protected String getMethodDeclaration(AbstractMethod method) {
+    public static String getMethodDeclaration(AbstractMethod method) {
+        int skipParameters = 0;
+
         StringBuilder stringBuilder = new StringBuilder();
         if (method instanceof NamespacedMethod) {
             stringBuilder.append(((NamespacedMethod) method).getNamespace());
@@ -503,15 +505,20 @@ public class MethodInvoker {
             stringBuilder.append("<");
             stringBuilder.append(((ClassMethod) method).getOperatesOn().getSimpleName());
             stringBuilder.append(">");
+            skipParameters = 1;
         }
         stringBuilder.append(".");
         stringBuilder.append(method.getName());
         stringBuilder.append("(");
         Parameter[] parameters = method.getJavaMethod().getParameters();
         StringJoiner joiner = new StringJoiner(", ");
-        Arrays.asList(parameters).stream().filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter)).forEach(parameter -> {
-            joiner.add(parameter.getType().getSimpleName());
-        });
+        
+        Arrays.asList(parameters)
+                .stream()
+                .skip(skipParameters)
+                .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                .forEach(parameter -> joiner.add(parameter.getType().getSimpleName()));
+
         stringBuilder.append(joiner.toString());
         stringBuilder.append(")");
         return stringBuilder.toString();
