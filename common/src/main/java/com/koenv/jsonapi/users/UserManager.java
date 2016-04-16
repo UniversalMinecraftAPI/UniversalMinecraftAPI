@@ -2,6 +2,7 @@ package com.koenv.jsonapi.users;
 
 import com.koenv.jsonapi.config.user.UsersConfiguration;
 import com.koenv.jsonapi.users.impl.EncryptionContextImpl;
+import com.koenv.jsonapi.users.model.AllowingPermission;
 import com.koenv.jsonapi.users.model.Group;
 import com.koenv.jsonapi.users.model.Permission;
 import com.koenv.jsonapi.users.model.User;
@@ -43,6 +44,8 @@ public class UserManager {
                 )
                 .build()
         ).collect(Collectors.toMap(Permission::getName, Function.identity()));
+
+        this.permissions.put("ALLOW_ALL", new AllowingPermission());
 
         this.groups = configuration.getGroups().stream().map(groupSection -> Group.builder()
                 .name(groupSection.getName())

@@ -22,10 +22,6 @@ public class Group {
         return name;
     }
 
-    public List<Permission> getPermissions() {
-        return permissions;
-    }
-
     public Stream<VoterResponse> canAccessNamespaceMethod(String namespace, String method) {
         return permissions.stream().flatMap(permission -> permission.canAccessNamespaceMethod(namespace, method));
     }

@@ -35,8 +35,14 @@ public class VoterUtils {
             return false; // allMatch returns true if the list is empty, which is something we don't want
         }
 
-        return matchedResponses.stream().allMatch(voterResponse -> {
-            return voterResponse == VoterResponse.ALLOWED;
-        });
+        if (matchedResponses.contains(VoterResponse.OVERRIDE_ALLOWED)) {
+            return true;
+        }
+
+        if (matchedResponses.contains(VoterResponse.OVERRIDE_DENIED)) {
+            return true;
+        }
+
+        return matchedResponses.stream().allMatch(voterResponse -> voterResponse == VoterResponse.ALLOWED);
     }
 }

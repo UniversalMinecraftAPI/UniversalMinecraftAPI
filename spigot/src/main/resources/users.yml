@@ -19,6 +19,7 @@ groups:
       - players
       - streams
       - jsonapi
+      - ALLOW_ALL
 
 permissions:
   default:

@@ -20,24 +20,19 @@ public class Permission {
         this.streams = builder.streams;
     }
 
+    protected Permission(String name, List<NamespacePermissions> namespaces, List<ClassPermissions> classes, StreamPermissions streams) {
+        this.name = name;
+        this.namespaces = namespaces;
+        this.classes = classes;
+        this.streams = streams;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     public String getName() {
         return name;
-    }
-
-    public List<NamespacePermissions> getNamespaces() {
-        return namespaces;
-    }
-
-    public List<ClassPermissions> getClasses() {
-        return classes;
-    }
-
-    public StreamPermissions getStreams() {
-        return streams;
     }
 
     public Stream<VoterResponse> canAccessNamespaceMethod(String namespace, String method) {
