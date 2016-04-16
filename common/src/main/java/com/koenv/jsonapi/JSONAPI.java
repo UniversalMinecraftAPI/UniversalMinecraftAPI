@@ -5,6 +5,7 @@ import com.koenv.jsonapi.config.JSONAPIRootConfiguration;
 import com.koenv.jsonapi.http.JSONAPIWebServer;
 import com.koenv.jsonapi.http.RequestHandler;
 import com.koenv.jsonapi.methods.MethodInvoker;
+import com.koenv.jsonapi.util.GenericServerMethods;
 import com.koenv.jsonapi.parser.ExpressionParser;
 import com.koenv.jsonapi.serializer.DefaultSerializers;
 import com.koenv.jsonapi.serializer.SerializerManager;
@@ -66,6 +67,7 @@ public class JSONAPI implements JSONAPIInterface {
         methodInvoker.registerMethods(StreamMethods.class);
         methodInvoker.registerMethods(UserMethods.class);
         methodInvoker.registerMethods(JSONAPIMethods.class);
+        methodInvoker.registerMethods(GenericServerMethods.class);
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());

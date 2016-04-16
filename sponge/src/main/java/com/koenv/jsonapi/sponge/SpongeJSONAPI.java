@@ -9,20 +9,28 @@ import com.koenv.jsonapi.config.user.UsersConfiguration;
 import com.koenv.jsonapi.sponge.command.SpongeJSONAPICommandExecutor;
 import com.koenv.jsonapi.sponge.listeners.ChatStreamListener;
 import com.koenv.jsonapi.sponge.methods.PlayerMethods;
-import com.koenv.jsonapi.sponge.serializer.PlayerSerializer;
+import com.koenv.jsonapi.sponge.methods.ServerMethods;
+import com.koenv.jsonapi.sponge.serializer.*;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Dimension;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import spark.utils.IOUtils;
 
 import java.io.FileWriter;
@@ -159,7 +167,14 @@ public class SpongeJSONAPI implements JSONAPIProvider {
     }
 
     private void registerSerializers() {
+        jsonapi.getSerializerManager().registerSerializer(CatalogType.class, new CatalogTypeSerializer());
+        jsonapi.getSerializerManager().registerSerializer(CommandResult.class, new CommandResultSerializer());
+        jsonapi.getSerializerManager().registerSerializer(Dimension.class, new DimensionSerializer());
+        jsonapi.getSerializerManager().registerSerializer(Location.class, new LocationSerializer());
         jsonapi.getSerializerManager().registerSerializer(Player.class, new PlayerSerializer());
+        jsonapi.getSerializerManager().registerSerializer(Transform.class, new TransformSerializer());
+        jsonapi.getSerializerManager().registerSerializer(Server.class, new ServerSerializer());
+        jsonapi.getSerializerManager().registerSerializer(World.class, new WorldSerializer());
     }
 
     private void registerListeners() {
@@ -168,6 +183,7 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
     private void registerMethods() {
         jsonapi.getMethodInvoker().registerMethods(PlayerMethods.class);
+        jsonapi.getMethodInvoker().registerMethods(ServerMethods.class);
     }
 
     public JSONAPIInterface getJSONAPI() {
