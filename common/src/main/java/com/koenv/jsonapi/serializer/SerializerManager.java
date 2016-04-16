@@ -26,22 +26,14 @@ public class SerializerManager {
         }
         if (clazz.getSuperclass() != null) {
             Object value = serialize(object, clazz.getSuperclass(), true);
-            if (value == null) {
-                for (Class<?> interfaceClazz : clazz.getInterfaces()) {
-                    Object interfaceValue = serialize(object, interfaceClazz, true);
-                    if (interfaceValue != null) {
-                        return interfaceValue;
-                    }
-                }
-            } else {
+            if (value != null) {
                 return value;
             }
-        } else {
-            for (Class<?> interfaceClazz : clazz.getInterfaces()) {
-                Object interfaceValue = serialize(object, interfaceClazz, true);
-                if (interfaceValue != null) {
-                    return interfaceValue;
-                }
+        }
+        for (Class<?> interfaceClazz : clazz.getInterfaces()) {
+            Object interfaceValue = serialize(object, interfaceClazz, true);
+            if (interfaceValue != null) {
+                return interfaceValue;
             }
         }
         if (!within) {
