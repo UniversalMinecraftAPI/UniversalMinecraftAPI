@@ -206,7 +206,7 @@ public class MethodInvoker {
         }
 
         if (invoker != null && !invoker.checkPermission(method)) {
-            throw new MethodAccessDeniedException("No access to method " + getMethodDeclaration(method));
+            throw new MethodAccessDeniedException("No access to method " + MethodUtils.getMethodDeclaration(method));
         }
 
         List<Object> parameters = new ArrayList<>();
@@ -277,7 +277,7 @@ public class MethodInvoker {
         }
 
         if (j != requiredParameters || j < parameters.size()) {
-            throw new MethodInvocationException("Method " + getMethodDeclaration(method) + " requires " +
+            throw new MethodInvocationException("Method " + MethodUtils.getMethodDeclaration(method) + " requires " +
                     requiredParameters +
                     " parameters, received " + parameters.size());
         }
@@ -290,9 +290,9 @@ public class MethodInvoker {
             if (e.getCause() instanceof RuntimeException && e.getCause() instanceof RethrowableException) {
                 throw (RuntimeException) e.getCause();
             }
-            throw new MethodInvocationException("Unable to invoke method: " + getMethodDeclaration(method) + ": " + e.getCause().getMessage());
+            throw new MethodInvocationException("Unable to invoke method: " + MethodUtils.getMethodDeclaration(method) + ": " + e.getCause().getMessage());
         } catch (Exception e) {
-            throw new MethodInvocationException("Unable to invoke method " + getMethodDeclaration(method) + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
+            throw new MethodInvocationException("Unable to invoke method " + MethodUtils.getMethodDeclaration(method) + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
         }
 
         return result;
@@ -487,41 +487,6 @@ public class MethodInvoker {
 
     public Map<Class<?>, Map<String, ClassMethod>> getClasses() {
         return classMethodsMap;
-    }
-
-    /**
-     * Gets a method declaration. This will be in the format: `methodName(methodParameters)`
-     *
-     * @param method Method for which to get the method declaration.
-     * @return A string representation of the method.
-     */
-    public static String getMethodDeclaration(AbstractMethod method) {
-        int skipParameters = 0;
-
-        StringBuilder stringBuilder = new StringBuilder();
-        if (method instanceof NamespacedMethod) {
-            stringBuilder.append(((NamespacedMethod) method).getNamespace());
-        } else if (method instanceof ClassMethod) {
-            stringBuilder.append("<");
-            stringBuilder.append(((ClassMethod) method).getOperatesOn().getSimpleName());
-            stringBuilder.append(">");
-            skipParameters = 1;
-        }
-        stringBuilder.append(".");
-        stringBuilder.append(method.getName());
-        stringBuilder.append("(");
-        Parameter[] parameters = method.getJavaMethod().getParameters();
-        StringJoiner joiner = new StringJoiner(", ");
-        
-        Arrays.asList(parameters)
-                .stream()
-                .skip(skipParameters)
-                .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
-                .forEach(parameter -> joiner.add(parameter.getType().getSimpleName()));
-
-        stringBuilder.append(joiner.toString());
-        stringBuilder.append(")");
-        return stringBuilder.toString();
     }
 
     /**

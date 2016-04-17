@@ -3,6 +3,7 @@ package com.koenv.jsonapi.commands;
 import com.koenv.jsonapi.ChatColor;
 import com.koenv.jsonapi.JSONAPIInterface;
 import com.koenv.jsonapi.methods.*;
+import com.koenv.jsonapi.util.json.JSONArray;
 import com.koenv.jsonapi.util.json.JSONObject;
 
 import java.io.File;
@@ -11,8 +12,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class CreateApiDocCommand extends Command {
@@ -33,20 +32,31 @@ public class CreateApiDocCommand extends Command {
 
         JSONObject root = new JSONObject();
 
-        JSONObject namespaces = new JSONObject();
+        JSONArray namespaces = new JSONArray();
 
-        methodInvoker.getNamespaces().entrySet().stream().forEach(entry -> namespaces.put(findFirst(entry.getValue()).getNamespace(), getJsonMethods(entry.getValue())));
+        methodInvoker.getNamespaces().values().stream().flatMap(map -> map.values().stream()).forEach(method -> namespaces.put(getJsonMethod(method)));
 
         root.put("namespaces", namespaces);
 
-        JSONObject objects = new JSONObject();
+        JSONArray classes = new JSONArray();
 
-        methodInvoker.getClasses().entrySet().stream().forEach(entry -> objects.put(findFirst(entry.getValue()).getOperatesOn().getSimpleName(), getJsonMethods(entry.getValue())));
+        methodInvoker.getClasses().values().stream().flatMap(map -> map.values().stream()).forEach(method -> classes.put(getJsonMethod(method)));
 
-        root.put("objects", objects);
+        root.put("classes", classes);
+
+        JSONArray streams = new JSONArray();
+        jsonapi.getStreamManager().getStreams().stream().forEach(streams::put);
+
+        root.put("streams", streams);
+
+        JSONObject platform = new JSONObject();
+        platform.put("name", jsonapi.getProvider().getPlatform());
+        platform.put("version", jsonapi.getProvider().getPlatformVersion());
+
+        root.put("platform", platform);
 
         try (PrintWriter printWriter = new PrintWriter(file)) {
-            printWriter.write(root.toString(4));
+            printWriter.write(root.toString());
         } catch (IOException e) {
             e.printStackTrace();
             commandSource.sendMessage(ChatColor.RED, "Failed to write to file: " + e.toString());
@@ -58,66 +68,44 @@ public class CreateApiDocCommand extends Command {
         return true;
     }
 
-    private JSONObject getJsonMethods(Map<String, ? extends AbstractMethod> map) {
-        JSONObject root = new JSONObject();
-        for (Map.Entry<String, ? extends AbstractMethod> methodEntry : map.entrySet()) {
-            JSONObject jsonMethod = new JSONObject();
+    private JSONObject getJsonMethod(AbstractMethod methodEntry) {
+        JSONObject jsonMethod = new JSONObject();
 
-            Method method = methodEntry.getValue().getJavaMethod();
+        Method method = methodEntry.getJavaMethod();
 
-            APIMethod annotation = method.getAnnotation(APIMethod.class);
+        jsonMethod.put("name", methodEntry.getName());
 
-            if (annotation != null) {
-                jsonMethod.put("description", annotation.description());
-            }
-
-            int parameterCount = method.getParameters().length;
-            Stream<Parameter> stream = Arrays.stream(method.getParameters());
-            if (methodEntry.getValue() instanceof ClassMethod) {
-                stream = stream.skip(1);
-                parameterCount--;
-            }
-
-            if (parameterCount > 0) {
-                JSONObject arguments = new JSONObject();
-                AtomicInteger index = new AtomicInteger();
-                stream
-                        .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
-                        .forEach(parameter -> {
-                            JSONObject json = new JSONObject();
-                            json.put("type", parameter.getType().getSimpleName());
-                            if (annotation != null) {
-                                if (annotation.argumentDescriptions().length > index.get()) {
-                                    json.put("description", annotation.argumentDescriptions()[index.getAndIncrement()]);
-                                }
-                            }
-                            arguments.put(parameter.getName(), json);
-                        });
-                jsonMethod.put("arguments", arguments);
-            }
-
-            JSONObject returns = new JSONObject();
-            returns.put("type", method.getReturnType().getSimpleName());
-            if (annotation != null) {
-                returns.put("description", annotation.returnDescription());
-            }
-
-            jsonMethod.put("returns", returns);
-
-            if (methodEntry.getValue() instanceof ClassMethod) {
-                jsonMethod.put("operatesOn", ((ClassMethod) methodEntry.getValue()).getOperatesOn().getSimpleName());
-            } else if (methodEntry.getValue() instanceof NamespacedMethod) {
-                jsonMethod.put("namespace", ((NamespacedMethod) methodEntry.getValue()).getNamespace());
-            }
-
-            root.put(methodEntry.getValue().getName(), jsonMethod);
+        int parameterCount = method.getParameters().length;
+        Stream<Parameter> stream = Arrays.stream(method.getParameters());
+        if (methodEntry instanceof ClassMethod) {
+            stream = stream.skip(1);
+            parameterCount--;
         }
 
-        return root;
-    }
+        if (parameterCount > 0) {
+            JSONArray arguments = new JSONArray();
+            stream
+                    .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                    .forEach(parameter -> {
+                        JSONObject json = new JSONObject();
+                        json.put("name", parameter.getName());
+                        json.put("type", parameter.getType().getSimpleName());
+                        arguments.put(json);
+                    });
+            jsonMethod.put("arguments", arguments);
+        } else {
+            jsonMethod.put("arguments", new JSONArray());
+        }
 
-    private <T extends AbstractMethod> T findFirst(Map<String, T> map) {
-        return map.values().stream().findFirst().orElseThrow(NullPointerException::new);
+        jsonMethod.put("returns", method.getReturnType().getSimpleName());
+
+        if (methodEntry instanceof ClassMethod) {
+            jsonMethod.put("operatesOn", ((ClassMethod) methodEntry).getOperatesOn().getSimpleName());
+        } else if (methodEntry instanceof NamespacedMethod) {
+            jsonMethod.put("namespace", ((NamespacedMethod) methodEntry).getNamespace());
+        }
+
+        return jsonMethod;
     }
 
     @Override

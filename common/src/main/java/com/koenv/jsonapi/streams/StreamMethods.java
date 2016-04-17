@@ -14,11 +14,7 @@ import java.util.List;
 
 @APINamespace("streams")
 public class StreamMethods {
-    @APIMethod(
-            description = "Subscribe to a stream, should only be executed while connected via a web socket",
-            argumentDescriptions = {"Stream name, see @[streams.listStreams]"},
-            returnDescription = "true if subscription succeeded"
-    )
+    @APIMethod
     public static boolean subscribe(Invoker invoker, JsonRequest request, String stream) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);
@@ -45,7 +41,7 @@ public class StreamMethods {
         return true;
     }
 
-    @APIMethod(returnDescription = "Returns the unsubscribed subscriptions, usually 1")
+    @APIMethod
     public static int unsubscribe(Invoker invoker, JsonRequest request, String stream) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);

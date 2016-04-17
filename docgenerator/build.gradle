@@ -1,0 +1,9 @@
+apply plugin: 'application'
+
+mainClassName = 'com.koenv.jsonapi.docgenerator.Main'
+
+dependencies {
+    compile project(':common')
+    compile 'com.beust:jcommander:1.48'
+    compile 'com.google.guava:guava:19.0'
+}

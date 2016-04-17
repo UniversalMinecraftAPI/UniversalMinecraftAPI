@@ -39,27 +39,6 @@ public @interface APIMethod {
     Class<?> operatesOn() default DEFAULT.class;
 
     /**
-     * Description of the method, as will be used in the documentation.
-     *
-     * @return Description of the method
-     */
-    String description() default "";
-
-    /**
-     * Description of what this method will return, as will be used in the documentation
-     *
-     * @return Return description
-     */
-    String returnDescription() default "";
-
-    /**
-     * Description of the arguments in order, as will be used in the documentation.
-     *
-     * @return Argument descriptions
-     */
-    String[] argumentDescriptions() default {};
-
-    /**
      * Default {@link #operatesOn()} class to see whether {@link #operatesOn()} has been set.
      */
     final class DEFAULT {
