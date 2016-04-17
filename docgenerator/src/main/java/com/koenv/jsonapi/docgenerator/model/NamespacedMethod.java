@@ -24,16 +24,18 @@ public class NamespacedMethod extends AbstractMethod {
 
     @Override
     public String getDeclaration() {
+        return namespace + "." + getDeclarationWithoutNamespace();
+    }
+
+    public String getDeclarationWithoutNamespace() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(namespace);
-        stringBuilder.append(".");
         stringBuilder.append(name);
         stringBuilder.append("(");
         StringJoiner joiner = new StringJoiner(", ");
 
         arguments
                 .stream()
-                .forEach(parameter -> joiner.add(parameter.getType()));
+                .forEach(parameter -> joiner.add(parameter.getName()));
 
         stringBuilder.append(joiner.toString());
         stringBuilder.append(")");

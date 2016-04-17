@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 public class CreateApiDocCommand extends Command {
@@ -97,7 +99,13 @@ public class CreateApiDocCommand extends Command {
             jsonMethod.put("arguments", new JSONArray());
         }
 
-        jsonMethod.put("returns", method.getReturnType().getSimpleName());
+        if (Collection.class.isAssignableFrom(method.getReturnType())) {
+            ParameterizedType type = (ParameterizedType) method.getGenericReturnType();
+            Class<?> realType = (Class<?>) type.getActualTypeArguments()[0];
+            jsonMethod.put("returns", realType.getSimpleName() + "[]");
+        } else {
+            jsonMethod.put("returns", method.getReturnType().getSimpleName());
+        }
 
         if (methodEntry instanceof ClassMethod) {
             jsonMethod.put("operatesOn", ((ClassMethod) methodEntry).getOperatesOn().getSimpleName());

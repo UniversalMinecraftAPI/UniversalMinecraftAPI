@@ -1,6 +1,8 @@
 package com.koenv.jsonapi;
 
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.methods.*;
+import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONArray;
 import com.koenv.jsonapi.util.json.JSONObject;
 
@@ -27,7 +29,7 @@ public class JSONAPIMethods {
     }
 
     @APIMethod
-    public static JSONObject listMethods() {
+    public static Methods listMethods() {
         JSONObject json = new JSONObject();
 
         MethodInvoker methodInvoker = JSONAPI.getInstance().getMethodInvoker();
@@ -41,6 +43,19 @@ public class JSONAPIMethods {
         json.put("namespaces", namespaces);
         json.put("classes", classes);
 
-        return json;
+        return new Methods(json);
+    }
+
+    public static class Methods implements JsonSerializable {
+        private JSONObject json;
+
+        public Methods(JSONObject json) {
+            this.json = json;
+        }
+
+        @Override
+        public JSONObject toJson(SerializerManager serializerManager) {
+            return json;
+        }
     }
 }

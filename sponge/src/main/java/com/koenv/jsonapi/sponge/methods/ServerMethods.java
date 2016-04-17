@@ -1,7 +1,9 @@
 package com.koenv.jsonapi.sponge.methods;
 
+import com.koenv.jsonapi.http.model.JsonSerializable;
 import com.koenv.jsonapi.methods.APIMethod;
 import com.koenv.jsonapi.methods.APINamespace;
+import com.koenv.jsonapi.serializer.SerializerManager;
 import com.koenv.jsonapi.util.json.JSONObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.spongepowered.api.Server;
@@ -58,7 +60,7 @@ public class ServerMethods {
     }
 
     @APIMethod
-    public static List<JSONObject> getCommands() {
+    public static List<Command> getCommands() {
         return Sponge.getCommandManager().getPluginContainers().stream()
                 .flatMap(container -> Sponge.getCommandManager().getOwnedBy(container).stream().map(commandMapping -> new ImmutablePair<>(container, commandMapping)))
                 .map(pair -> {
@@ -69,9 +71,22 @@ public class ServerMethods {
                     object.put("help", pair.getRight().getCallable().getHelp(Sponge.getServer().getConsole()).map(Text::toPlain).orElse(""));
                     object.put("usage", pair.getRight().getCallable().getUsage(Sponge.getServer().getConsole()).toPlain());
 
-                    return object;
+                    return new Command(object);
                 })
                 .collect(Collectors.toList());
+    }
+
+    public static class Command implements JsonSerializable {
+        private JSONObject json;
+
+        public Command(JSONObject json) {
+            this.json = json;
+        }
+
+        @Override
+        public JSONObject toJson(SerializerManager serializerManager) {
+            return json;
+        }
     }
 
     @APIMethod
