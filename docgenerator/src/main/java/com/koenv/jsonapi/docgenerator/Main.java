@@ -43,6 +43,8 @@ public class Main {
     }
 
     private void run() {
+        long startTime = System.currentTimeMillis();
+
         boolean valid = true;
 
         if (files.size() < 1) {
@@ -241,6 +243,9 @@ public class Main {
                 logger.error("Failed to generate documentation for stream " + stream, e);
             }
         });
+
+        long time = System.currentTimeMillis() - startTime;
+        logger.info("Completed in " + time + " ms");
     }
 
     private <T extends AbstractMethod> void printDiffWarnings(Platform platform, List<T> methods) {
