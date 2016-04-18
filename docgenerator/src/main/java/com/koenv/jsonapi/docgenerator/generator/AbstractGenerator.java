@@ -1,5 +1,6 @@
 package com.koenv.jsonapi.docgenerator.generator;
 
+import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
@@ -14,5 +15,5 @@ public abstract class AbstractGenerator {
         this.rootDirectory = rootDirectory;
     }
 
-    public abstract void generate(Configuration configuration, Writer output) throws IOException, TemplateException;
+    public abstract void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException;
 }

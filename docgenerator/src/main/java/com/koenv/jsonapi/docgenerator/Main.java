@@ -2,9 +2,10 @@ package com.koenv.jsonapi.docgenerator;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.koenv.jsonapi.docgenerator.generator.IndexGenerator;
-import com.koenv.jsonapi.docgenerator.generator.namespace.NamespaceDocGenerator;
+import com.google.common.io.Files;
+import com.koenv.jsonapi.docgenerator.generator.*;
 import com.koenv.jsonapi.docgenerator.model.*;
+import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
@@ -14,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -34,6 +32,9 @@ public class Main {
 
     @Parameter(names = {"-output", "-o"})
     private String outputDirectoryPath = "output";
+
+    @Parameter(names = {"-mappings", "-m"})
+    private String mappingsPath = extraDirectoryPath + "/mappings.conf";
 
     public static void main(String[] args) {
         Main main = new Main();
@@ -74,6 +75,12 @@ public class Main {
                 logger.error("Failed to create output directory " + outputDirectory.getPath());
                 valid = false;
             }
+        }
+
+        File mappingsFile = new File(mappingsPath);
+        if (mappingsFile.exists() && !mappingsFile.isFile()) {
+            logger.error(mappingsFile.getPath() + " must be a file if it exists.");
+            valid = false;
         }
 
         if (!valid) {
@@ -132,6 +139,23 @@ public class Main {
             streams.addAll(platformMethods.getStreams());
         });
 
+        File classesDirectory = new File(extraDirectory, "classes");
+
+        ClassResolver classResolver = new ClassResolver();
+        allClassMethods.stream().collect(Collectors.groupingBy(ClassMethod::getOperatesOn)).keySet().forEach(s -> classResolver.register(new JSONAPIClass(s, true)));
+
+        List<String> extraClasses = readClasses(classesDirectory, classResolver);
+
+        if (mappingsFile.exists()) {
+            Map<String, String> mappings = MappingsReader.readMappings(mappingsFile);
+            mappings.forEach((key, value) -> {
+                if (!classResolver.contains(value)) {
+                    throw new IllegalArgumentException("Invalid mapping: Mapping " + value + " doesn't exist");
+                }
+                classResolver.register(key, classResolver.resolve(value));
+            });
+        }
+
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_24);
         try {
             configuration.setDirectoryForTemplateLoading(templateDirectory);
@@ -150,7 +174,7 @@ public class Main {
         );
 
         try (FileWriter fileWriter = new FileWriter(new File(outputDirectory, "index.html"))) {
-            indexGenerator.generate(configuration, fileWriter);
+            indexGenerator.generate(configuration, classResolver, fileWriter);
         } catch (IOException | TemplateException e) {
             logger.error("Failed to generate index file", e);
         }
@@ -163,12 +187,58 @@ public class Main {
         allNamespacedMethods.stream().collect(Collectors.groupingBy(NamespacedMethod::getNamespace)).entrySet().forEach(entry -> {
             NamespaceDocGenerator generator = new NamespaceDocGenerator(namespaceDirectory, entry.getKey(), entry.getValue());
 
-            File file = new File(outputDirectory, "namespaces/" + entry.getKey() + ".html");
+            File file = new File(namespaceOutputDirectory, entry.getKey() + ".html");
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, fileWriter);
+                generator.generate(configuration, classResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate documentation for namespace " + entry.getKey(), e);
+            }
+        });
+
+        File classesOutputDirectory = new File(outputDirectory, "classes");
+        classesOutputDirectory.mkdirs();
+
+        allClassMethods.stream().collect(Collectors.groupingBy(ClassMethod::getOperatesOn)).entrySet().forEach(entry -> {
+            ClassDocWithMethodsGenerator generator = new ClassDocWithMethodsGenerator(classesDirectory, entry.getKey(), entry.getValue());
+
+            File file = new File(classesOutputDirectory, entry.getKey() + ".html");
+
+            extraClasses.remove(entry.getKey()); // be extra sure to not generate twice
+
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                generator.generate(configuration, classResolver, fileWriter);
+            } catch (IOException | TemplateException e) {
+                logger.error("Failed to generate documentation for class " + entry.getKey(), e);
+            }
+        });
+
+        extraClasses.forEach(s -> {
+            ClassDocGenerator generator = new ClassDocGenerator(classesDirectory, s);
+
+            File file = new File(classesOutputDirectory, s + ".html");
+
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                generator.generate(configuration, classResolver, fileWriter);
+            } catch (IOException | TemplateException e) {
+                logger.error("Failed to generate documentation for class " + s, e);
+            }
+        });
+
+        File streamsDirectory = new File(extraDirectory, "streams");
+
+        File streamsOutputDirectory = new File(outputDirectory, "streams");
+        streamsOutputDirectory.mkdirs();
+
+        streams.stream().forEach(stream -> {
+            StreamDocGenerator generator = new StreamDocGenerator(streamsDirectory, stream);
+
+            File file = new File(streamsOutputDirectory, stream + ".html");
+
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                generator.generate(configuration, classResolver, fileWriter);
+            } catch (IOException | TemplateException e) {
+                logger.error("Failed to generate documentation for stream " + stream, e);
             }
         });
     }
@@ -200,5 +270,19 @@ public class Main {
                 logger.warn("* " + stream);
             }
         }
+    }
+
+    private List<String> readClasses(File classesDirectory, ClassResolver resolver) {
+        List<String> classes = new ArrayList<>();
+        Arrays.asList(classesDirectory.listFiles()).forEach(file -> {
+            if (file.isFile()) {
+                String name = Files.getNameWithoutExtension(file.getPath());
+                if (!resolver.contains(name)) {
+                    resolver.register(new JSONAPIClass(name, true));
+                    classes.add(name);
+                }
+            }
+        });
+        return classes;
     }
 }

@@ -3,7 +3,7 @@
 
 <h1>Namespace ${namespace}</h1>
 <#if description??>
-<p>${description}</p>
+<p class="lead">${description}</p>
 </#if>
 
 <div class="row">
@@ -19,7 +19,7 @@
                         <td width="30%">Arguments</td>
                         <td width="70%">
                             <#list method.arguments as argument>
-                                <strong>${argument.type}</strong> ${argument.name}: ${method.argumentDescriptions[argument.name]!''}<br/>
+                                <strong><@type type=argument.type/></strong> ${argument.name}: ${method.argumentDescriptions[argument.name]!''}<br/>
                             </#list>
                         </td>
                     </tr>
@@ -27,7 +27,7 @@
                 <#if method.returns != "void">
                     <tr>
                         <td width="30%">Returns</td>
-                        <td width="70%"><strong>${method.returns}</strong>: ${method.returnDescription}</td>
+                        <td width="70%"><strong><@type type=method.returns/></strong>: ${method.returnDescription}</td>
                     </tr>
                 </#if>
             </table>

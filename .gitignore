@@ -19,7 +19,7 @@ out/
 
 .gradle
 build/
-classes/
+/classes/
 
 ## Additional for JSONAPI
 output/

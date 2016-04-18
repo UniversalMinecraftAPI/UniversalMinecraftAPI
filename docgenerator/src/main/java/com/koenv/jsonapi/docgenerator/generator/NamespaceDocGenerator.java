@@ -1,8 +1,8 @@
-package com.koenv.jsonapi.docgenerator.generator.namespace;
+package com.koenv.jsonapi.docgenerator.generator;
 
-import com.koenv.jsonapi.docgenerator.generator.AbstractGenerator;
-import com.koenv.jsonapi.docgenerator.model.Argument;
+import com.koenv.jsonapi.docgenerator.model.JSONAPIClass;
 import com.koenv.jsonapi.docgenerator.model.NamespacedMethod;
+import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
@@ -32,7 +32,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
     }
 
     @Override
-    public void generate(Configuration configuration, Writer output) throws IOException, TemplateException {
+    public void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException {
         Template template = configuration.getTemplate("namespace.ftl");
 
         Map<String, Object> dataModel = new HashMap<>();
@@ -50,9 +50,13 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
         dataModel.put("methods", methods.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName())).map(method -> {
             String description = "";
-            Map<String, String> arguments = new HashMap<>();
+            Map<String, String> argumentDescriptions = new HashMap<>();
             String returnDescription = "";
             String example = "";
+            JSONAPIClass returnType = classResolver.resolve(method.getReturns());
+            List<ArgumentWrapper> arguments = method.getArguments().stream()
+                    .map(argument -> new ArgumentWrapper(argument.getName(), classResolver.resolve(argument.getType())))
+                    .collect(Collectors.toList());
 
             File methodFile = new File(rootDirectory, namespace + "/" + method.getName() + ".conf");
 
@@ -61,14 +65,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                 if (config.hasPath("description")) {
                     description = config.getString("description");
                 }
-                if (config.hasPath("arguments")) {
-                    config.getConfig("arguments").entrySet().forEach(entry -> {
-                        if (entry.getValue().valueType() != ConfigValueType.STRING) {
-                            throw new IllegalArgumentException("Description for argument at path " + entry.getKey() + " for method " + method.getDeclaration() + " must be a string");
-                        }
-                        arguments.put(entry.getKey(), (String) entry.getValue().unwrapped());
-                    });
-                }
+                GeneratorUtils.getArgumentDescriptions(argumentDescriptions, config, method);
                 if (config.hasPath("returns")) {
                     returnDescription = config.getString("returns");
                 }
@@ -115,9 +112,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                             break;
                         case OBJECT:
                             Map<String, Object> exampleArguments = new HashMap<>();
-                            config.getConfig("example").entrySet().forEach(entry -> {
-                                exampleArguments.put(entry.getKey(), (String) entry.getValue().unwrapped());
-                            });
+                            config.getConfig("example").entrySet().forEach(entry -> exampleArguments.put(entry.getKey(), entry.getValue().unwrapped()));
                             if (exampleArguments.size() != method.getArguments().size()) {
                                 throw new IllegalArgumentException(
                                         "Invalid number of parameters for example for method " +
@@ -164,49 +159,38 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                 }
             }
 
-            return new MethodWrapper(method, description, arguments, returnDescription, example);
+            return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription, example);
         }).collect(Collectors.toList()));
 
         template.process(dataModel, output);
     }
 
+    @SuppressWarnings("unused")
     public static class MethodWrapper {
         private NamespacedMethod method;
+        private List<ArgumentWrapper> arguments;
+        private JSONAPIClass returns;
         private String description;
         private Map<String, String> argumentDescriptions;
         private String returnDescription;
         private String example;
 
-        public MethodWrapper(NamespacedMethod method, String description, Map<String, String> argumentDescriptions, String returnDescription, String example) {
+        public MethodWrapper(NamespacedMethod method, List<ArgumentWrapper> arguments, JSONAPIClass returns, String description, Map<String, String> argumentDescriptions, String returnDescription, String example) {
             this.method = method;
+            this.arguments = arguments;
+            this.returns = returns;
             this.description = description;
             this.argumentDescriptions = argumentDescriptions;
             this.returnDescription = returnDescription;
             this.example = example;
         }
 
-        public String getNamespace() {
-            return method.getNamespace();
+        public List<ArgumentWrapper> getArguments() {
+            return arguments;
         }
 
-        public String getName() {
-            return method.getName();
-        }
-
-        public String getDeclaration() {
-            return method.getDeclaration();
-        }
-
-        public String getDeclarationWithoutNamespace() {
-            return method.getDeclarationWithoutNamespace();
-        }
-
-        public String getReturns() {
-            return method.getReturns();
-        }
-
-        public List<Argument> getArguments() {
-            return method.getArguments();
+        public JSONAPIClass getReturns() {
+            return returns;
         }
 
         public String getDescription() {
@@ -223,6 +207,37 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
         public String getExample() {
             return example;
+        }
+
+        public String getName() {
+            return method.getName();
+        }
+
+        public String getDeclaration() {
+            return method.getDeclaration();
+        }
+
+        public String getDeclarationWithoutNamespace() {
+            return method.getDeclarationWithoutNamespace();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class ArgumentWrapper {
+        private String name;
+        private JSONAPIClass type;
+
+        public ArgumentWrapper(String name, JSONAPIClass type) {
+            this.name = name;
+            this.type = type;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public JSONAPIClass getType() {
+            return type;
         }
     }
 }

@@ -23,11 +23,15 @@ public class ClassMethod extends AbstractMethod {
 
     @Override
     public String getDeclaration() {
+        return "<" +
+                operatesOn +
+                ">" +
+                "." +
+                getDeclarationWithoutOperatesOn();
+    }
+
+    public String getDeclarationWithoutOperatesOn() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("<");
-        stringBuilder.append(operatesOn);
-        stringBuilder.append(">");
-        stringBuilder.append(".");
         stringBuilder.append(name);
         stringBuilder.append("(");
         StringJoiner joiner = new StringJoiner(", ");
