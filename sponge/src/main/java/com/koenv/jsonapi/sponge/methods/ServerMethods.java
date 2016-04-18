@@ -8,7 +8,6 @@ import com.koenv.jsonapi.util.json.JSONObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -90,7 +89,7 @@ public class ServerMethods {
     }
 
     @APIMethod
-    public static CommandResult runCommand(String command) {
-        return Sponge.getCommandManager().process(Sponge.getServer().getConsole(), command);
+    public static void runCommand(String command) {
+        Sponge.getCommandManager().process(Sponge.getServer().getConsole(), command);
     }
 }

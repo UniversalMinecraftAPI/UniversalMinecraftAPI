@@ -7,10 +7,4 @@
 <body>
 <div class="container">
 
-<#macro type type>
-    <#if type.hasOwnDocumentation()>
-        <a href="/classes/${type.documentationName}.html">${type.name}</a>
-    <#else>
-        ${type.name}
-    </#if>
-</#macro>
+<#macro type type><#if type.hasOwnDocumentation()><a href="/classes/${type.documentationName}.html">${type.name}</a><#else>${type.name}</#if></#macro>

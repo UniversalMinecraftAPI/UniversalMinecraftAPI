@@ -24,7 +24,7 @@
                         </td>
                     </tr>
                 </#if>
-                <#if method.returns != "void">
+                <#if method.returns.name != "void">
                     <tr>
                         <td width="30%">Returns</td>
                         <td width="70%"><strong><@type type=method.returns/></strong>: ${method.returnDescription}</td>

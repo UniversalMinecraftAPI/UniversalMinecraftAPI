@@ -42,6 +42,8 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
                 if (config.hasPath("returns")) {
                     returnDescription = config.getString("returns");
                 }
+            } else {
+                logger.warn("No configuration file found for " + method.getDeclaration() + " at " + methodFile.getPath());
             }
 
             return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription);

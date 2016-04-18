@@ -11,6 +11,8 @@ import com.typesafe.config.ConfigValueType;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +27,13 @@ import java.util.stream.Collectors;
 public class NamespaceDocGenerator extends AbstractGenerator {
     private String namespace;
     private List<NamespacedMethod> methods;
+    private Logger logger;
 
     public NamespaceDocGenerator(File rootDirectory, String namespace, List<NamespacedMethod> methods) {
         super(rootDirectory);
         this.namespace = namespace;
         this.methods = methods;
+        this.logger = LoggerFactory.getLogger(namespace);
     }
 
     @Override
@@ -47,6 +51,8 @@ public class NamespaceDocGenerator extends AbstractGenerator {
             if (config.hasPath("description")) {
                 dataModel.put("description", config.getString("description"));
             }
+        } else {
+            logger.warn("No configuration file found at " + namespaceIndexFile.getPath());
         }
 
         dataModel.put("methods", methods.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName())).map(method -> {
@@ -152,6 +158,8 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                                     + ": must be a string, object or list, given " + config.getValue("example").valueType().name());
                     }
                 }
+            } else {
+                logger.warn("No configuration file found for " + method.getDeclaration() + " at " + methodFile.getPath());
             }
 
             if (example.isEmpty()) {
