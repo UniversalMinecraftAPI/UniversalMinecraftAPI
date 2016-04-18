@@ -62,22 +62,19 @@ Content-Type: application/json
 Authorization: Basic YWRtaW46Y2hhbmdlbWU=
 
 {
-    "expression": "${method.example}"
+    "expression": ${method.jsonExample}
 }</pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}Curl">
                         <pre>curl -X POST \
 -H "Content-Type: application/json" \
 -H "Authorization: Basic YWRtaW46Y2hhbmdlbWU=" -d '{
-    "expression": "${method.example}"
+    "expression": ${method.jsonExample}
 }' "http://localhost:20059/api/v1/call"</pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}HTTPie">
-                        <pre>echo '{
-    "expression": "${method.example}"
-}' |  \
-  http -a admin:changeme POST http://localhost:20059/api/v1/call \
-  content-type:application/json expression="${method.example}"</pre>
+                        <pre>http -a admin:changeme POST http://localhost:20059/api/v1/call \
+  content-type:application/json expression=${method.jsonExample}</pre>
                     </div>
                 </div>
             </div>

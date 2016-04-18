@@ -3,6 +3,7 @@ package com.koenv.jsonapi.docgenerator.generator;
 import com.koenv.jsonapi.docgenerator.model.JSONAPIClass;
 import com.koenv.jsonapi.docgenerator.model.NamespacedMethod;
 import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.jsonapi.util.json.JSONObject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
@@ -136,7 +137,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                                             throw new IllegalArgumentException("Missing value for example argument " + argument.getName() + " for method " + method.getDeclaration());
                                         }
                                         if (a instanceof String) {
-                                            return "'" + a + "'";
+                                            return "\"" + a + "\"";
                                         }
                                         return a.toString();
                                     })
@@ -159,7 +160,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                 }
             }
 
-            return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription, example);
+            return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription, example, JSONObject.quote(example));
         }).collect(Collectors.toList()));
 
         template.process(dataModel, output);
@@ -174,8 +175,18 @@ public class NamespaceDocGenerator extends AbstractGenerator {
         private Map<String, String> argumentDescriptions;
         private String returnDescription;
         private String example;
+        private String jsonExample;
 
-        public MethodWrapper(NamespacedMethod method, List<ArgumentWrapper> arguments, JSONAPIClass returns, String description, Map<String, String> argumentDescriptions, String returnDescription, String example) {
+        public MethodWrapper(
+                NamespacedMethod method,
+                List<ArgumentWrapper> arguments,
+                JSONAPIClass returns,
+                String description,
+                Map<String, String> argumentDescriptions,
+                String returnDescription,
+                String example,
+                String jsonExample
+        ) {
             this.method = method;
             this.arguments = arguments;
             this.returns = returns;
@@ -183,6 +194,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
             this.argumentDescriptions = argumentDescriptions;
             this.returnDescription = returnDescription;
             this.example = example;
+            this.jsonExample = jsonExample;
         }
 
         public List<ArgumentWrapper> getArguments() {
@@ -207,6 +219,10 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
         public String getExample() {
             return example;
+        }
+
+        public String getJsonExample() {
+            return jsonExample;
         }
 
         public String getName() {
