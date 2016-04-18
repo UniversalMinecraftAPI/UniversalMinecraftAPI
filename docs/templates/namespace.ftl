@@ -76,9 +76,8 @@ Authorization: Basic YWRtaW46Y2hhbmdlbWU=
                         <pre>echo '{
     "expression": "${method.example}"
 }' |  \
-  http POST http://localhost:20059/api/v1/call \
-  authorization:'Basic YWRtaW46Y2hhbmdlbWU=' \
-  content-type:application/json</pre>
+  http -a admin:changeme POST http://localhost:20059/api/v1/call \
+  content-type:application/json expression="${method.example}"</pre>
                     </div>
                 </div>
             </div>
