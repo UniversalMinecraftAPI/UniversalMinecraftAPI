@@ -29,6 +29,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "com.koenv.jsonapi.sponge", name = "JSONAPI", version = SpongeJSONAPI.VERSION, description = "A JSON API for Sponge")
 public class SpongeJSONAPI implements JSONAPIProvider {
@@ -54,6 +56,9 @@ public class SpongeJSONAPI implements JSONAPIProvider {
 
     @Inject
     private Logger logger;
+
+    @Inject
+    private PluginContainer container;
 
     private CommentedConfigurationNode rootNode;
     private CommentedConfigurationNode usersNode;
@@ -82,6 +87,15 @@ public class SpongeJSONAPI implements JSONAPIProvider {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Sponge.getScheduler()
+                .createTaskBuilder()
+                .execute(() -> jsonapi.getUserManager().getApiKeyManager().cleanup())
+                .interval(1, TimeUnit.MINUTES)
+                .delay(1, TimeUnit.MINUTES)
+                .async()
+                .name(container.getId() + "-APIKey-Cleanup")
+                .submit(this);
 
         try {
             Class.forName("org.apache.logging.log4j.LogManager");

@@ -4,13 +4,13 @@ import com.koenv.jsonapi.users.model.User;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class APIKeyManager {
-    private List<APIKey> keys = new ArrayList<>();
+    private List<APIKey> keys = new CopyOnWriteArrayList<>();
 
     /**
      * Generate a fairly random API key valid for 1 minute
