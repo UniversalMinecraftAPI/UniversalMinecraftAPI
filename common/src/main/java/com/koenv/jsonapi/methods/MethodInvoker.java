@@ -290,7 +290,8 @@ public class MethodInvoker {
             if (e.getCause() instanceof RuntimeException && e.getCause() instanceof RethrowableException) {
                 throw (RuntimeException) e.getCause();
             }
-            throw new MethodInvocationException("Unable to invoke method: " + MethodUtils.getMethodDeclaration(method) + ": " + e.getCause().getMessage());
+            e.printStackTrace();
+            throw new MethodInvocationException("Unable to invoke method: " + MethodUtils.getMethodDeclaration(method) + ": " + e.getCause().getClass().getSimpleName() + " " + e.getCause().getMessage());
         } catch (Exception e) {
             throw new MethodInvocationException("Unable to invoke method " + MethodUtils.getMethodDeclaration(method) + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
         }

@@ -145,13 +145,6 @@ public class JSONAPIWebServer {
             JSONValue result = (JSONValue) serializerManager.serialize(responses);
             return result.toString(4);
         });
-
-        get("/*", (request, response) -> {
-            response.header("Content-Type", "application/json");
-            halt(404, getErrorResponse(ErrorCodes.NOT_FOUND, "Not found"));
-
-            return null;
-        });
     }
 
     public void stop() {

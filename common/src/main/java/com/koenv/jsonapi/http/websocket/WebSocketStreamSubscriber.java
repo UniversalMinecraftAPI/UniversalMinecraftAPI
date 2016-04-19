@@ -4,7 +4,6 @@ import com.koenv.jsonapi.JSONAPI;
 import com.koenv.jsonapi.streams.StreamSubscriber;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class WebSocketStreamSubscriber implements StreamSubscriber {
@@ -17,11 +16,7 @@ public class WebSocketStreamSubscriber implements StreamSubscriber {
     @Override
     public void send(Object message) {
         if (session.isOpen()) {
-            try {
-                session.getRemote().sendString(JSONAPI.getInstance().getSerializerManager().serialize(message).toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            session.getRemote().sendStringByFuture(JSONAPI.getInstance().getSerializerManager().serialize(message).toString());
         }
     }
 

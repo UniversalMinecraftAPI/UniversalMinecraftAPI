@@ -1,6 +1,7 @@
 package com.koenv.jsonapi.users;
 
 import com.koenv.jsonapi.config.user.UsersConfiguration;
+import com.koenv.jsonapi.http.websocket.APIKeyManager;
 import com.koenv.jsonapi.users.impl.EncryptionContextImpl;
 import com.koenv.jsonapi.users.model.AllowingPermission;
 import com.koenv.jsonapi.users.model.Group;
@@ -17,6 +18,12 @@ public class UserManager {
     private Map<String, Permission> permissions;
 
     private List<UserEncoder> encoders = new ArrayList<>();
+
+    private APIKeyManager apiKeyManager;
+
+    public UserManager() {
+        this.apiKeyManager = new APIKeyManager();
+    }
 
     public void loadConfiguration(UsersConfiguration configuration) {
         this.permissions = configuration.getPermissions().stream().map(permissionSection -> Permission.builder()
@@ -103,5 +110,9 @@ public class UserManager {
         }
 
         return false;
+    }
+
+    public APIKeyManager getApiKeyManager() {
+        return apiKeyManager;
     }
 }

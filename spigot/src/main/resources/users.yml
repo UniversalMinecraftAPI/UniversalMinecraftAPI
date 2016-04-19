@@ -42,10 +42,6 @@ permissions:
       Player:
         type: blacklist
         methods: []
-    streams:
-      type: whitelist
-      streams:
-        - chat
   jsonapi:
     namespaces:
       jsonapi:
@@ -56,3 +52,6 @@ permissions:
       streams:
         type: blacklist
         methods: []
+    streams:
+      type: blacklist
+      streams: []

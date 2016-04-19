@@ -1,9 +1,8 @@
 package com.koenv.jsonapi.streams;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,19 +11,27 @@ public class StreamManager {
     private List<String> streams = new ArrayList<>();
 
     public void send(String stream, Object message) {
+        send(stream, subscription -> message);
+    }
+
+    public void send(String stream, Function<StreamSubscription, Object> converter) {
         subscriptions.stream().filter(subscription -> Objects.equals(subscription.getStream(), stream)).forEach(subscription -> {
-            subscription.getSubscriber().send(new StreamMessage(message, subscription.getTag(), stream));
+            subscription.getSubscriber().send(new StreamMessage(converter.apply(subscription), subscription.getTag(), stream));
         });
     }
 
-    public void subscribe(String stream, StreamSubscriber subscriber, String tag) {
+    public void subscribe(String stream, StreamSubscriber subscriber, String tag, Map<String, String> parameters) {
         if (!streams.contains(stream)) {
             throw new InvalidStreamException();
         }
         if (findSubscription(stream, subscriber).findAny().isPresent()) {
             throw new DuplicateSubscriptionException();
         }
-        subscriptions.add(new StreamSubscription(subscriber, tag, stream));
+        subscriptions.add(new StreamSubscription(subscriber, tag, stream, parameters));
+    }
+
+    public void subscribe(String stream, StreamSubscriber subscriber, String tag) {
+        subscribe(stream, subscriber, tag, new HashMap<>());
     }
 
     public Stream<StreamSubscription> findSubscription(String stream, StreamSubscriber subscriber) {

@@ -11,9 +11,11 @@ import com.koenv.jsonapi.sponge.listeners.ChatStreamListener;
 import com.koenv.jsonapi.sponge.methods.PlayerMethods;
 import com.koenv.jsonapi.sponge.methods.ServerMethods;
 import com.koenv.jsonapi.sponge.serializer.*;
+import com.koenv.jsonapi.sponge.streams.console.Log4JConsoleStream;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.slf4j.Logger;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -50,6 +52,9 @@ public class SpongeJSONAPI implements JSONAPIProvider {
     @ConfigDir(sharedRoot = false)
     private Path configDir;
 
+    @Inject
+    private Logger logger;
+
     private CommentedConfigurationNode rootNode;
     private CommentedConfigurationNode usersNode;
 
@@ -76,6 +81,13 @@ public class SpongeJSONAPI implements JSONAPIProvider {
             reloadUsers();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        try {
+            Class.forName("org.apache.logging.log4j.LogManager");
+            new Log4JConsoleStream(jsonapi);
+        } catch (ClassNotFoundException e) {
+            logger.warn("Unable to find suitable logger implementation to hook in to");
         }
     }
 

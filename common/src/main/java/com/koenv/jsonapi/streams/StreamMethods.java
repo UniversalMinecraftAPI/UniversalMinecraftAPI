@@ -15,6 +15,7 @@ import java.util.List;
 @APINamespace("streams")
 public class StreamMethods {
     @APIMethod
+    // TODO: Make it possible to pass parameters
     public static boolean subscribe(Invoker invoker, JsonRequest request, String stream) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);
