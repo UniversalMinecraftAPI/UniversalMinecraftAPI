@@ -1,7 +1,5 @@
 package com.koenv.jsonapi.docgenerator;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 import com.google.common.io.Files;
 import com.koenv.jsonapi.docgenerator.generator.*;
 import com.koenv.jsonapi.docgenerator.model.*;
@@ -23,74 +21,68 @@ import java.util.stream.Collectors;
 public class Main {
     private static Logger logger = LoggerFactory.getLogger(Main.class);
 
-    @Parameter
-    private List<File> files = new ArrayList<>();
-
-    @Parameter(names = {"-extra", "-e"})
-    private String extraDirectoryPath = "docs";
-
-    @Parameter(names = {"-templates", "-t"})
-    private String templateDirectoryPath = extraDirectoryPath + "/templates";
-
-    @Parameter(names = {"-output", "-o"})
-    private String outputDirectoryPath = "output";
-
-    @Parameter(names = {"-config", "-c"})
-    private String configPath = extraDirectoryPath + "/config.conf";
-
-    @Parameter(names = {"-mappings", "-m"})
-    private String mappingsPath = extraDirectoryPath + "/mappings.conf";
-
     public static void main(String[] args) {
+        if (args.length != 2) {
+            logger.error("Invalid usage, need 2 parameters: <config> <output>");
+            return;
+        }
+
+        File configFile = new File(args[0]);
+
+        if (!configFile.exists() || !configFile.isFile()) {
+            logger.error("Configuration file doesn't exist or isn't a file: " + configFile.getPath());
+            return;
+        }
+
+        File outputDirectory = new File(args[1]);
+
+        if (!outputDirectory.exists() || !outputDirectory.isDirectory()) {
+            if (!outputDirectory.mkdirs()) {
+                logger.error("Failed to create output directory " + outputDirectory.getPath());
+                return;
+            }
+        }
+
         Main main = new Main();
-        new JCommander(main, args);
-        main.run();
+        main.run(configFile, outputDirectory);
     }
 
-    private void run() {
+    private void run(File configFile, File outputDirectory) {
+        File rootDirectory = configFile.getParentFile();
+
         long startTime = System.currentTimeMillis();
 
         boolean valid = true;
 
-        if (files.size() < 1) {
+        Config config = ConfigFactory.parseFile(configFile).resolve();
+
+        List<File> platformFiles = config.getStringList("platforms").stream().map(s -> new File(rootDirectory, s)).collect(Collectors.toList());
+
+        if (platformFiles.size() < 1) {
             logger.error("Please specify at least 1 API file");
             valid = false;
         }
 
-        for (File file : files) {
+        for (File file : platformFiles) {
             if (!file.exists() || !file.isFile()) {
                 logger.error("File " + file.getPath() + " doesn't exist or isn't a file.");
                 valid = false;
             }
         }
 
-        File extraDirectory = new File(extraDirectoryPath);
+        File extraDirectory = new File(config.getString("directory"));
         if (!extraDirectory.exists() || !extraDirectory.isDirectory()) {
             logger.error("Extra directory " + extraDirectory.getPath() + " doesn't exist or isn't a directory.");
             valid = false;
         }
 
-        File templateDirectory = new File(templateDirectoryPath);
+        File templateDirectory = new File(config.getString("templateDirectory"));
         if (!templateDirectory.exists() || !templateDirectory.isDirectory()) {
             logger.error("Template directory " + templateDirectory.getPath() + " doesn't exist or isn't a directory");
             valid = false;
         }
 
-        File outputDirectory = new File(outputDirectoryPath);
-        if (!outputDirectory.exists() || !outputDirectory.isDirectory()) {
-            if (!outputDirectory.mkdirs()) {
-                logger.error("Failed to create output directory " + outputDirectory.getPath());
-                valid = false;
-            }
-        }
-
-        File configFile = new File(configPath);
-        if (!configFile.exists() || !configFile.isFile()) {
-            logger.error("Config file " + configFile.getPath() + " doesn't exist or isn't a directory");
-            valid = false;
-        }
-
-        File mappingsFile = new File(mappingsPath);
+        File mappingsFile = new File(config.getString("mappings"));
         if (mappingsFile.exists() && !mappingsFile.isFile()) {
             logger.error(mappingsFile.getPath() + " must be a file if it exists.");
             valid = false;
@@ -101,7 +93,7 @@ public class Main {
         }
 
         List<PlatformMethods> methods = new ArrayList<>();
-        for (File file : files) {
+        for (File file : platformFiles) {
             APIFileParser parser = new APIFileParser(file);
             try {
                 methods.add(parser.parse());
@@ -169,7 +161,6 @@ public class Main {
             });
         }
 
-        Config config = ConfigFactory.parseFile(configFile);
         List<Page> pages = config.getConfigList("pages").stream().map(o -> {
             File file = new File(extraDirectory, o.getString("file"));
             if (!file.exists() || !file.isFile()) {
