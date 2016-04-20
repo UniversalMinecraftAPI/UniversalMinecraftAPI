@@ -31,6 +31,7 @@ public class Main {
 
         if (!configFile.exists() || !configFile.isFile()) {
             logger.error("Configuration file doesn't exist or isn't a file: " + configFile.getPath());
+            System.exit(1);
             return;
         }
 
@@ -39,6 +40,7 @@ public class Main {
         if (!outputDirectory.exists() || !outputDirectory.isDirectory()) {
             if (!outputDirectory.mkdirs()) {
                 logger.error("Failed to create output directory " + outputDirectory.getPath());
+                System.exit(2);
                 return;
             }
         }
@@ -89,6 +91,7 @@ public class Main {
         }
 
         if (!valid) {
+            System.exit(3);
             return;
         }
 

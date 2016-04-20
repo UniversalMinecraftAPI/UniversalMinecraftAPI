@@ -78,3 +78,11 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
         dependsOn shadowJar
     }
 }
+
+task dist() {
+    dependsOn 'docgenerator:generateDoc'
+}
+
+task clean() {
+    delete buildDir
+}
