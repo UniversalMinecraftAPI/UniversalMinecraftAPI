@@ -6,6 +6,8 @@ import com.google.common.io.Files;
 import com.koenv.jsonapi.docgenerator.generator.*;
 import com.koenv.jsonapi.docgenerator.model.*;
 import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
@@ -32,6 +34,9 @@ public class Main {
 
     @Parameter(names = {"-output", "-o"})
     private String outputDirectoryPath = "output";
+
+    @Parameter(names = {"-config", "-c"})
+    private String configPath = extraDirectoryPath + "/config.conf";
 
     @Parameter(names = {"-mappings", "-m"})
     private String mappingsPath = extraDirectoryPath + "/mappings.conf";
@@ -77,6 +82,12 @@ public class Main {
                 logger.error("Failed to create output directory " + outputDirectory.getPath());
                 valid = false;
             }
+        }
+
+        File configFile = new File(configPath);
+        if (!configFile.exists() || !configFile.isFile()) {
+            logger.error("Config file " + configFile.getPath() + " doesn't exist or isn't a directory");
+            valid = false;
         }
 
         File mappingsFile = new File(mappingsPath);
@@ -158,6 +169,15 @@ public class Main {
             });
         }
 
+        Config config = ConfigFactory.parseFile(configFile);
+        List<Page> pages = config.getConfigList("pages").stream().map(o -> {
+            File file = new File(extraDirectory, o.getString("file"));
+            if (!file.exists() || !file.isFile()) {
+                throw new IllegalArgumentException("Invalid file " + file.getPath() + " for page: file doesn't exist or isn't a file");
+            }
+            return new Page(o.getString("title"), file);
+        }).collect(Collectors.toList());
+
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_24);
         try {
             configuration.setDirectoryForTemplateLoading(templateDirectory);
@@ -170,6 +190,7 @@ public class Main {
 
         IndexGenerator indexGenerator = new IndexGenerator(
                 outputDirectory,
+                pages,
                 new ArrayList<>(allNamespacedMethods.stream().collect(Collectors.groupingBy(NamespacedMethod::getNamespace)).keySet()),
                 new ArrayList<>(allClassMethods.stream().collect(Collectors.groupingBy(ClassMethod::getOperatesOn)).keySet()),
                 new ArrayList<>(streams)
@@ -180,6 +201,18 @@ public class Main {
         } catch (IOException | TemplateException e) {
             logger.error("Failed to generate index file", e);
         }
+
+        pages.forEach(page -> {
+            PageGenerator generator = new PageGenerator(extraDirectory, page);
+
+            File file = new File(outputDirectory, Files.getNameWithoutExtension(page.getFile().getPath()) + ".html");
+
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                generator.generate(configuration, classResolver, fileWriter);
+            } catch (IOException | TemplateException e) {
+                logger.error("Failed to generate page " + page.getTitle(), e);
+            }
+        });
 
         File namespaceDirectory = new File(extraDirectory, "namespaces");
 
