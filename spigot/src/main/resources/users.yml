@@ -18,7 +18,7 @@ groups:
     permissions:
       - players
       - streams
-      - jsonapi
+      - uma
       - ALLOW_ALL
 
 permissions:
@@ -42,9 +42,9 @@ permissions:
       Player:
         type: blacklist
         methods: []
-  jsonapi:
+  uma:
     namespaces:
-      jsonapi:
+      uma:
         type: blacklist
         methods: []
   streams:

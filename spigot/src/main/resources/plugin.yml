@@ -1,7 +1,8 @@
-name: JSONAPI
-main: com.koenv.jsonapi.spigot.SpigotJSONAPI
+name: UniversalMinecraftAPI
+main: com.koenv.universalminecraftapi.spigot.SpigotUniversalMinecraftAPI
 version: $version
 commands:
-   jsonapi:
-      description: The JSONAPI base command
+   universalminecraftapi:
+      description: The UniversalMinecraftAPI base command
       usage: /<command>
+      aliases: [uma]

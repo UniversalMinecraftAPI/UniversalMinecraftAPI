@@ -13,13 +13,12 @@ dependencies {
 }
 
 shadowJar {
-    relocate 'org.slf4j', 'com.koenv.jsonapi.thirdparty.org.slf4j'
+    relocate 'org.slf4j', 'com.koenv.universalminecraftapi.thirdparty.org.slf4j'
     dependencies {
         exclude(dependency('org.slf4j:slf4j-simple'))
     }
 }
 
 configure(tasks.processResources) {
-    include 'plugin.yml'
     expand(version: project.version)
 }

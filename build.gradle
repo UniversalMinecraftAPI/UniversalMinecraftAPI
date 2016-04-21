@@ -15,7 +15,7 @@ subprojects {
 
     apply plugin: 'java'
 
-    // when updating this version number, also update the version number in SpongeJSONAPI
+    // when updating this version number, also update the version number in SpongeUniversalMinecraftAPI
     version = '0.1-SNAPSHOT'
     archivesBaseName = "$rootProject.name-$project.name"
 
@@ -65,11 +65,11 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
         exclude 'META-INF/MANIFEST.MF'
         exclude 'about.html'
 
-        relocate 'javax.servlet', 'com.koenv.jsonapi.thirdparty.javax.servlet'
-        relocate 'org.eclipse.jetty', 'com.koenv.jsonapi.thirdparty.org.eclipse.jetty'
-        relocate 'spark', 'com.koenv.jsonapi.thirdparty.spark'
-        relocate 'org.jetbrains.annotations', 'com.koenv.jsonapi.thirdparty.org.jetbrains.annotations'
-        relocate 'org.intellij.lang.annotations', 'com.koenv.jsonapi.thirdparty.org.intellij.lang.annotations'
+        relocate 'javax.servlet', 'com.koenv.universalminecraftapi.thirdparty.javax.servlet'
+        relocate 'org.eclipse.jetty', 'com.koenv.universalminecraftapi.thirdparty.org.eclipse.jetty'
+        relocate 'spark', 'com.koenv.universalminecraftapi.thirdparty.spark'
+        relocate 'org.jetbrains.annotations', 'com.koenv.universalminecraftapi.thirdparty.org.jetbrains.annotations'
+        relocate 'org.intellij.lang.annotations', 'com.koenv.universalminecraftapi.thirdparty.org.intellij.lang.annotations'
     }
 
     task dist() {

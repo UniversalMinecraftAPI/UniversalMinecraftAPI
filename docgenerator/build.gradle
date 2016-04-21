@@ -1,6 +1,6 @@
 apply plugin: 'application'
 
-mainClassName = 'com.koenv.jsonapi.docgenerator.Main'
+mainClassName = 'com.koenv.universalminecraftapi.docgenerator.Main'
 
 dependencies {
     compile project(':common')
@@ -17,7 +17,7 @@ task generateDoc(type: JavaExec) {
     main = mainClassName
 
     args rootProject.file('docs/config.conf')
-    args rootProject.buildDir.path + '/docs/jsonapi'
+    args rootProject.buildDir.path + '/docs/universalminecraftapi'
 
     workingDir = rootProject.rootDir
 }

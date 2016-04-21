@@ -1,10 +1,10 @@
-JSONAPI has multiple configuration options. There are currently two configuration files `config` and `users`. The file
-extension and format depends on the platform. For Spigot this is `.yml` (YAML format) and for Sponge this is `.conf`
-(HOCON format).
+UniversalMinecraftAPI has multiple configuration options. There are currently two configuration files `config` and 
+`users`. The file extension and format depends on the platform. For Spigot this is `.yml` (YAML format) and for Sponge 
+this is `.conf` (HOCON format).
 
 ## Main configuration
 The main configuration currently contains only one section: `web_server`. This section specifies all details of the
-web server that will be used for JSONAPI.
+web server that will be used for UniversalMinecraftAPI.
 
 ### ip_address
 **Default value**: `null`
@@ -33,7 +33,7 @@ This section contains two options:
 1. `file`: Specifies the file for the keystore/truststore
 2. `password`: Specifies the password for the keystore/truststore
 
-More information about SSL in the web server JSONAPI uses, can be found
+More information about SSL in the web server UniversalMinecraftAPI uses, can be found
 [here](http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html).
 
 ### thread_pool

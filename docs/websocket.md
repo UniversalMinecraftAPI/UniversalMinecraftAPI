@@ -68,7 +68,7 @@ In this example, whenever a chat message is sent by a player, you will receive a
 ```
 {
     "result": {
-        "message": " Hi! Welcome to JSONAPI!",
+        "message": " Hi! Welcome to UniversalMinecraftAPI!",
         "player": "Koen"
     },
     "stream": "chat",

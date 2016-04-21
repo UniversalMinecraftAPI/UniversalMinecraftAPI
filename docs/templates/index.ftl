@@ -1,7 +1,7 @@
-<#assign title="JSONAPI">
+<#assign title="UniversalMinecraftAPI">
 <#include "common/header.ftl">
 
-<h1>JSONAPI</h1>
+<h1>UniversalMinecraftAPI</h1>
 
 <ol>
 <#list pages as page>
