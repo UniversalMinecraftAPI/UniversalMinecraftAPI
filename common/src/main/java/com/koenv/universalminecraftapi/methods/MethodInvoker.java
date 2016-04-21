@@ -228,9 +228,16 @@ public class MethodInvoker {
         int j = 0;
         for (Parameter javaParameter : javaParameters) {
             if (j >= parameters.size()) {
-                Object invokerObject = invoker.get(javaParameter.getType());
-                if (invokerObject != null) {
-                    convertedParameters.add(invokerObject);
+                if (invoker != null) {
+                    Object invokerObject = invoker.get(javaParameter.getType());
+                    if (invokerObject != null) {
+                        convertedParameters.add(invokerObject);
+                        requiredParameters--;
+                        continue;
+                    }
+                }
+                if (javaParameter.getAnnotation(Optional.class) != null) {
+                    convertedParameters.add(null);
                     requiredParameters--;
                     continue;
                 }
@@ -241,11 +248,13 @@ public class MethodInvoker {
             if (!allowed) {
                 Object convertedParameter = convertParameterUntilFound(parameter, javaParameter);
                 if (convertedParameter == null) {
-                    Object invokerObject = invoker.get(javaParameter.getType());
-                    if (invokerObject != null) {
-                        convertedParameters.add(invokerObject);
-                        requiredParameters--;
-                        continue;
+                    if (invoker != null) {
+                        Object invokerObject = invoker.get(javaParameter.getType());
+                        if (invokerObject != null) {
+                            convertedParameters.add(invokerObject);
+                            requiredParameters--;
+                            continue;
+                        }
                     }
                     throw new MethodInvocationException(
                             "Wrong type of parameter for place " + j +

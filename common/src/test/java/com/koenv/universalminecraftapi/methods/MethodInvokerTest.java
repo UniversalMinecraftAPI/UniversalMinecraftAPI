@@ -176,6 +176,39 @@ public class MethodInvokerTest {
         assertEquals("value", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
+    @Test
+    public void testOptionalMap() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("maps"));
+
+        List<Expression> parameters = new ArrayList<>();
+
+        expressions.add(new MethodCallExpression("getOptionalMap", parameters));
+
+        // maps.getOptionalMap()
+        assertEquals("null", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void invokeMethodWithNamespaceAndOptional() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("test"));
+        expressions.add(new MethodCallExpression("getOptional", new ArrayList<>()));
+
+        // test.getOptional()
+        assertEquals("null", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void invokeMethodWithNamespaceAndOptionalWhileSpecifyingValue() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("test"));
+        expressions.add(new MethodCallExpression("getOptional", Collections.singletonList(new StringExpression("test"))));
+
+        // test.getOptional("test")
+        assertEquals("test", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void invokeMethodWithWrongIntParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
@@ -219,6 +252,11 @@ public class MethodInvokerTest {
             return 12.67;
         }
 
+        @APIMethod(namespace = "test")
+        public static String getOptional(@Optional String that) {
+            return String.valueOf(that);
+        }
+
         @APIMethod(namespace = "ints")
         public static int getInt(int arg) {
             return arg;
@@ -247,6 +285,11 @@ public class MethodInvokerTest {
         @APIMethod(namespace = "maps")
         public static String getNestedMap(Map<Object, Object> arg) {
             return ((Map<Object, Object>) arg.get("key")).get("key").toString();
+        }
+
+        @APIMethod(namespace = "maps")
+        public static String getOptionalMap(@Optional Map<Object, Object> arg) {
+            return String.valueOf(arg);
         }
 
         @APIMethod(namespace = "objects")
