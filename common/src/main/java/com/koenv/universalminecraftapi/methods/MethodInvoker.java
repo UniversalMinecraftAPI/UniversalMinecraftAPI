@@ -217,23 +217,7 @@ public class MethodInvoker {
 
         for (int i = 0; i < methodCallExpression.getParameters().size(); i++) {
             Expression expression = methodCallExpression.getParameters().get(i);
-            if (expression instanceof BooleanExpression) {
-                parameters.add(((BooleanExpression) expression).getValue());
-            } else if (expression instanceof DoubleExpression) {
-                parameters.add(((DoubleExpression) expression).getValue());
-            } else if (expression instanceof IntegerExpression) {
-                parameters.add(((IntegerExpression) expression).getValue());
-            } else if (expression instanceof StringExpression) {
-                parameters.add(((StringExpression) expression).getValue());
-            } else if (expression instanceof MethodCallExpression) {
-                Object result = invokeMethod(null, (MethodCallExpression) expression, null, invoker);
-                parameters.add(result);
-            } else if (expression instanceof ChainedMethodCallExpression) {
-                Object result = invokeMethod(expression);
-                parameters.add(result);
-            } else {
-                throw new MethodInvocationException("Unknown expression: " + expression);
-            }
+            parameters.add(convertExpression(expression, invoker));
         }
 
         Parameter[] javaParameters = method.getJavaMethod().getParameters();
@@ -399,6 +383,34 @@ public class MethodInvoker {
             }
         }
         return null;
+    }
+
+    protected Object convertExpression(Expression expression, InvokeParameters invoker) throws MethodInvocationException {
+        if (expression instanceof BooleanExpression) {
+            return ((BooleanExpression) expression).getValue();
+        } else if (expression instanceof DoubleExpression) {
+            return ((DoubleExpression) expression).getValue();
+        } else if (expression instanceof IntegerExpression) {
+            return ((IntegerExpression) expression).getValue();
+        } else if (expression instanceof StringExpression) {
+            return ((StringExpression) expression).getValue();
+        } else if (expression instanceof MapExpression) {
+            return convertMap((MapExpression) expression, invoker);
+        } else if (expression instanceof MethodCallExpression) {
+            return invokeMethod(null, (MethodCallExpression) expression, null, invoker);
+        } else if (expression instanceof ChainedMethodCallExpression) {
+            return invokeMethod(expression);
+        } else {
+            throw new MethodInvocationException("Unknown expression: " + expression);
+        }
+    }
+
+    protected Map<Object, Object> convertMap(MapExpression expression, InvokeParameters invoker) throws MethodInvocationException {
+        Map<Object, Object> result = new HashMap<>();
+        for (Map.Entry<Expression, Expression> entry : expression.getValue().entrySet()) {
+            result.put(convertExpression(entry.getKey(), invoker), convertExpression(entry.getValue(), invoker));
+        }
+        return result;
     }
 
     /**

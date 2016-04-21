@@ -3,9 +3,7 @@ package com.koenv.universalminecraftapi.methods;
 import com.koenv.universalminecraftapi.parser.expressions.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -141,6 +139,43 @@ public class MethodInvokerTest {
         assertEquals(true, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
+    @Test
+    public void testMap() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("maps"));
+
+        Map<Expression, Expression> map = new HashMap<>();
+        map.put(new StringExpression("key"), new StringExpression("value"));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new MapExpression(map));
+
+        expressions.add(new MethodCallExpression("getMap", parameters));
+
+        // maps.getMap({"key"="value"})
+        assertEquals("value", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void testNestedMap() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("maps"));
+
+        Map<Expression, Expression> nestedMap = new HashMap<>();
+        nestedMap.put(new StringExpression("key"), new StringExpression("value"));
+
+        Map<Expression, Expression> map = new HashMap<>();
+        map.put(new StringExpression("key"), new MapExpression(nestedMap));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new MapExpression(map));
+
+        expressions.add(new MethodCallExpression("getNestedMap", parameters));
+
+        // maps.getMap({"key"={"key"="value"}})
+        assertEquals("value", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void invokeMethodWithWrongIntParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
@@ -202,6 +237,16 @@ public class MethodInvokerTest {
         @APIMethod(namespace = "booleans")
         public static boolean getBoolean(boolean arg) {
             return arg;
+        }
+
+        @APIMethod(namespace = "maps")
+        public static String getMap(Map<Object, Object> arg) {
+            return arg.get("key").toString();
+        }
+
+        @APIMethod(namespace = "maps")
+        public static String getNestedMap(Map<Object, Object> arg) {
+            return ((Map<Object, Object>) arg.get("key")).get("key").toString();
         }
 
         @APIMethod(namespace = "objects")
