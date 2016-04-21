@@ -209,6 +209,7 @@ public class Main {
         configuration.setLogTemplateExceptions(false); // will already be thrown
         try {
             configuration.setSharedVariable("basedir", baseDir);
+            configuration.setSharedVariable("umaVersion", methods.get(0).getPlatform().getUmaVersion());
         } catch (TemplateModelException e) {
             logger.error("Error while configuring freemarker", e);
         }
