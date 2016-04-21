@@ -146,6 +146,11 @@ public class Main {
             printDiffWarnings(platform2.getPlatform(), onlyInPlatform2);
 
             printStreamDiffWarnings(platform1.getPlatform(), platform1.getStreams(), platform2.getPlatform(), platform2.getStreams());
+
+            if (!Objects.equals(platform1.getPlatform().getUmaVersion(), platform2.getPlatform().getUmaVersion())) {
+                logger.warn("UMA versions don't match between the two platforms: " +
+                        platform1.getPlatform().getUmaVersion() + " vs " + platform2.getPlatform().getUmaVersion());
+            }
         } else {
             logger.warn("Not yet possible to gather information about possible method diffs");
         }
