@@ -102,6 +102,11 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void testAlternateStringAndMap() throws Exception {
+        new ExpressionParser().parse("streams.subscribe('console', {'nostrip'='true'})");
+    }
+
+    @Test
     public void methodAsParameter() throws Exception {
         new ExpressionParser().parse("getIt(getIt())");
     }
