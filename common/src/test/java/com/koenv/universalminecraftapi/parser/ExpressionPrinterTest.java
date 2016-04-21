@@ -3,8 +3,7 @@ package com.koenv.universalminecraftapi.parser;
 import com.koenv.universalminecraftapi.parser.expressions.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -87,5 +86,22 @@ public class ExpressionPrinterTest {
         expressions.add(new MethodCallExpression("getIt", parameters));
 
         assertEquals("getIt(12, getIt())", ExpressionPrinter.printExpressions(expressions));
+    }
+
+    @Test
+    public void nestedMapPrint() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+
+        Map<Expression, Expression> map = new HashMap<>();
+        Map<Expression, Expression> nestedMap = new HashMap<>();
+        nestedMap.put(new StringExpression("key"), new MethodCallExpression("getIt", new ArrayList<>()));
+        nestedMap.put(new IntegerExpression(12), new StringExpression("value"));
+
+        map.put(new StringExpression("map"), new MapExpression(nestedMap));
+        map.put(new StringExpression("double"), new DoubleExpression(12.67));
+
+        expressions.add(new MethodCallExpression("getIt", Arrays.asList(new MapExpression(map), new DoubleExpression(12.67))));
+
+        assertEquals("getIt({\"double\"=12.67, \"map\"={12=\"value\", \"key\"=getIt()}}, 12.67)", ExpressionPrinter.printExpressions(expressions));
     }
 }

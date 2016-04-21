@@ -1,10 +1,11 @@
 package com.koenv.universalminecraftapi.parser;
 
 import com.koenv.universalminecraftapi.parser.expressions.*;
-import com.koenv.universalminecraftapi.util.Counter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,7 @@ public class ExpressionParser {
     protected static final Pattern ALTERNATE_STRING_PATTERN = Pattern.compile("^'(?:\\\\.|[^\"\\\\])*'");
     protected static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
+    protected static final Pattern MAP_PATTERN = Pattern.compile("^\\{");
 
     /**
      * Parse expressions from a string
@@ -29,9 +31,9 @@ public class ExpressionParser {
      * @throws ParseException Thrown when the expression cannot be parsed
      */
     public Expression parse(String string) throws ParseException {
-        Counter bracketsCounter = new Counter();
-        Expression expression = parseExpression(string, bracketsCounter).expression;
-        if (bracketsCounter.count() != 0) {
+        ParseContext context = new ParseContext();
+        Expression expression = parseExpression(string, context).expression;
+        if (context.getParenthesesCounter().count() != 0) {
             throw new ParseException("Invalid number of parentheses");
         }
         return expression;
@@ -40,12 +42,12 @@ public class ExpressionParser {
     /**
      * Parses a single expression, recursively parsing any expressions in that expression.
      *
-     * @param string          The expression
-     * @param bracketsCounter A counter for the number of brackets
+     * @param string  The expression
+     * @param context The current parse context
      * @return The parsed expression
      * @throws ParseException Thrown when the expression cannot be parsed
      */
-    protected ExpressionResult parseExpression(String string, Counter bracketsCounter) throws ParseException {
+    protected ExpressionResult parseExpression(String string, ParseContext context) throws ParseException {
         string = string.trim();
         Matcher matcher = BOOLEAN_PATTERN.matcher(string);
         if (matcher.find()) {
@@ -72,19 +74,23 @@ public class ExpressionParser {
             string = matcher.replaceFirst("");
             return new ExpressionResult(string, parseStringExpression(matcher.group(0)));
         }
+        matcher = MAP_PATTERN.matcher(string);
+        if (matcher.find()) {
+            return parseMap(string, context);
+        }
 
-        return parseChainedMethodCallExpression(string, bracketsCounter);
+        return parseChainedMethodCallExpression(string, context);
     }
 
     /**
      * Parses a chained method call, such as `players.getPlayer("koesie10").getUUID()`
      *
-     * @param string          The expression
-     * @param bracketsCounter A counter for the number of brackets
+     * @param string  The expression
+     * @param context The current parse context
      * @return The parsed expression
      * @throws ParseException Thrown when the expression cannot be parsed
      */
-    protected ExpressionResult parseChainedMethodCallExpression(String string, Counter bracketsCounter) throws ParseException {
+    protected ExpressionResult parseChainedMethodCallExpression(String string, ParseContext context) throws ParseException {
         List<Expression> expressions = new ArrayList<>();
         for (int i = 0; !string.isEmpty(); i++) {
             string = string.trim();
@@ -94,7 +100,7 @@ public class ExpressionParser {
             }
             Matcher matcher = METHOD_PATTERN.matcher(string);
             if (matcher.find()) {
-                ExpressionResult expressionResult = parseMethod(string, bracketsCounter);
+                ExpressionResult expressionResult = parseMethod(string, context);
                 expressions.add(expressionResult.expression);
                 string = expressionResult.string;
                 continue;
@@ -109,11 +115,7 @@ public class ExpressionParser {
                 }
             }
 
-            if (string.startsWith(",")) {
-                break;
-            }
-
-            if (string.startsWith(")")) {
+            if (string.startsWith(",") || string.startsWith(")") || string.startsWith("}")) {
                 break;
             }
 
@@ -141,17 +143,17 @@ public class ExpressionParser {
     /**
      * Parses a method.
      *
-     * @param string          The method expression
-     * @param bracketsCounter A counter for the number of brackets
+     * @param string  The method expression
+     * @param context The current parse context
      * @return The parsed expression
      * @throws ParseException Thrown when the expression cannot be parsed
      */
-    protected ExpressionResult parseMethod(String string, Counter bracketsCounter) throws ParseException {
+    protected ExpressionResult parseMethod(String string, ParseContext context) throws ParseException {
         Matcher matcher = METHOD_PATTERN.matcher(string);
         if (!matcher.find()) {
             throw new ParseException("Unable to parse method " + string);
         }
-        bracketsCounter.increment();
+        context.getParenthesesCounter().increment();
         String methodName = matcher.group(1);
         string = matcher.replaceFirst("");
 
@@ -160,7 +162,7 @@ public class ExpressionParser {
         while (!string.isEmpty()) {
             string = string.trim();
             if (string.startsWith(")")) {
-                bracketsCounter.decrement();
+                context.getParenthesesCounter().decrement();
                 string = string.substring(1);
                 break;
             }
@@ -168,12 +170,60 @@ public class ExpressionParser {
                 string = string.substring(1);
                 continue;
             }
-            ExpressionResult expressionResult = parseExpression(string, bracketsCounter);
+            ExpressionResult expressionResult = parseExpression(string, context);
             parameters.add(expressionResult.expression);
             string = expressionResult.string;
         }
 
         return new ExpressionResult(string, new MethodCallExpression(methodName, parameters));
+    }
+
+    /**
+     * Parses a map
+     *
+     * @param string  The map expression
+     * @param context The current parse context
+     * @return The parsed expression
+     * @throws ParseException Thrown when the expression cannot be parsed
+     */
+    protected ExpressionResult parseMap(String string, ParseContext context) throws ParseException {
+        Matcher matcher = MAP_PATTERN.matcher(string);
+        if (!matcher.find()) {
+            throw new ParseException("Unable to parse map " + string);
+        }
+        context.getBracesCounter().increment();
+        string = string.substring(1);
+
+        Map<Expression, Expression> map = new HashMap<>();
+
+        Expression key = null;
+
+        while (!string.isEmpty()) {
+            string = string.trim();
+            if (string.startsWith("}")) {
+                context.getBracesCounter().decrement();
+                string = string.substring(1);
+                break;
+            }
+            if (string.startsWith(",")) {
+                string = string.substring(1);
+                continue;
+            }
+            if (string.startsWith("=")) {
+                string = string.substring(1);
+                continue;
+            }
+            ExpressionResult expressionResult = parseExpression(string, context);
+            if (key == null) {
+                key = expressionResult.expression;
+            } else {
+                map.put(key, expressionResult.expression);
+                key = null;
+            }
+            string = expressionResult.string;
+        }
+
+        return new ExpressionResult(string, new MapExpression(map));
     }
 
     /**

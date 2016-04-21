@@ -3,7 +3,7 @@ package com.koenv.universalminecraftapi.parser;
 import com.koenv.universalminecraftapi.parser.expressions.*;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -46,8 +46,59 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void booleanAsParameter() throws Exception{
+    public void booleanAsParameter() throws Exception {
         new ExpressionParser().parse("getIt(true)");
+    }
+
+    @Test
+    public void mapAsParameter() throws Exception {
+        Expression expression = new ExpressionParser().parse("getIt({\"key\" = \"value\"})");
+
+        assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
+
+        List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
+
+        assertEquals(1, expressions.size());
+        assertThat(expressions.get(0), instanceOf(MethodCallExpression.class));
+
+        MethodCallExpression methodCall = (MethodCallExpression) expressions.get(0);
+        assertEquals("getIt", methodCall.getMethodName());
+        assertEquals(1, methodCall.getParameters().size());
+        assertThat(methodCall.getParameters().get(0), instanceOf(MapExpression.class));
+
+        MapExpression parameter = (MapExpression) methodCall.getParameters().get(0);
+        Map<Expression, Expression> expectedMap = new HashMap<>();
+        expectedMap.put(new StringExpression("key"), new StringExpression("value"));
+
+        assertEquals(expectedMap, parameter.getValue());
+    }
+
+    @Test
+    public void nestedMap() throws Exception {
+        Expression expression = new ExpressionParser().parse("getIt({\"key\" = {\"key\" = getIt()}, \"key2\"=\"value\"})");
+
+        assertThat(expression, instanceOf(ChainedMethodCallExpression.class));
+
+        List<Expression> expressions = ((ChainedMethodCallExpression) expression).getExpressions();
+
+        assertEquals(1, expressions.size());
+        assertThat(expressions.get(0), instanceOf(MethodCallExpression.class));
+
+        MethodCallExpression methodCall = (MethodCallExpression) expressions.get(0);
+        assertEquals("getIt", methodCall.getMethodName());
+        assertEquals(1, methodCall.getParameters().size());
+        assertThat(methodCall.getParameters().get(0), instanceOf(MapExpression.class));
+
+        MapExpression parameter = (MapExpression) methodCall.getParameters().get(0);
+
+        Map<Expression, Expression> expectedNestedMap = new HashMap<>();
+        expectedNestedMap.put(new StringExpression("key"),new ChainedMethodCallExpression(Collections.singletonList(new MethodCallExpression("getIt", new ArrayList<>()))));
+
+        Map<Expression, Expression> expectedMap = new HashMap<>();
+        expectedMap.put(new StringExpression("key"), new MapExpression(expectedNestedMap));
+        expectedMap.put(new StringExpression("key2"), new StringExpression("value"));
+
+        assertEquals(expectedMap, parameter.getValue());
     }
 
     @Test

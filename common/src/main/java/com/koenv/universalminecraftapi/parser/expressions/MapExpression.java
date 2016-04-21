@@ -1,16 +1,19 @@
 package com.koenv.universalminecraftapi.parser.expressions;
 
-/**
- * A string expression, such as `"test"`.
- */
-public class StringExpression extends ValueExpression {
-    private String value;
+import java.util.Map;
 
-    public StringExpression(String value) {
+/**
+ * A map expression, such as `{"key" = "value"}` (in this example having two string expressions)
+ */
+public class MapExpression extends ValueExpression {
+    private Map<Expression, Expression> value;
+
+    public MapExpression(Map<Expression, Expression> value) {
         this.value = value;
     }
 
-    public String getValue() {
+    @Override
+    public Map<Expression, Expression> getValue() {
         return value;
     }
 
@@ -19,7 +22,7 @@ public class StringExpression extends ValueExpression {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        StringExpression that = (StringExpression) o;
+        MapExpression that = (MapExpression) o;
 
         return value != null ? value.equals(that.value) : that.value == null;
 
@@ -32,8 +35,8 @@ public class StringExpression extends ValueExpression {
 
     @Override
     public String toString() {
-        return "StringExpression{" +
-                "value='" + value + '\'' +
+        return "MapExpression{" +
+                "value=" + value +
                 '}';
     }
 }

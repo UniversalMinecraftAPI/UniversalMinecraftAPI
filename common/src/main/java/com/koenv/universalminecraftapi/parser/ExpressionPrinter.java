@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.parser;
 
 import com.koenv.universalminecraftapi.parser.expressions.*;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Prints expressions, basically the reverse of {@link ExpressionParser}
@@ -49,6 +49,8 @@ public final class ExpressionPrinter {
             return printDoubleExpression((DoubleExpression) expression);
         } else if (expression instanceof ChainedMethodCallExpression) {
             return printChainedMethodCallExpression((ChainedMethodCallExpression) expression);
+        } else if (expression instanceof MapExpression) {
+            return printMapExpression((MapExpression) expression);
         } else {
             return "undefined";
         }
@@ -81,6 +83,22 @@ public final class ExpressionPrinter {
             }
         }
         builder.append(')');
+        return builder.toString();
+    }
+
+    private static String printMapExpression(MapExpression expression) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('{');
+        List<Map.Entry<Expression, Expression>> expressions = new LinkedList<>(expression.getValue().entrySet());
+        for (int i = 0; i < expressions.size(); i++) {
+            builder.append(printExpression(expressions.get(i).getKey()));
+            builder.append('=');
+            builder.append(printExpression(expressions.get(i).getValue()));
+            if (i != expressions.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append('}');
         return builder.toString();
     }
 
