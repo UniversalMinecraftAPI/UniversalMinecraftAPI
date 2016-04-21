@@ -30,10 +30,6 @@ public class StreamManager {
         subscriptions.add(new StreamSubscription(subscriber, tag, stream, parameters));
     }
 
-    public void subscribe(String stream, StreamSubscriber subscriber, String tag) {
-        subscribe(stream, subscriber, tag, new HashMap<>());
-    }
-
     public Stream<StreamSubscription> findSubscription(String stream, StreamSubscriber subscriber) {
         return subscriptions.stream()
                 .filter(subscription -> Objects.equals(subscription.getStream(), stream))

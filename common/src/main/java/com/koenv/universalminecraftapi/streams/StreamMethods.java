@@ -11,6 +11,7 @@ import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.methods.Invoker;
 import com.koenv.universalminecraftapi.methods.Optional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,10 +29,16 @@ public class StreamMethods {
             throw new APIException("No access to stream " + stream, ErrorCodes.ACCESS_DENIED);
         }
 
+        Map<String, String> params = new HashMap<>();
+
+        parameters.forEach((key, value) -> {
+            params.put(key.toString(), value.toString());
+        });
+
         StreamSubscriber streamSubscriber = new WebSocketStreamSubscriber(webSocketInvoker.getSession());
 
         try {
-            UniversalMinecraftAPI.getInstance().getStreamManager().subscribe(stream, streamSubscriber, request.getTag());
+            UniversalMinecraftAPI.getInstance().getStreamManager().subscribe(stream, streamSubscriber, request.getTag(), params);
         } catch (InvalidStreamException e) {
             throw new APIException("Invalid stream: " + stream, ErrorCodes.INVALID_STREAM);
         } catch (DuplicateSubscriptionException e) {
