@@ -12,6 +12,18 @@
         <h2>${method.declarationWithoutNamespace}</h2>
         <p class="lead">${method.description}</p>
 
+        <#if !method.availableOnAllPlatforms>
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong> This method is not available on all platforms. It is only available on the
+                following platforms:
+                <ul>
+                    <#list method.platforms as platform>
+                        <li>${platform.name}</li>
+                    </#list>
+                </ul>
+            </div>
+        </#if>
+
         <div class="table-responsive">
             <table class="table">
                 <#if method.arguments?size != 0>
@@ -56,25 +68,25 @@
                 </ul>
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="${method.name}HTTP">
-                        <pre>POST /api/v1/call HTTP/1.1
+                        <pre><code class="language-http">POST /api/v1/call HTTP/1.1
 Host: localhost:20059
 Content-Type: application/json
 Authorization: Basic YWRtaW46Y2hhbmdlbWU=
 
 {
     "expression": ${method.jsonExample}
-}</pre>
+}</code></pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}Curl">
-                        <pre>curl -X POST \
+                        <pre><code class="language-bash">curl -X POST \
 -H "Content-Type: application/json" \
 -H "Authorization: Basic YWRtaW46Y2hhbmdlbWU=" -d '{
     "expression": ${method.jsonExample}
-}' "http://localhost:20059/api/v1/call"</pre>
+}' "http://localhost:20059/api/v1/call"</code></pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}HTTPie">
-                        <pre>http -a admin:changeme POST http://localhost:20059/api/v1/call \
-  content-type:application/json expression=${method.jsonExample}</pre>
+                        <pre><code class="language-bash">http -a admin:changeme POST http://localhost:20059/api/v1/call \
+  content-type:application/json expression=${method.jsonExample}</code></pre>
                     </div>
                 </div>
             </div>
@@ -82,15 +94,4 @@ Authorization: Basic YWRtaW46Y2hhbmdlbWU=
     </div>
 </#list>
 </div>
-</div>
-<script src="http://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
-        crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-    $('.tabList a').click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    })
-</script>
-</body>
-</html>
+<#include "common/footer.ftl">

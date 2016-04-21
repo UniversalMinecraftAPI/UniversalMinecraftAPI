@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import freemarker.template.Configuration;
@@ -27,7 +28,7 @@ public class ClassDocGenerator extends AbstractGenerator {
     }
 
     @Override
-    public void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException {
+    public void generate(Configuration configuration, ClassResolver classResolver, PlatformResolver platformResolver, Writer output) throws IOException, TemplateException {
         Template template = configuration.getTemplate("class.ftl");
 
         Map<String, Object> dataModel = new HashMap<>();
@@ -68,12 +69,12 @@ public class ClassDocGenerator extends AbstractGenerator {
             logger.warn("No configuration file found at " + classIndexFile.getPath());
         }
 
-        addToDataModel(classResolver, dataModel);
+        addToDataModel(classResolver, platformResolver, dataModel);
 
         template.process(dataModel, output);
     }
 
-    protected void addToDataModel(ClassResolver classResolver, Map<String, Object> dataModel) {
+    protected void addToDataModel(ClassResolver classResolver, PlatformResolver platformResolver, Map<String, Object> dataModel) {
 
     }
 

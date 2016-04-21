@@ -3,6 +3,12 @@
         crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="assets/js/highlight.pack.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    hljs.initHighlightingOnLoad();
+    $('.tabList a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    })
+</script>
 </body>
 </html>

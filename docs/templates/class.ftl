@@ -21,6 +21,18 @@
             <h2>${method.declarationWithoutOperatesOn}</h2>
             <p class="lead">${method.description}</p>
 
+            <#if !method.availableOnAllPlatforms>
+                <div class="alert alert-warning" role="alert">
+                    <strong>Warning!</strong> This method is not available on all platforms. It is only available on the
+                    following platforms:
+                    <ul>
+                        <#list method.platforms as platform>
+                            <li>${platform.name}</li>
+                        </#list>
+                    </ul>
+                </div>
+            </#if>
+
             <div class="table-responsive">
                 <table class="table">
                     <#if method.arguments?size != 0>

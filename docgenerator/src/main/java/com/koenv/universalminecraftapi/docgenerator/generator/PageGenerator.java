@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.koenv.universalminecraftapi.docgenerator.model.Page;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -30,7 +31,7 @@ public class PageGenerator extends AbstractGenerator {
     }
 
     @Override
-    public void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException {
+    public void generate(Configuration configuration, ClassResolver classResolver, PlatformResolver platformResolver, Writer output) throws IOException, TemplateException {
         Template template = configuration.getTemplate("page.ftl");
 
         Map<String, Object> dataModel = new HashMap<>();

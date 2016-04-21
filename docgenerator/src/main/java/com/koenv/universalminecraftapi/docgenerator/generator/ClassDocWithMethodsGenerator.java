@@ -1,12 +1,15 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.koenv.universalminecraftapi.docgenerator.model.ClassMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,7 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
     }
 
     @Override
-    protected void addToDataModel(ClassResolver classResolver, Map<String, Object> dataModel) {
+    protected void addToDataModel(ClassResolver classResolver, PlatformResolver platformResolver, Map<String, Object> dataModel) {
         dataModel.put("methods", methods.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName())).map(method -> {
             String description = "";
             Map<String, String> argumentDescriptions = new HashMap<>();
@@ -46,7 +49,16 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
                 logger.warn("No configuration file found for " + method.getDeclaration() + " at " + methodFile.getPath());
             }
 
-            return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription);
+            List<Platform> platforms = new ArrayList<>();
+
+            if (!platformResolver.availableOnAllPlatforms(method)) {
+                platforms.addAll(platformResolver.getPlatforms(method));
+            }
+
+            return new MethodWrapper(
+                    method, arguments, returnType, description, argumentDescriptions, returnDescription,
+                    platforms.size() == 0, platforms
+            );
         }).collect(Collectors.toList()));
     }
 
@@ -58,14 +70,22 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
         private String description;
         private Map<String, String> argumentDescriptions;
         private String returnDescription;
+        private boolean availableOnAllPlatforms;
+        private List<Platform> platforms;
 
-        public MethodWrapper(ClassMethod method, List<ArgumentWrapper> arguments, UniversalMinecraftAPIClass returns, String description, Map<String, String> argumentDescriptions, String returnDescription) {
+        public MethodWrapper(
+                ClassMethod method, List<ArgumentWrapper> arguments, UniversalMinecraftAPIClass returns,
+                String description, Map<String, String> argumentDescriptions, String returnDescription,
+                boolean availableOnAllPlatforms, List<Platform> platforms
+        ) {
             this.method = method;
             this.arguments = arguments;
             this.returns = returns;
             this.description = description;
             this.argumentDescriptions = argumentDescriptions;
             this.returnDescription = returnDescription;
+            this.availableOnAllPlatforms = availableOnAllPlatforms;
+            this.platforms = platforms;
         }
 
         public List<ArgumentWrapper> getArguments() {
@@ -86,6 +106,14 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
 
         public String getReturnDescription() {
             return returnDescription;
+        }
+
+        public boolean isAvailableOnAllPlatforms() {
+            return availableOnAllPlatforms;
+        }
+
+        public List<Platform> getPlatforms() {
+            return platforms;
         }
 
         public String getName() {

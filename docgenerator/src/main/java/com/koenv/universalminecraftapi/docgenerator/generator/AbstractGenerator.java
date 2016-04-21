@@ -1,6 +1,7 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
@@ -15,5 +16,5 @@ public abstract class AbstractGenerator {
         this.rootDirectory = rootDirectory;
     }
 
-    public abstract void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException;
+    public abstract void generate(Configuration configuration, ClassResolver classResolver, PlatformResolver platformResolver, Writer output) throws IOException, TemplateException;
 }

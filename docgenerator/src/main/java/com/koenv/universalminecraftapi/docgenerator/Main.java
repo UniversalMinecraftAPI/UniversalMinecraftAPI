@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.koenv.universalminecraftapi.docgenerator.generator.*;
 import com.koenv.universalminecraftapi.docgenerator.model.*;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import freemarker.template.Configuration;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -149,10 +151,18 @@ public class Main {
         HashSet<ClassMethod> allClassMethods = new HashSet<>();
         HashSet<String> streams = new HashSet<>();
 
+        PlatformResolver platformResolver = new PlatformResolver();
+
         methods.forEach(platformMethods -> {
             allNamespacedMethods.addAll(platformMethods.getNamespacedMethods());
             allClassMethods.addAll(platformMethods.getClassMethods());
             streams.addAll(platformMethods.getStreams());
+
+            Consumer<AbstractMethod> methodRegisterer = method -> platformResolver.addMethod(platformMethods.getPlatform(), method);
+            platformMethods.getNamespacedMethods().forEach(methodRegisterer);
+            platformMethods.getClassMethods().forEach(methodRegisterer);
+
+            platformMethods.getStreams().forEach(s -> platformResolver.addStream(platformMethods.getPlatform(), s));
         });
 
         File classesDirectory = new File(extraDirectory, "classes");
@@ -204,7 +214,7 @@ public class Main {
         );
 
         try (FileWriter fileWriter = new FileWriter(new File(outputDirectory, "index.html"))) {
-            indexGenerator.generate(configuration, classResolver, fileWriter);
+            indexGenerator.generate(configuration, classResolver, platformResolver, fileWriter);
         } catch (IOException | TemplateException e) {
             logger.error("Failed to generate index file", e);
         }
@@ -215,7 +225,7 @@ public class Main {
             File file = new File(outputDirectory, Files.getNameWithoutExtension(page.getFile().getPath()) + ".html");
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, classResolver, fileWriter);
+                generator.generate(configuration, classResolver, platformResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate page " + page.getTitle(), e);
             }
@@ -232,7 +242,7 @@ public class Main {
             File file = new File(namespaceOutputDirectory, entry.getKey() + ".html");
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, classResolver, fileWriter);
+                generator.generate(configuration, classResolver, platformResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate documentation for namespace " + entry.getKey(), e);
             }
@@ -249,7 +259,7 @@ public class Main {
             extraClasses.remove(entry.getKey()); // be extra sure to not generate twice
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, classResolver, fileWriter);
+                generator.generate(configuration, classResolver, platformResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate documentation for class " + entry.getKey(), e);
             }
@@ -261,7 +271,7 @@ public class Main {
             File file = new File(classesOutputDirectory, s + ".html");
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, classResolver, fileWriter);
+                generator.generate(configuration, classResolver, platformResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate documentation for class " + s, e);
             }
@@ -278,7 +288,7 @@ public class Main {
             File file = new File(streamsOutputDirectory, stream + ".html");
 
             try (FileWriter fileWriter = new FileWriter(file)) {
-                generator.generate(configuration, classResolver, fileWriter);
+                generator.generate(configuration, classResolver, platformResolver, fileWriter);
             } catch (IOException | TemplateException e) {
                 logger.error("Failed to generate documentation for stream " + stream, e);
             }

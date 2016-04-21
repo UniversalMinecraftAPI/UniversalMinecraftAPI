@@ -1,8 +1,10 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
-import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.model.NamespacedMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.Platform;
+import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
+import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -17,10 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
     }
 
     @Override
-    public void generate(Configuration configuration, ClassResolver classResolver, Writer output) throws IOException, TemplateException {
+    public void generate(Configuration configuration, ClassResolver classResolver, PlatformResolver platformResolver, Writer output) throws IOException, TemplateException {
         Template template = configuration.getTemplate("namespace.ftl");
 
         Map<String, Object> dataModel = new HashMap<>();
@@ -168,7 +167,16 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                 }
             }
 
-            return new MethodWrapper(method, arguments, returnType, description, argumentDescriptions, returnDescription, example, JSONObject.quote(example));
+            List<Platform> platforms = new ArrayList<>();
+
+            if (!platformResolver.availableOnAllPlatforms(method)) {
+                platforms.addAll(platformResolver.getPlatforms(method));
+            }
+
+            return new MethodWrapper(
+                    method, arguments, returnType, description, argumentDescriptions, returnDescription, example,
+                    JSONObject.quote(example), platforms.size() == 0, platforms
+            );
         }).collect(Collectors.toList()));
 
         template.process(dataModel, output);
@@ -184,16 +192,13 @@ public class NamespaceDocGenerator extends AbstractGenerator {
         private String returnDescription;
         private String example;
         private String jsonExample;
+        private boolean availableOnAllPlatforms;
+        private List<Platform> platforms;
 
         public MethodWrapper(
-                NamespacedMethod method,
-                List<ArgumentWrapper> arguments,
-                UniversalMinecraftAPIClass returns,
-                String description,
-                Map<String, String> argumentDescriptions,
-                String returnDescription,
-                String example,
-                String jsonExample
+                NamespacedMethod method, List<ArgumentWrapper> arguments, UniversalMinecraftAPIClass returns,
+                String description, Map<String, String> argumentDescriptions, String returnDescription, String example,
+                String jsonExample, boolean availableOnAllPlatforms, List<Platform> platforms
         ) {
             this.method = method;
             this.arguments = arguments;
@@ -203,6 +208,8 @@ public class NamespaceDocGenerator extends AbstractGenerator {
             this.returnDescription = returnDescription;
             this.example = example;
             this.jsonExample = jsonExample;
+            this.availableOnAllPlatforms = availableOnAllPlatforms;
+            this.platforms = platforms;
         }
 
         public List<ArgumentWrapper> getArguments() {
@@ -231,6 +238,14 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
         public String getJsonExample() {
             return jsonExample;
+        }
+
+        public boolean isAvailableOnAllPlatforms() {
+            return availableOnAllPlatforms;
+        }
+
+        public List<Platform> getPlatforms() {
+            return platforms;
         }
 
         public String getName() {
