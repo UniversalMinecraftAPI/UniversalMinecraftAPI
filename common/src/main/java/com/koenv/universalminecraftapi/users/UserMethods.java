@@ -31,4 +31,13 @@ public class UserMethods {
         }
         throw new APIException("Invalid user", ErrorCodes.INVALID_CREDENTIALS);
     }
+
+    @APIMethod
+    public static String getCurrentUser(Invoker invoker) {
+        if (invoker instanceof BaseHttpInvoker) {
+            BaseHttpInvoker httpInvoker = (BaseHttpInvoker) invoker;
+            return httpInvoker.getUser().getUsername();
+        }
+        throw new APIException("Invalid user", ErrorCodes.INVALID_CREDENTIALS);
+    }
 }
