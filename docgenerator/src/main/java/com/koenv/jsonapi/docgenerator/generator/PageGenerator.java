@@ -5,6 +5,9 @@ import com.koenv.jsonapi.docgenerator.resolvers.ClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.commonmark.Extension;
+import org.commonmark.ext.gfm.tables.TableBlock;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.html.HtmlRenderer;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -13,7 +16,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PageGenerator extends AbstractGenerator {
@@ -32,9 +37,24 @@ public class PageGenerator extends AbstractGenerator {
 
         dataModel.put("page", page);
 
-        Parser parser = Parser.builder().build();
+        List<Extension> extensions = Collections.singletonList(TablesExtension.create());
+
+        Parser parser = Parser
+                .builder()
+                .extensions(extensions)
+                .build();
+
+        HtmlRenderer renderer = HtmlRenderer
+                .builder()
+                .attributeProvider((node, attributes) -> {
+                    if (node instanceof TableBlock) {
+                        attributes.put("class", "table");
+                    }
+                })
+                .extensions(extensions)
+                .build();
+
         Node document = parser.parseReader(new FileReader(page.getFile()));
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
 
         dataModel.put("contents", renderer.render(document));
 

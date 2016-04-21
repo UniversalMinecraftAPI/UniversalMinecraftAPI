@@ -9,6 +9,8 @@ import com.typesafe.config.ConfigFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateModelException;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +24,8 @@ public class Main {
     private static Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            logger.error("Invalid usage, need 2 parameters: <config> <output>");
+        if (args.length < 2) {
+            logger.error("Invalid usage, need 2 parameters: <config> <output> [basedir]");
             return;
         }
 
@@ -45,11 +47,17 @@ public class Main {
             }
         }
 
+        String baseDir = "/";
+
+        if (args.length > 2) {
+            baseDir = args[2];
+        }
+
         Main main = new Main();
-        main.run(configFile, outputDirectory);
+        main.run(configFile, outputDirectory, baseDir);
     }
 
-    private void run(File configFile, File outputDirectory) {
+    private void run(File configFile, File outputDirectory, String baseDir) {
         File rootDirectory = configFile.getParentFile();
 
         long startTime = System.currentTimeMillis();
@@ -181,6 +189,11 @@ public class Main {
         configuration.setDefaultEncoding("UTF-8");
         configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         configuration.setLogTemplateExceptions(false); // will already be thrown
+        try {
+            configuration.setSharedVariable("basedir", baseDir);
+        } catch (TemplateModelException e) {
+            logger.error("Error while configuring freemarker", e);
+        }
 
         IndexGenerator indexGenerator = new IndexGenerator(
                 outputDirectory,
@@ -270,6 +283,12 @@ public class Main {
                 logger.error("Failed to generate documentation for stream " + stream, e);
             }
         });
+
+        try {
+            FileUtils.copyDirectory(new File(rootDirectory, "assets"), new File(outputDirectory, "assets"));
+        } catch (IOException e) {
+            logger.error("Failed to copy assets directory", e);
+        }
 
         long time = System.currentTimeMillis() - startTime;
         logger.info("Completed in " + time + " ms");

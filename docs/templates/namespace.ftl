@@ -8,7 +8,7 @@
 
 <div class="row">
 <#list methods as method>
-    <div class="col-md-12">
+    <div class="col-md-12" id="${method.name}">
         <h2>${method.declarationWithoutNamespace}</h2>
         <p class="lead">${method.description}</p>
 
