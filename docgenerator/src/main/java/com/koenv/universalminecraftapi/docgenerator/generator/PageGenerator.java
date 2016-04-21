@@ -13,10 +13,7 @@ import org.commonmark.html.HtmlRenderer;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +35,12 @@ public class PageGenerator extends AbstractGenerator {
 
         dataModel.put("page", page);
 
+        dataModel.put("contents", generateContents(page));
+
+        template.process(dataModel, output);
+    }
+
+    public String generateContents(Page page) throws IOException {
         List<Extension> extensions = Collections.singletonList(TablesExtension.create());
 
         Parser parser = Parser
@@ -57,8 +60,6 @@ public class PageGenerator extends AbstractGenerator {
 
         Node document = parser.parseReader(new FileReader(page.getFile()));
 
-        dataModel.put("contents", renderer.render(document));
-
-        template.process(dataModel, output);
+        return renderer.render(document);
     }
 }

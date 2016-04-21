@@ -11,18 +11,21 @@ import freemarker.template.TemplateException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class IndexGenerator extends AbstractGenerator {
+    private Page introPage;
     private List<Page> pages;
     private List<String> namespaces;
     private List<String> classes;
     private List<String> streams;
 
-    public IndexGenerator(File rootDirectory, List<Page> pages, List<String> namespaces, List<String> classes, List<String> streams) {
+    public IndexGenerator(File rootDirectory, Page introPage, List<Page> pages, List<String> namespaces, List<String> classes, List<String> streams) {
         super(rootDirectory);
+        this.introPage = introPage;
         this.pages = pages;
         this.namespaces = namespaces;
         this.classes = classes;
@@ -59,6 +62,9 @@ public class IndexGenerator extends AbstractGenerator {
         dataModel.put("streams", streams);
         dataModel.put("platforms", platforms);
         dataModel.put("now", new Date());
+
+        PageGenerator introGenerator = new PageGenerator(rootDirectory, introPage);
+        dataModel.put("introduction", introGenerator.generateContents(introPage));
 
         template.process(dataModel, output);
     }

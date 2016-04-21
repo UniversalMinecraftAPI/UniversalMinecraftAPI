@@ -5,6 +5,9 @@
     <div class="col-md-7">
         <h1>UniversalMinecraftAPI</h1>
 
+    ${introduction}
+
+        <h2>Table of contents</h2>
         <ol>
         <#list pages as page>
             <li><a href="${page.link}">${page.title}</a></li>
@@ -51,11 +54,13 @@
     </div>
 </div>
 
-<button class="btn btn-default btn-sm" type="button" data-toggle="collapse" data-target="#generationInfo"
-        aria-expanded="false"
-        aria-controls="generationInfo">
-    Show generation info
-</button>
+<p>
+    <button class="btn btn-default btn-sm" type="button" data-toggle="collapse" data-target="#generationInfo"
+            aria-expanded="false"
+            aria-controls="generationInfo">
+        Show generation info
+    </button>
+</p>
 <div class="collapse" id="generationInfo">
     <div class="well">
         <p><strong>Generation time: </strong> ${now?datetime?iso("UTC")}</p>

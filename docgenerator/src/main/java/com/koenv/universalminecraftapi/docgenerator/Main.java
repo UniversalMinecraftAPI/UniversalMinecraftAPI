@@ -103,6 +103,13 @@ public class Main {
             valid = false;
         }
 
+        File introFile = new File(rootDirectory, config.getString("introduction"));
+
+        if (!introFile.exists() || !introFile.isFile()) {
+            logger.error("Introduction file " + introFile.getPath() + " doesn't exist or isn't a file.");
+            valid = false;
+        }
+
         if (!valid) {
             System.exit(3);
             return;
@@ -216,6 +223,7 @@ public class Main {
 
         IndexGenerator indexGenerator = new IndexGenerator(
                 outputDirectory,
+                new Page("Introduction", introFile),
                 pages,
                 new ArrayList<>(allNamespacedMethods.stream().collect(Collectors.groupingBy(NamespacedMethod::getNamespace)).keySet()),
                 new ArrayList<>(allClassMethods.stream().collect(Collectors.groupingBy(ClassMethod::getOperatesOn)).keySet()),
