@@ -40,4 +40,8 @@ public class PlatformResolver {
     public Collection<Platform> getPlatforms(String stream) {
         return streams.get(stream);
     }
+
+    public Set<Platform> getPlatforms() {
+        return platforms;
+    }
 }

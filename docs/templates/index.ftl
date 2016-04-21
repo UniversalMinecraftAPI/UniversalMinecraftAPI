@@ -31,4 +31,35 @@
     <li><a href="streams/${stream}.html">${stream}</a></li>
 </#list>
 </ul>
+
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#generationInfo" aria-expanded="false"
+        aria-controls="generationInfo">
+    Show generation info
+</button>
+<div class="collapse" id="generationInfo">
+    <div class="well">
+        <p><strong>Generation time: </strong> ${now?datetime?iso("UTC")}</p>
+        <strong>Platforms included: </strong>
+        <table class="table">
+            <thead>
+            <tr>
+                <td>Platform name</td>
+                <td>Platform reported name</td>
+                <td>Platform version</td>
+                <td>UMA version</td>
+            </tr>
+            </thead>
+            <tbody>
+            <#list platforms as platform>
+            <tr>
+                <td>${platform.name}</td>
+                <td>${platform.rawName}</td>
+                <td>${platform.version}</td>
+                <td>${platform.umaVersion}</td>
+            </tr>
+            </#list>
+            </tbody>
+        </table>
+    </div>
+</div>
 <#include "common/footer.ftl">

@@ -54,6 +54,7 @@ public class CreateApiDocCommand extends Command {
         JSONObject platform = new JSONObject();
         platform.put("name", uma.getProvider().getPlatform());
         platform.put("version", uma.getProvider().getPlatformVersion());
+        platform.put("umaVersion", uma.getProvider().getUMAVersion());
 
         root.put("platform", platform);
 

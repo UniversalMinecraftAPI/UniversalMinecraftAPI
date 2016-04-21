@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.google.common.io.Files;
 import com.koenv.universalminecraftapi.docgenerator.model.Page;
+import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import freemarker.template.Configuration;
@@ -11,10 +12,7 @@ import freemarker.template.TemplateException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class IndexGenerator extends AbstractGenerator {
@@ -48,14 +46,19 @@ public class IndexGenerator extends AbstractGenerator {
             return s;
         }).collect(Collectors.toSet()));
 
+        List<Platform> platforms = new ArrayList<>(platformResolver.getPlatforms());
+
         namespaces.sort(String::compareTo);
         classes.sort(String::compareTo);
         streams.sort(String::compareTo);
+        platforms.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
 
         dataModel.put("pages", pages);
         dataModel.put("namespaces", namespaces);
         dataModel.put("classes", classes);
         dataModel.put("streams", streams);
+        dataModel.put("platforms", platforms);
+        dataModel.put("now", new Date());
 
         template.process(dataModel, output);
     }

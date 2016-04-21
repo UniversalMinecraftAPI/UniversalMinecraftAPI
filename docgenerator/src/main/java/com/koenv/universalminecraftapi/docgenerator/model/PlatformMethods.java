@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlatformMethods {
-    private Platform platform;
-    private List<NamespacedMethod> namespacedMethods;
-    private List<ClassMethod> classMethods;
-    private List<String> streams;
+    protected Platform platform;
+    protected List<NamespacedMethod> namespacedMethods;
+    protected List<ClassMethod> classMethods;
+    protected List<String> streams;
 
     public PlatformMethods(Platform platform, List<NamespacedMethod> namespacedMethods, List<ClassMethod> classMethods, List<String> streams) {
         this.platform = platform;
@@ -19,7 +19,8 @@ public class PlatformMethods {
         this.streams = streams;
     }
 
-    public PlatformMethods(JSONObject jsonObject) {
+    public PlatformMethods(Platform platform, JSONObject jsonObject) {
+        this.platform = platform;
         this.populateFrom(jsonObject);
     }
 
@@ -40,8 +41,6 @@ public class PlatformMethods {
     }
 
     public void populateFrom(JSONObject jsonObject) {
-        this.platform = new Platform(jsonObject.getJSONObject("platform"));
-
         JSONArray namespaces = jsonObject.getJSONArray("namespaces");
 
         this.namespacedMethods = new ArrayList<>();

@@ -68,16 +68,19 @@ public class Main {
 
         Config config = ConfigFactory.parseFile(configFile).resolve();
 
-        List<File> platformFiles = config.getStringList("platforms").stream().map(s -> new File(rootDirectory, s)).collect(Collectors.toList());
+        List<PlatformDefinition> platformDefinitions = config.getConfigList("platforms")
+                .stream()
+                .map(o -> new PlatformDefinition(o.getString("name"), new File(rootDirectory, o.getString("file"))))
+                .collect(Collectors.toList());
 
-        if (platformFiles.size() < 1) {
-            logger.error("Please specify at least 1 API file");
+        if (platformDefinitions.size() < 1) {
+            logger.error("Please specify at least 1 platform");
             valid = false;
         }
 
-        for (File file : platformFiles) {
-            if (!file.exists() || !file.isFile()) {
-                logger.error("File " + file.getPath() + " doesn't exist or isn't a file.");
+        for (PlatformDefinition platform : platformDefinitions) {
+            if (!platform.getFile().exists() || !platform.getFile().isFile()) {
+                logger.error("File " + platform.getFile().getPath() + " doesn't exist or isn't a file.");
                 valid = false;
             }
         }
@@ -106,12 +109,12 @@ public class Main {
         }
 
         List<PlatformMethods> methods = new ArrayList<>();
-        for (File file : platformFiles) {
-            APIFileParser parser = new APIFileParser(file);
+        for (PlatformDefinition platform : platformDefinitions) {
+            APIFileParser parser = new APIFileParser(platform);
             try {
                 methods.add(parser.parse());
             } catch (Exception e) {
-                logger.error("Failed to parse file " + file.getPath(), e);
+                logger.error("Failed to parse file " + platform.getFile().getPath(), e);
                 return;
             }
         }
