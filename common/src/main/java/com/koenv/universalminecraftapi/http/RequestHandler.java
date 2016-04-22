@@ -53,7 +53,7 @@ public class RequestHandler {
     }
 
     private JsonErrorResponse createErrorResponse(int code, String message, JsonRequest request) {
-        return new JsonErrorResponse(code, message, request.getTag());
+        return new JsonErrorResponse(code, message, request != null ? request.getTag() : "");
     }
 
     private JsonSuccessResponse createSuccessResponse(Object value, JsonRequest request) {
