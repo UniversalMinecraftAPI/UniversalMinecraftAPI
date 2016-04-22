@@ -380,6 +380,7 @@ public class MethodInvoker {
      * @param from      From which class to convert, which is usually the class of from, from's superclass or one of from's interfaces
      * @return The converted parameter. Null if it cannot be converted.
      */
+    @SuppressWarnings("unchecked")
     protected Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
         if (from == null && parameter != null) {
             from = parameter.getClass();

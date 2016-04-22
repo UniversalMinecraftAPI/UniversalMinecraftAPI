@@ -11,7 +11,6 @@ import freemarker.template.TemplateException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,12 +41,7 @@ public class IndexGenerator extends AbstractGenerator {
                 .map(page -> new PageWrapper(page.getTitle(), Files.getNameWithoutExtension(page.getFile().getPath()) + ".html"))
                 .collect(Collectors.toList());
 
-        List<String> classes = new ArrayList<>(this.classes.stream().map(s -> {
-            if (classResolver.resolve(s) != null) {
-                return classResolver.resolve(s).getName();
-            }
-            return s;
-        }).collect(Collectors.toSet()));
+        List<String> classes = new ArrayList<>(this.classes.stream().map(s -> classResolver.resolve(s).getName()).collect(Collectors.toSet()));
 
         List<Platform> platforms = new ArrayList<>(platformResolver.getPlatforms());
 

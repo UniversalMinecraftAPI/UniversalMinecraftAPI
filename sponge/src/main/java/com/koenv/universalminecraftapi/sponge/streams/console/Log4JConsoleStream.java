@@ -31,7 +31,7 @@ public class Log4JConsoleStream {
 
         Logger minecraftLogger = (Logger) LogManager.getLogger("net.minecraft");
 
-        Layout<? extends Serializable> minecraftLayout = null;
+        Layout<? extends Serializable> minecraftLayout;
 
         minecraftLayout = Optional.ofNullable(minecraftLogger.getAppenders().get("Console")).map(Appender::getLayout).orElse(null);
 

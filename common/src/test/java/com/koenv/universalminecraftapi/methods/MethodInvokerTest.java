@@ -295,6 +295,7 @@ public class MethodInvokerTest {
             return arg.get("key").toString();
         }
 
+        @SuppressWarnings("unchecked")
         @APIMethod(namespace = "maps")
         public static String getNestedMap(Map<Object, Object> arg) {
             return ((Map<Object, Object>) arg.get("key")).get("key").toString();

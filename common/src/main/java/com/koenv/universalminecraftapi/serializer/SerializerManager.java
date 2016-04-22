@@ -19,6 +19,7 @@ public class SerializerManager {
         return serialize(object, clazz, false);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> Object serialize(T object, Class<? extends T> clazz, boolean within) {
         if (serializers.containsKey(clazz)) {
             Serializer<T> serializer = (Serializer<T>) serializers.get(clazz);

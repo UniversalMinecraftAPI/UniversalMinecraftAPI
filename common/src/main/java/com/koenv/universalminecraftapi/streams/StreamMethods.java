@@ -31,9 +31,7 @@ public class StreamMethods {
 
         Map<String, String> params = new HashMap<>();
 
-        parameters.forEach((key, value) -> {
-            params.put(key.toString(), value.toString());
-        });
+        parameters.forEach((key, value) -> params.put(key.toString(), value.toString()));
 
         StreamSubscriber streamSubscriber = new WebSocketStreamSubscriber(webSocketInvoker.getSession());
 

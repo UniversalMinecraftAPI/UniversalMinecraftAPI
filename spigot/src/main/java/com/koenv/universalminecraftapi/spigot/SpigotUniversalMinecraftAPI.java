@@ -27,7 +27,7 @@ public class SpigotUniversalMinecraftAPI extends JavaPlugin implements Universal
     public void onEnable() {
         saveDefaultConfig();
 
-        UniversalMinecraftAPIRootConfiguration config = null;
+        UniversalMinecraftAPIRootConfiguration config;
         try {
             config = SpigotConfigurationLoader.load(getConfig());
         } catch (InvalidConfigurationException e) {

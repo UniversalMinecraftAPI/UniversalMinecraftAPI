@@ -9,7 +9,7 @@ public class ClassMethod extends AbstractMethod {
 
     public ClassMethod(JSONObject jsonObject) {
         super(jsonObject);
-        this.populateRestFrom(jsonObject);
+        this.populateFrom(jsonObject);
     }
 
     public String getOperatesOn() {
@@ -19,6 +19,7 @@ public class ClassMethod extends AbstractMethod {
     @Override
     public void populateFrom(JSONObject jsonObject) {
         super.populateFrom(jsonObject);
+        this.populateRestFrom(jsonObject);
     }
 
     @Override

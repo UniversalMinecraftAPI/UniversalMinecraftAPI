@@ -13,9 +13,8 @@ public abstract class Command {
      * @param commandSource The sender of the command
      * @param args          The args, excluding the first subcommand arg.
      *                      For example, `/universalminecraftapi exec this that and more` gives `{"this", "that", "and", "more"}`
-     * @return Whether the command succeeded
      */
-    public abstract boolean onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args);
+    public abstract void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args);
 
     public boolean hasPermission(CommandSource commandSource) {
         return true;

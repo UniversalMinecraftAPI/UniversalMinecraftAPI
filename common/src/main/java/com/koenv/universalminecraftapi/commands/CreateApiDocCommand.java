@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public class CreateApiDocCommand extends Command {
     @Override
-    public boolean onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
+    public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
         if (args.length < 1) {
             commandSource.sendMessage(ChatColor.RED, "Missing argument: file name");
             return false;

@@ -38,16 +38,14 @@ public class ArgumentsUtil {
             return new BooleanExpression((Boolean) object);
         } else if (object instanceof Map) {
             //noinspection unchecked
-            return new MapExpression(convertMap((Map<?, ?>) object));
+            return new MapExpression(convertMap((Map<Object, Object>) object));
         }
         throw new IllegalArgumentException("Unable to convert object " + object.getClass().getName() + ": " + object.toString());
     }
 
-    public static Map<Expression, Expression> convertMap(Map<?, ?> map) {
+    public static Map<Expression, Expression> convertMap(Map<Object, Object> map) {
         Map<Expression, Expression> result = new HashMap<>();
-        map.forEach((key, value) -> {
-            result.put(convert(key), convert(value));
-        });
+        map.forEach((key, value) -> result.put(convert(key), convert(value)));
         return result;
     }
 }

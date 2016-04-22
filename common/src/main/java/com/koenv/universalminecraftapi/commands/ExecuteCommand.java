@@ -8,7 +8,7 @@ import com.koenv.universalminecraftapi.parser.expressions.Expression;
 
 public class ExecuteCommand extends Command {
     @Override
-    public boolean onCommand(UniversalMinecraftAPIInterface uma, CommandSource source, String[] args) {
+    public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource source, String[] args) {
         if (args.length < 1) {
             source.sendMessage(ChatColor.RED, "Please specify the expression.");
             return true;

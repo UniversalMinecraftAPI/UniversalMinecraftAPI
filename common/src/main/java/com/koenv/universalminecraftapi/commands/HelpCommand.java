@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class HelpCommand extends Command {
     @Override
-    public boolean onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
+    public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
         commandSource.sendMessage("UniversalMinecraftAPI Help");
         commandSource.sendMessage(ChatColor.GREEN, "===================");
         Map<Command, List<Map.Entry<String, Command>>> commands = uma.getCommandManager().getCommands().entrySet().stream().collect(Collectors.groupingBy(Map.Entry::getValue));

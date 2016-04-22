@@ -15,9 +15,8 @@ public class StreamManager {
     }
 
     public void send(String stream, Function<StreamSubscription, Object> converter) {
-        subscriptions.stream().filter(subscription -> Objects.equals(subscription.getStream(), stream)).forEach(subscription -> {
-            subscription.getSubscriber().send(new StreamMessage(converter.apply(subscription), subscription.getTag(), stream));
-        });
+        subscriptions.stream().filter(subscription -> Objects.equals(subscription.getStream(), stream)).forEach(subscription
+                -> subscription.getSubscriber().send(new StreamMessage(converter.apply(subscription), subscription.getTag(), stream)));
     }
 
     public void subscribe(String stream, StreamSubscriber subscriber, String tag, Map<String, String> parameters) {

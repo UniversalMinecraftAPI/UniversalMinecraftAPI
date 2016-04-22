@@ -5,7 +5,7 @@ import com.koenv.universalminecraftapi.UniversalMinecraftAPIInterface;
 
 public class ReloadCommand extends Command {
     @Override
-    public boolean onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
+    public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
         if (args.length < 1) {
             args = new String[]{"global"};
         }

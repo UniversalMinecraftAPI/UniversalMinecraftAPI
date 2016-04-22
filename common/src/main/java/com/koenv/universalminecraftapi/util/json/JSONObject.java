@@ -1401,8 +1401,8 @@ public class JSONObject implements JSONValue {
                 } else {
                     Long myLong = new Long(string);
                     if (string.equals(myLong.toString())) {
-                        if (myLong.longValue() == myLong.intValue()) {
-                            return Integer.valueOf(myLong.intValue());
+                        if (myLong == myLong.intValue()) {
+                            return myLong.intValue();
                         }
                         return myLong;
                     }
@@ -1527,10 +1527,10 @@ public class JSONObject implements JSONValue {
             } catch (Exception e) {
                 throw new JSONException(e);
             }
-            if (object instanceof String) {
+            if (object != null) {
                 return (String) object;
             }
-            throw new JSONException("Bad value from toJSONString: " + object);
+            throw new JSONException("Bad value from toJSONString: " + null);
         }
         if (value instanceof Number) {
             return numberToString((Number) value);
@@ -1618,7 +1618,7 @@ public class JSONObject implements JSONValue {
         return this.write(writer, 0, 0);
     }
 
-    static final Writer writeValue(Writer writer, Object value,
+    static Writer writeValue(Writer writer, Object value,
                                    int indentFactor, int indent) throws JSONException, IOException {
         if (value == null || value.equals(null)) {
             writer.write("null");
@@ -1652,7 +1652,7 @@ public class JSONObject implements JSONValue {
         return writer;
     }
 
-    static final void indent(Writer writer, int indent) throws IOException {
+    static void indent(Writer writer, int indent) throws IOException {
         for (int i = 0; i < indent; i += 1) {
             writer.write(' ');
         }
