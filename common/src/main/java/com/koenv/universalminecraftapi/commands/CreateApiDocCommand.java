@@ -59,7 +59,7 @@ public class CreateApiDocCommand extends Command {
         root.put("platform", platform);
 
         try (PrintWriter printWriter = new PrintWriter(file)) {
-            printWriter.write(root.toString());
+            printWriter.write(root.toString(4));
         } catch (IOException e) {
             e.printStackTrace();
             commandSource.sendMessage(ChatColor.RED, "Failed to write to file: " + e.toString());
