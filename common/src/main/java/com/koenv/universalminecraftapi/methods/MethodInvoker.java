@@ -130,9 +130,6 @@ public class MethodInvoker {
             if (annotation == null) {
                 continue;
             }
-            if (!Modifier.isPublic(objectMethod.getModifiers())) {
-                throw new MethodRegistrationException("All registered API methods must be public: " + objectMethod.getName());
-            }
             if (!Modifier.isStatic(objectMethod.getModifiers())) {
                 throw new MethodRegistrationException("All registered API methods must be static: " + objectMethod.getName());
             }
@@ -283,7 +280,6 @@ public class MethodInvoker {
             if (e.getCause() instanceof RuntimeException && e.getCause() instanceof RethrowableException) {
                 throw (RuntimeException) e.getCause();
             }
-            e.printStackTrace();
             throw new MethodInvocationException("Unable to invoke method: " + MethodUtils.getMethodDeclaration(method) + ": " + e.getCause().getClass().getSimpleName() + " " + e.getCause().getMessage());
         } catch (Exception e) {
             throw new MethodInvocationException("Unable to invoke method " + MethodUtils.getMethodDeclaration(method) + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
