@@ -132,6 +132,11 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void mapWithTrailingComma() throws Exception {
+        new ExpressionParser().parse("it.get({'key'='value',})");
+    }
+
+    @Test
     public void simpleStringList() throws Exception {
         List<Expression> items = Arrays.asList(new StringExpression("test"), new StringExpression("test"));
         ListExpression parameter = new ListExpression(items);
