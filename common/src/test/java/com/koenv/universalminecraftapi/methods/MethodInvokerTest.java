@@ -190,6 +190,19 @@ public class MethodInvokerTest {
     }
 
     @Test
+    public void testList() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("lists"));
+
+        List<Expression> parameters = new ArrayList<>();
+        parameters.add(new ListExpression(Arrays.asList(new StringExpression("test"), new DoubleExpression(12.67), new StringExpression("expected"))));
+
+        expressions.add(new MethodCallExpression("getList", parameters));
+
+        assertEquals("expected", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
     public void invokeMethodWithNamespaceAndOptional() throws Exception {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new NamespaceExpression("test"));
@@ -290,6 +303,11 @@ public class MethodInvokerTest {
         @APIMethod(namespace = "maps")
         public static String getOptionalMap(@Optional Map<Object, Object> arg) {
             return String.valueOf(arg);
+        }
+
+        @APIMethod(namespace = "lists")
+        public static String getList(List<Object> arg) {
+            return arg.get(2).toString();
         }
 
         @APIMethod(namespace = "objects")

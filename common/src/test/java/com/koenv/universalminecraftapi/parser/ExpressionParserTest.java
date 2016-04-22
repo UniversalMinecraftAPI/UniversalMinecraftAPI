@@ -132,6 +132,29 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void simpleStringList() throws Exception {
+        List<Expression> items = Arrays.asList(new StringExpression("test"), new StringExpression("test"));
+        ListExpression parameter = new ListExpression(items);
+
+        NamespaceExpression namespaceExpression = new NamespaceExpression("test");
+        MethodCallExpression methodCallExpression = new MethodCallExpression("getIt", Collections.singletonList(parameter));
+
+        ChainedMethodCallExpression root = new ChainedMethodCallExpression(Arrays.asList(namespaceExpression, methodCallExpression));
+
+        assertEquals(root, new ExpressionParser().parse("test.getIt(['test', 'test'])"));
+    }
+
+    @Test
+    public void listWithMixedItems() throws Exception {
+        new ExpressionParser().parse("test.getIt([\"test\", {'key'='value', 'test'=['test']}, method.getMethod(), 12])");
+    }
+
+    @Test
+    public void listWithTrailingComma() throws Exception {
+        new ExpressionParser().parse("test.getIt(['test',])");
+    }
+
+    @Test
     public void methodAsParameter() throws Exception {
         new ExpressionParser().parse("getIt(getIt())");
     }

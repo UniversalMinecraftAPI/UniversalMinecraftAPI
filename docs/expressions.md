@@ -173,3 +173,21 @@ Invalid maps:
 {'key'='value'
 'key'='value'
 ```
+
+## List
+A list is defined as follows:
+* An opening bracket (`[`)
+* 0 or more times a valid expression. Items must be separated by a comma (`,`).
+* A closing bracket (`]`)
+
+Valid lists:
+```
+['item1', 'item2', 12, method.getIt()]
+['item1', 'item2', ]
+```
+
+Invalid lists:
+```
+['item'
+'item', 'item'
+```

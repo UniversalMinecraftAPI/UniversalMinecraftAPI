@@ -405,6 +405,8 @@ public class MethodInvoker {
             return ((StringExpression) expression).getValue();
         } else if (expression instanceof MapExpression) {
             return convertMap((MapExpression) expression, invoker);
+        } else if (expression instanceof ListExpression) {
+            return convertList((ListExpression) expression, invoker);
         } else if (expression instanceof MethodCallExpression) {
             return invokeMethod(null, (MethodCallExpression) expression, null, invoker);
         } else if (expression instanceof ChainedMethodCallExpression) {
@@ -418,6 +420,14 @@ public class MethodInvoker {
         Map<Object, Object> result = new HashMap<>();
         for (Map.Entry<Expression, Expression> entry : expression.getValue().entrySet()) {
             result.put(convertExpression(entry.getKey(), invoker), convertExpression(entry.getValue(), invoker));
+        }
+        return result;
+    }
+
+    protected List<Object> convertList(ListExpression expression, InvokeParameters invoker) throws MethodInvocationException {
+        List<Object> result = new ArrayList<>();
+        for (Expression item : expression.getValue()) {
+            result.add(convertExpression(item, invoker));
         }
         return result;
     }

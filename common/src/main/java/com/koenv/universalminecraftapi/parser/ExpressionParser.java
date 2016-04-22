@@ -22,6 +22,7 @@ public class ExpressionParser {
     protected static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(?i)true|false");
     protected static final Pattern SEPARATOR_PATTERN = Pattern.compile("^\\.");
     protected static final Pattern MAP_PATTERN = Pattern.compile("^\\{");
+    protected static final Pattern LIST_PATTERN = Pattern.compile("^\\[");
 
     /**
      * Parse expressions from a string
@@ -87,6 +88,10 @@ public class ExpressionParser {
         matcher = MAP_PATTERN.matcher(string);
         if (matcher.find()) {
             return parseMap(string, context);
+        }
+        matcher = LIST_PATTERN.matcher(string);
+        if (matcher.find()) {
+            return parseList(string, context);
         }
 
         return parseChainedMethodCallExpression(string, context);
@@ -242,6 +247,45 @@ public class ExpressionParser {
         }
 
         return new ExpressionResult(string, new MapExpression(map));
+    }
+
+    /**
+     * Parses a map
+     *
+     * @param string  The list expression
+     * @param context The current parse context
+     * @return The parsed expression
+     * @throws ParseException Thrown when the expression cannot be parsed
+     */
+    protected ExpressionResult parseList(String string, ParseContext context) throws ParseException {
+        Matcher matcher = LIST_PATTERN.matcher(string);
+        if (!matcher.find()) {
+            throw new ParseException("Unable to parse list " + string);
+        }
+        context.getBracketsCounter().increment();
+        string = string.substring(1);
+
+        List<Expression> list = new ArrayList<>();
+
+        while (!string.isEmpty()) {
+            string = string.trim();
+            if (string.startsWith("]")) {
+                context.getBracketsCounter().decrement();
+                string = string.substring(1);
+                break;
+            }
+            if (string.startsWith(",")) {
+                string = string.substring(1);
+                continue;
+            }
+
+            ExpressionResult expressionResult = parseExpression(string, context);
+
+            list.add(expressionResult.expression);
+            string = expressionResult.string;
+        }
+
+        return new ExpressionResult(string, new ListExpression(list));
     }
 
     /**
