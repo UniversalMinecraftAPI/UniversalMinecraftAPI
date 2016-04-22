@@ -52,7 +52,7 @@ public class ExpressionParserTest {
 
     @Test
     public void stringWithEscapes() throws Exception {
-        new ExpressionParser().parse("'\\b\\t\\n\\r\\''");
+        new ExpressionParser().parse("'\\b\\t\\n\\r\\f\\''");
     }
 
     @Test
@@ -277,5 +277,10 @@ public class ExpressionParserTest {
     @Test(expected = ParseException.class)
     public void invalidUnicodeEscapeThrowsParseException() throws Exception {
         new ExpressionParser().parse("'\\u23'");
+    }
+
+    @Test(expected = ParseException.class)
+    public void unterminatedString() throws Exception {
+        new ExpressionParser().parse("'\n'");
     }
 }
