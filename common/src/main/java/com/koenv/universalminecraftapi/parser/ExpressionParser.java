@@ -48,7 +48,14 @@ public class ExpressionParser {
      * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseExpression(String string, ParseContext context) throws ParseException {
+        context.getDepth().increment();
+
+        if (context.getDepth().count() > 1000) {
+            throw new ParseException("Stack overflow at string " + string);
+        }
+
         string = string.trim();
+
         Matcher matcher = BOOLEAN_PATTERN.matcher(string);
         if (matcher.find()) {
             string = matcher.replaceFirst("");
