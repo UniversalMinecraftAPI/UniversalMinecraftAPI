@@ -1,9 +1,11 @@
 package com.koenv.universalminecraftapi.methods;
 
+import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.parser.expressions.*;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -53,6 +55,29 @@ public class MethodInvokerTest {
     }
 
     @Test
+    public void invokeChainedMethodOnParentClass() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("objects"));
+        expressions.add(new MethodCallExpression("getObject", new ArrayList<>()));
+        expressions.add(new MethodCallExpression("getInt", new ArrayList<>()));
+        expressions.add(new MethodCallExpression("getName", new ArrayList<>()));
+
+        // objects.getObject().getInt().getName()
+        assertEquals("Integer", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
+    public void invokeChainedMethodOnInterface() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("lists"));
+        expressions.add(new MethodCallExpression("create", new ArrayList<>()));
+        expressions.add(new MethodCallExpression("getFirstItem", new ArrayList<>()));
+
+        // lists.create().getFirstItem()
+        assertEquals("test", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
     public void convertParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new NamespaceExpression("objects"));
@@ -95,6 +120,44 @@ public class MethodInvokerTest {
 
         // booleans.getBoolean(objects.getObjectExtension())
         assertEquals(false, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void invalidParameter() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("ints"));
+
+        expressions.add(
+                new MethodCallExpression(
+                        "getInt",
+                        Collections.singletonList(new StringExpression("test"))
+                )
+        );
+
+        // ints.getInt(12)
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void throwingMethod() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("exceptions"));
+
+        expressions.add(new MethodCallExpression("throwNormal", Collections.emptyList()));
+
+        // exceptions.throwNormal()
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void rethrowableMethod() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("exceptions"));
+
+        expressions.add(new MethodCallExpression("throwRethrowable", Collections.emptyList()));
+
+        // exceptions.throwRethrowable()
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
     }
 
     @Test
@@ -222,6 +285,77 @@ public class MethodInvokerTest {
         assertEquals("test", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
+    @Test
+    public void valueExpressionAsRoot() throws Exception {
+        assertEquals("test", buildMethodInvoker().invokeMethod(new StringExpression("test")));
+    }
+
+    @Test
+    public void methodCallExpressionAsRoot() throws Exception {
+        assertEquals(
+                12,
+                buildMethodInvoker()
+                        .invokeMethod(new MethodCallExpression("getIt", Collections.emptyList()))
+        );
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void nonExistentExpressionAsRoot() throws Exception {
+        buildMethodInvoker().invokeMethod(new Expression() {
+            @Override
+            public String toString() {
+                return null;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return 0;
+            }
+        });
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void nonExistentParameter() throws Exception {
+        buildMethodInvoker().invokeMethod(
+                new MethodCallExpression("getIt", Collections.singletonList(
+                        new Expression() {
+                            @Override
+                            public String toString() {
+                                return null;
+                            }
+
+                            @Override
+                            public boolean equals(Object o) {
+                                return false;
+                            }
+
+                            @Override
+                            public int hashCode() {
+                                return 0;
+                            }
+                        }
+                )
+                )
+        );
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void invalidNumberOfParameters() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new MethodCallExpression(
+                "getIt",
+                Collections.singletonList(new StringExpression("test")))
+        );
+
+        // getIt()
+        assertEquals(12, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
     @Test(expected = MethodInvocationException.class)
     public void invokeMethodWithWrongIntParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
@@ -242,6 +376,110 @@ public class MethodInvokerTest {
 
         // getIt().test.testIt()
         buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void invalidNamespace() throws MethodInvocationException {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("invalid"));
+        expressions.add(new MethodCallExpression("getIt", new ArrayList<>()));
+
+        // invalid.getIt()
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
+    }
+
+    @Test(expected = MethodInvocationException.class)
+    public void invalidClassMethod() throws MethodInvocationException {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("ints"));
+
+        expressions.add(new MethodCallExpression("getInt", Collections.singletonList(new IntegerExpression(12))));
+        expressions.add(new MethodCallExpression("getIt", new ArrayList<>()));
+
+        // ints.getInt(getIt())
+        buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions));
+    }
+
+    @Test(expected = MethodRegistrationException.class)
+    public void nonStaticMethodThrows() throws MethodRegistrationException {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.registerMethods(NonStaticMethod.class);
+    }
+
+    @Test(expected = MethodRegistrationException.class)
+    public void invalidOperatesOnThrows() throws MethodRegistrationException {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.registerMethods(NoValidOperatesOn.class);
+    }
+
+    @Test(expected = MethodRegistrationException.class)
+    public void unmatchingValidOperatesOn() throws MethodRegistrationException {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.registerMethods(UnmatchingValidOperatesOn.class);
+    }
+
+    @Test
+    public void namespaceOnClass() throws MethodRegistrationException {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.registerMethods(NamespaceOnClass.class);
+    }
+
+    @Test(expected = MethodAccessDeniedException.class)
+    public void invokerNoPermissionTest() throws MethodInvocationException {
+        MethodInvoker methodInvoker = buildMethodInvoker();
+
+        Queue<Boolean> queue = new LinkedBlockingQueue<>(Collections.singletonList(false));
+
+        TestInvoker invoker = new TestInvoker(null, queue);
+
+        methodInvoker.invokeMethod(new MethodCallExpression("getIt", Collections.emptyList()), invoker);
+    }
+
+    @Test
+    public void invokerWithParameter() throws MethodInvocationException {
+        Map<Class<?>, Object> map = new HashMap<>();
+        map.put(String.class, "test");
+        TestInvoker invoker = new TestInvoker(map, null);
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("objects"));
+        expressions.add(new MethodCallExpression("getString", new ArrayList<>()));
+
+        // objects.getString()
+        assertEquals(
+                "test",
+                buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions), invoker)
+        );
+    }
+
+    @Test
+    public void invokerWithParameterOnMultipleParameterMethod() throws MethodInvocationException {
+        Map<Class<?>, Object> map = new HashMap<>();
+        map.put(int.class, 12);
+        TestInvoker invoker = new TestInvoker(map, null);
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("objects"));
+        expressions.add(
+                new MethodCallExpression(
+                        "getMultipleString",
+                        Arrays.asList(
+                                new StringExpression("test"),
+                                new StringExpression("test")
+                        )
+                )
+        );
+
+        // objects.getString("test")
+        assertEquals(
+                "testtest",
+                buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions), invoker)
+        );
+    }
+
+    @Test
+    public void allMethodsAreRegistered() {
+        MethodInvoker methodInvoker = buildMethodInvoker();
+        assertEquals(10, methodInvoker.getNamespaces().size());
+        assertEquals(3, methodInvoker.getClasses().size());
     }
 
     private MethodInvoker buildMethodInvoker() {
@@ -311,6 +549,11 @@ public class MethodInvokerTest {
             return arg.get(2).toString();
         }
 
+        @APIMethod(namespace = "lists")
+        public static List<String> create() {
+            return Collections.singletonList("test");
+        }
+
         @APIMethod(namespace = "objects")
         public static MethodInvokerTestObject getObject() {
             return new MethodInvokerTestObject();
@@ -324,6 +567,36 @@ public class MethodInvokerTest {
         @APIMethod(namespace = "objects")
         public static String getUUID(UUID uuid) {
             return uuid.toString();
+        }
+
+        @APIMethod(namespace = "objects")
+        public static String getString(String string) {
+            return string;
+        }
+
+        @APIMethod(namespace = "objects")
+        public static String getMultipleString(String string, int arg, String it) {
+            return string + it;
+        }
+
+        @APIMethod(namespace = "exceptions")
+        public static void throwNormal() throws Exception {
+            throw new Exception();
+        }
+
+        @APIMethod(namespace = "exceptions")
+        public static void throwRethrowable() throws Exception{
+            throw new APIException("Test", 12);
+        }
+
+        @APIMethod(operatesOn = Object.class)
+        public static String getName(Object object) {
+            return object.getClass().getSimpleName();
+        }
+
+        @APIMethod(operatesOn = List.class)
+        public static String getFirstItem(List list) {
+            return list.get(0).toString();
         }
 
         @APIMethod(operatesOn = MethodInvokerTestObject.class)
@@ -350,6 +623,61 @@ public class MethodInvokerTest {
 
         private interface MethodInvokerTestInterface {
             boolean getBoolean();
+        }
+    }
+
+    private static class NonStaticMethod {
+        @APIMethod
+        public String getIt() {
+            return "";
+        }
+    }
+
+    private static class NoValidOperatesOn {
+        @APIMethod(operatesOn = Object.class)
+        public static String getObject() {
+            return "";
+        }
+    }
+
+    private static class UnmatchingValidOperatesOn {
+        @APIMethod(operatesOn = String.class)
+        public static String getObject(Object self) {
+            return self.toString();
+        }
+    }
+
+    @APINamespace("test")
+    private static class NamespaceOnClass {
+        @APIMethod
+        public static String getIt() {
+            return "";
+        }
+    }
+
+    private static class TestInvoker implements InvokeParameters {
+        private Map<Class<?>, Object> objects;
+        private Queue<Boolean> hasPermissions;
+
+        public TestInvoker(Map<Class<?>, Object> objects, Queue<Boolean> hasPermissions) {
+            this.objects = objects;
+            this.hasPermissions = hasPermissions;
+        }
+
+        @Override
+        public Object get(Class<?> clazz) {
+            if (objects == null) {
+                return null;
+            }
+            return objects.get(clazz);
+        }
+
+        @Override
+        public boolean checkPermission(AbstractMethod method) {
+            if (hasPermissions == null) {
+                return true;
+            }
+            return hasPermissions.poll();
         }
     }
 }
