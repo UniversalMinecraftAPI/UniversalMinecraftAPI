@@ -237,6 +237,10 @@ public class ExpressionParser {
             string = expressionResult.string;
         }
 
+        if (key != null) {
+            throw new ParseException("Invalid map: every key requires a value, key " + key + " doesn't have a value");
+        }
+
         return new ExpressionResult(string, new MapExpression(map));
     }
 

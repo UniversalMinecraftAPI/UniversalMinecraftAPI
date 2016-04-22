@@ -92,7 +92,7 @@ public class ExpressionParserTest {
         MapExpression parameter = (MapExpression) methodCall.getParameters().get(0);
 
         Map<Expression, Expression> expectedNestedMap = new HashMap<>();
-        expectedNestedMap.put(new StringExpression("key"),new ChainedMethodCallExpression(Collections.singletonList(new MethodCallExpression("getIt", new ArrayList<>()))));
+        expectedNestedMap.put(new StringExpression("key"), new ChainedMethodCallExpression(Collections.singletonList(new MethodCallExpression("getIt", new ArrayList<>()))));
 
         Map<Expression, Expression> expectedMap = new HashMap<>();
         expectedMap.put(new StringExpression("key"), new MapExpression(expectedNestedMap));
@@ -209,5 +209,10 @@ public class ExpressionParserTest {
     @Test(expected = ParseException.class)
     public void invalidNamespacesThrowsParseException() throws Exception {
         new ExpressionParser().parse("test.getThat().test.getThat()");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidMapThrowsParseException() throws Exception {
+        new ExpressionParser().parse("{'key'}");
     }
 }
