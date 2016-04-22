@@ -33,10 +33,10 @@ public class UserMethods {
     }
 
     @APIMethod
-    public static String getCurrentUser(Invoker invoker) {
+    public static User getCurrentUser(Invoker invoker) {
         if (invoker instanceof BaseHttpInvoker) {
             BaseHttpInvoker httpInvoker = (BaseHttpInvoker) invoker;
-            return httpInvoker.getUser().getUsername();
+            return httpInvoker.getUser();
         }
         throw new APIException("Invalid user", ErrorCodes.INVALID_CREDENTIALS);
     }
