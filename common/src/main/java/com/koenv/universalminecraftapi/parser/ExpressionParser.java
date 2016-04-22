@@ -260,8 +260,58 @@ public class ExpressionParser {
      * @param string String expression, such as `"test"`
      * @return The parsed expression
      */
-    protected StringExpression parseStringExpression(String string) {
-        return new StringExpression(string.substring(1, string.length() - 1).replaceAll("\\\\", ""));
+    protected StringExpression parseStringExpression(String string) throws ParseException {
+        string = string.substring(1, string.length() - 1);
+
+        StringBuilder finalString = new StringBuilder();
+
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+            switch (c) {
+                case 0:
+                case '\n':
+                case '\r':
+                    throw new ParseException("Invalid string: unterminated at " + string + " (column " + i + ")");
+                case '\\':
+                    c = string.charAt(++i);
+                    switch (c) {
+                        case 'b': // backspace
+                            finalString.append('\b');
+                            break;
+                        case 't': // tab
+                            finalString.append('\t');
+                            break;
+                        case 'n': // new line
+                            finalString.append('\n');
+                            break;
+                        case 'f': // form feed
+                            finalString.append('\f');
+                            break;
+                        case 'r': // carriage return
+                            finalString.append('\r');
+                            break;
+                        case 'u': // unicode escape
+                            if (string.length() - i < 5) {
+                                throw new ParseException("Invalid unicode escape at " + string + " (column " + i + ")");
+                            }
+                            finalString.append((char) Integer.parseInt(string.substring(i + 1, i + 5), 16));
+                            i += 4;
+                            break;
+                        case '\'':
+                        case '"':
+                        case '\\':
+                        case '/':
+                            finalString.append(c);
+                            break;
+                        default:
+                            throw new ParseException("Invalid escape at " + string + " (column " + i + ")");
+                    }
+                    break;
+                default:
+                    finalString.append(c);
+            }
+        }
+        return new StringExpression(finalString.toString());
     }
 
     /**

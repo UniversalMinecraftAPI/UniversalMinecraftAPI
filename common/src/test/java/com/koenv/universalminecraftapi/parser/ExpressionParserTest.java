@@ -51,6 +51,16 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void stringWithEscapes() throws Exception {
+        new ExpressionParser().parse("'\\b\\t\\n\\r\\''");
+    }
+
+    @Test
+    public void stringWithUnicodeEscape() throws Exception {
+        assertEquals(new StringExpression("15\u00f8C"), new ExpressionParser().parse("'15\\u00f8C'"));
+    }
+
+    @Test
     public void mapAsParameter() throws Exception {
         Expression expression = new ExpressionParser().parse("getIt({\"key\" = \"value\"})");
 
@@ -229,5 +239,15 @@ public class ExpressionParserTest {
     @Test(expected = ParseException.class)
     public void invalidMapThrowsParseException() throws Exception {
         new ExpressionParser().parse("{'key'}");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidEscapeThrowsParseException() throws Exception {
+        new ExpressionParser().parse("'my\\ name'");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidUnicodeEscapeThrowsParseException() throws Exception {
+        new ExpressionParser().parse("'\\u23'");
     }
 }
