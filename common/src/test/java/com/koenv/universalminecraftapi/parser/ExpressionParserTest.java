@@ -102,7 +102,22 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void testAlternateStringAndMap() throws Exception {
+    public void mapWithAlternateStringAndAlternateStringParameter() throws Exception {
+        new ExpressionParser().parse("it.get('test', {'key'='value'})");
+    }
+
+    @Test
+    public void mapWithStringAndStringParameter() throws Exception {
+        new ExpressionParser().parse("it.get(\"test\", {\"key\"=\"value\"})");
+    }
+
+    @Test
+    public void mapWithAlternateStringAndStringAndDoubleParameter() throws Exception {
+        new ExpressionParser().parse("it.get({'key'='value', 'key2'='value2'}, 'test', 12)");
+    }
+
+    @Test
+    public void alternateStringAndMap() throws Exception {
         new ExpressionParser().parse("streams.subscribe('console', {'nostrip'='true'})");
     }
 

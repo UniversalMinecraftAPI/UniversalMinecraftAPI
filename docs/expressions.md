@@ -115,7 +115,9 @@ a23.123
 ## String
 A string consists of the following:
 * An opening quote (`"` or `'`)
-* 0 or more characters which are not one of the following, unless preceded by a backslash (`\`): the quote used as opening quote, `{`, `}`, `\`
+* 0 or more characters which are not one of the following, unless preceded by a backslash (`\`): 
+    * The quote used as opening quote
+    * A backslash (`\`)
 * A closing quote matching the opening quote
 
 Valid strings:
@@ -128,8 +130,8 @@ Valid strings:
 
 Invalid strings:
 ```
-"my name{"
-"my name{"
+'my name\'
+'my\ name'
 'my name"
 'my name
 'my name''
