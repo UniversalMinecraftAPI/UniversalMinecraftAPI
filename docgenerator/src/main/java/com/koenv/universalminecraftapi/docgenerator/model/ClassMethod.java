@@ -23,9 +23,7 @@ public class ClassMethod extends AbstractMethod {
 
     @Override
     public String getDeclaration() {
-        return "<" +
-                operatesOn +
-                ">" +
+        return operatesOn +
                 "." +
                 getDeclarationWithoutOperatesOn();
     }
@@ -39,7 +37,13 @@ public class ClassMethod extends AbstractMethod {
         arguments
                 .stream()
                 .skip(1)
-                .forEach(parameter -> joiner.add(parameter.getType()));
+                .forEach(parameter -> {
+                    String value = parameter.getName();
+                    if (parameter.isOptional()) {
+                        value = "[" + value + "]";
+                    }
+                    joiner.add(value);
+                });
 
         stringBuilder.append(joiner.toString());
         stringBuilder.append(")");

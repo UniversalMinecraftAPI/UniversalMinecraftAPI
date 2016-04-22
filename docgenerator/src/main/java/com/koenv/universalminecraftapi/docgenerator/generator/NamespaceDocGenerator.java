@@ -1,5 +1,6 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
+import com.koenv.universalminecraftapi.docgenerator.ArgumentsUtil;
 import com.koenv.universalminecraftapi.docgenerator.model.NamespacedMethod;
 import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
@@ -8,8 +9,6 @@ import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueType;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -19,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NamespaceDocGenerator extends AbstractGenerator {
@@ -61,7 +62,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
             String example = "";
             UniversalMinecraftAPIClass returnType = classResolver.resolve(method.getReturns());
             List<ArgumentWrapper> arguments = method.getArguments().stream()
-                    .map(argument -> new ArgumentWrapper(argument.getName(), classResolver.resolve(argument.getType())))
+                    .map(argument -> new ArgumentWrapper(argument.getName(), classResolver.resolve(argument.getType()), argument.isOptional()))
                     .collect(Collectors.toList());
 
             File methodFile = new File(rootDirectory, namespace + "/" + method.getName() + ".conf");
@@ -80,45 +81,9 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                         case STRING:
                             example = config.getString("example");
                             break;
-                        case LIST:
-                            List<ConfigValue> values = config.getList("example");
-                            if (values.size() != method.getArguments().size()) {
-                                throw new IllegalArgumentException(
-                                        "Invalid number of parameters for example for method " +
-                                                method.getDeclaration() + ". Expected " +
-                                                method.getArguments().size() + ", received " +
-                                                values.size()
-                                );
-                            }
-                            StringBuilder stringBuilder = new StringBuilder();
-                            stringBuilder.append(method.getNamespace());
-                            stringBuilder.append(".");
-                            stringBuilder.append(method.getName());
-                            stringBuilder.append("(");
-                            StringJoiner joiner = new StringJoiner(", ");
-
-                            AtomicInteger i = new AtomicInteger();
-                            method.getArguments()
-                                    .stream()
-                                    .map(argument -> {
-                                        ConfigValue a = values.get(i.getAndIncrement());
-                                        if (a == null) {
-                                            throw new IllegalArgumentException("Missing value for example argument " + argument.getName() + " for method " + method.getDeclaration());
-                                        }
-                                        if (a.valueType() == ConfigValueType.STRING) {
-                                            return "'" + a.unwrapped() + "'";
-                                        }
-                                        return a.unwrapped().toString();
-                                    })
-                                    .forEach(joiner::add);
-
-                            stringBuilder.append(joiner.toString());
-                            stringBuilder.append(")");
-                            example = stringBuilder.toString();
-                            break;
                         case OBJECT:
                             Map<String, Object> exampleArguments = new HashMap<>();
-                            config.getConfig("example").entrySet().forEach(entry -> exampleArguments.put(entry.getKey(), entry.getValue().unwrapped()));
+                            config.getConfig("example").root().entrySet().forEach(entry -> exampleArguments.put(entry.getKey(), entry.getValue().unwrapped()));
                             if (exampleArguments.size() != method.getArguments().size()) {
                                 throw new IllegalArgumentException(
                                         "Invalid number of parameters for example for method " +
@@ -127,30 +92,8 @@ public class NamespaceDocGenerator extends AbstractGenerator {
                                                 exampleArguments.size()
                                 );
                             }
-                            StringBuilder exampleBuilder = new StringBuilder();
-                            exampleBuilder.append(method.getNamespace());
-                            exampleBuilder.append(".");
-                            exampleBuilder.append(method.getName());
-                            exampleBuilder.append("(");
-                            StringJoiner exampleJoiner = new StringJoiner(", ");
 
-                            method.getArguments()
-                                    .stream()
-                                    .map(argument -> {
-                                        Object a = exampleArguments.get(argument.getName());
-                                        if (a == null) {
-                                            throw new IllegalArgumentException("Missing value for example argument " + argument.getName() + " for method " + method.getDeclaration());
-                                        }
-                                        if (a instanceof String) {
-                                            return "\"" + a + "\"";
-                                        }
-                                        return a.toString();
-                                    })
-                                    .forEach(exampleJoiner::add);
-
-                            exampleBuilder.append(exampleJoiner.toString());
-                            exampleBuilder.append(")");
-                            example = exampleBuilder.toString();
+                            example = ArgumentsUtil.getExample(method, exampleArguments);
                             break;
                         default:
                             throw new IllegalArgumentException("Invalid example format for " + method.getDeclaration()
@@ -163,7 +106,7 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
             if (example.isEmpty()) {
                 if (method.getArguments().size() == 0) {
-                    example = method.getDeclaration();
+                    example = ArgumentsUtil.getExample(method, new HashMap<>());
                 }
             }
 
@@ -265,10 +208,12 @@ public class NamespaceDocGenerator extends AbstractGenerator {
     public static class ArgumentWrapper {
         private String name;
         private UniversalMinecraftAPIClass type;
+        private boolean optional;
 
-        public ArgumentWrapper(String name, UniversalMinecraftAPIClass type) {
+        public ArgumentWrapper(String name, UniversalMinecraftAPIClass type, boolean optional) {
             this.name = name;
             this.type = type;
+            this.optional = optional;
         }
 
         public String getName() {
@@ -277,6 +222,10 @@ public class NamespaceDocGenerator extends AbstractGenerator {
 
         public UniversalMinecraftAPIClass getType() {
             return type;
+        }
+
+        public boolean isOptional() {
+            return optional;
         }
     }
 }

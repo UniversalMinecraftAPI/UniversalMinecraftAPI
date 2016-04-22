@@ -86,7 +86,7 @@ public final class ExpressionPrinter {
         return builder.toString();
     }
 
-    private static String printMapExpression(MapExpression expression) {
+    public static String printMapExpression(MapExpression expression) {
         StringBuilder builder = new StringBuilder();
         builder.append('{');
         List<Map.Entry<Expression, Expression>> expressions = new LinkedList<>(expression.getValue().entrySet());

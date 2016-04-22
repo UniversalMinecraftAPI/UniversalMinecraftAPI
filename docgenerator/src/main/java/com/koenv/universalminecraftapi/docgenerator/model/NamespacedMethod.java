@@ -35,7 +35,13 @@ public class NamespacedMethod extends AbstractMethod {
 
         arguments
                 .stream()
-                .forEach(parameter -> joiner.add(parameter.getName()));
+                .forEach(parameter -> {
+                    String value = parameter.getName();
+                    if (parameter.isOptional()) {
+                        value = "[" + value + "]";
+                    }
+                    joiner.add(value);
+                });
 
         stringBuilder.append(joiner.toString());
         stringBuilder.append(")");

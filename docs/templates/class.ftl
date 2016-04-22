@@ -40,6 +40,7 @@
                             <td width="30%">Arguments</td>
                             <td width="70%">
                                 <#list method.arguments as argument>
+                                    <#if argument.optional><span class="label label-info">Optional</span></#if>
                                     <strong><@type type=argument.type/></strong> ${argument.name}: ${method.argumentDescriptions[argument.name]!''}<br/>
                                 </#list>
                             </td>

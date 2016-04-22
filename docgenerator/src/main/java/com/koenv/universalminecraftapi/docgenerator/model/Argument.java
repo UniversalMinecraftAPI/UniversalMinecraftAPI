@@ -5,6 +5,7 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 public class Argument {
     private String name;
     private String type;
+    private boolean optional;
 
     public Argument(JSONObject jsonObject) {
         this.populateFrom(jsonObject);
@@ -18,9 +19,14 @@ public class Argument {
         return type;
     }
 
+    public boolean isOptional() {
+        return optional;
+    }
+
     public void populateFrom(JSONObject jsonObject) {
         this.name = jsonObject.getString("name");
         this.type = jsonObject.getString("type");
+        this.optional = jsonObject.getBoolean("optional");
     }
 
     @Override
