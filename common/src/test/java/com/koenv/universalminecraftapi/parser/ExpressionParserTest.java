@@ -192,6 +192,21 @@ public class ExpressionParserTest {
     }
 
     @Test(expected = ParseException.class)
+    public void invalidNumberOfBracesOnItsOwnThrowsParseException() throws Exception {
+        new ExpressionParser().parse("{'key'='value'");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidNumberOfBracesExceptionThrowsParseException() throws Exception {
+        new ExpressionParser().parse("getIt({'key'='value')");
+    }
+
+    @Test(expected = ParseException.class)
+    public void invalidNumberOfParenthesesAndBracesThrowsParseException() throws Exception {
+        new ExpressionParser().parse("getIt(}");
+    }
+
+    @Test(expected = ParseException.class)
     public void invalidNamespacesThrowsParseException() throws Exception {
         new ExpressionParser().parse("test.getThat().test.getThat()");
     }

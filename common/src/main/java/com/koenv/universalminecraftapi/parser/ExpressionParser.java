@@ -34,7 +34,10 @@ public class ExpressionParser {
         ParseContext context = new ParseContext();
         Expression expression = parseExpression(string, context).expression;
         if (context.getParenthesesCounter().count() != 0) {
-            throw new ParseException("Invalid number of parentheses");
+            throw new ParseException("Invalid number of parentheses ('(' and ')')");
+        }
+        if (context.getBracesCounter().count() != 0) {
+            throw new ParseException("Invalid number of braces ('{' and '}')");
         }
         return expression;
     }
@@ -131,6 +134,10 @@ public class ExpressionParser {
 
         if (expressions.size() == 1 && expressions.get(0) instanceof NamespaceExpression) {
             throw new ParseException("Namespace without method: " + string);
+        }
+
+        if (expressions.size() == 0) {
+            throw new ParseException("Invalid expression at " + string);
         }
 
         return new ExpressionResult(string, new ChainedMethodCallExpression(expressions));
