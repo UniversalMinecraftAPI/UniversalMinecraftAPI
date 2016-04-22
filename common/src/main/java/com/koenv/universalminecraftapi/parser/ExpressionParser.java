@@ -206,10 +206,6 @@ public class ExpressionParser {
      * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseMap(String string, ParseContext context) throws ParseException {
-        Matcher matcher = MAP_PATTERN.matcher(string);
-        if (!matcher.find()) {
-            throw new ParseException("Unable to parse map " + string);
-        }
         context.getBracesCounter().increment();
         string = string.substring(1);
 
@@ -258,10 +254,6 @@ public class ExpressionParser {
      * @throws ParseException Thrown when the expression cannot be parsed
      */
     protected ExpressionResult parseList(String string, ParseContext context) throws ParseException {
-        Matcher matcher = LIST_PATTERN.matcher(string);
-        if (!matcher.find()) {
-            throw new ParseException("Unable to parse list " + string);
-        }
         context.getBracketsCounter().increment();
         string = string.substring(1);
 
