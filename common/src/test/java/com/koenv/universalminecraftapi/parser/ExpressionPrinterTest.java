@@ -104,4 +104,21 @@ public class ExpressionPrinterTest {
 
         assertEquals("getIt({\"double\"=12.67, \"map\"={12=\"value\", \"key\"=getIt()}}, 12.67)", ExpressionPrinter.printExpressions(expressions));
     }
+
+    @Test
+    public void nestedListPrint() throws Exception {
+        List<Expression> expressions = new ArrayList<>();
+
+        List< Expression> list = new ArrayList<>();
+        List<Expression> nestedList = new ArrayList<>();
+        nestedList.add(new MethodCallExpression("getIt", new ArrayList<>()));
+        nestedList.add(new IntegerExpression(12));
+
+        list.add(new ListExpression(nestedList));
+        list.add(new StringExpression("double"));
+
+        expressions.add(new MethodCallExpression("getIt", Arrays.asList(new ListExpression(list), new DoubleExpression(12.67))));
+
+        assertEquals("getIt([[getIt(), 12], \"double\"], 12.67)", ExpressionPrinter.printExpressions(expressions));
+    }
 }

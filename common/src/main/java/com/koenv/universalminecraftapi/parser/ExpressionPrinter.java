@@ -51,6 +51,8 @@ public final class ExpressionPrinter {
             return printChainedMethodCallExpression((ChainedMethodCallExpression) expression);
         } else if (expression instanceof MapExpression) {
             return printMapExpression((MapExpression) expression);
+        } else if (expression instanceof ListExpression) {
+            return printListExpression((ListExpression) expression);
         } else {
             return "undefined";
         }
@@ -86,6 +88,12 @@ public final class ExpressionPrinter {
         return builder.toString();
     }
 
+    /**
+     * Prints a map.
+     *
+     * @param expression The expression to print
+     * @return The printed expression
+     */
     public static String printMapExpression(MapExpression expression) {
         StringBuilder builder = new StringBuilder();
         builder.append('{');
@@ -100,6 +108,21 @@ public final class ExpressionPrinter {
         }
         builder.append('}');
         return builder.toString();
+    }
+
+    /**
+     * Prints a list.
+     *
+     * @param expression The expression to print
+     * @return The printed expression
+     */
+    public static String printListExpression(ListExpression expression) {
+        StringJoiner joiner = new StringJoiner(", ");
+        expression.getValue().forEach(item -> {
+            joiner.add(printExpression(item));
+        });
+
+        return "[" + joiner.toString() + "]";
     }
 
     /**

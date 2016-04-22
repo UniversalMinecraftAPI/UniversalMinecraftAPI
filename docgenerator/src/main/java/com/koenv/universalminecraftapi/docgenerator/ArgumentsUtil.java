@@ -39,6 +39,9 @@ public class ArgumentsUtil {
         } else if (object instanceof Map) {
             //noinspection unchecked
             return new MapExpression(convertMap((Map<Object, Object>) object));
+        } else if (object instanceof List) {
+            //noinspection unchecked
+            return new ListExpression(convertList((List<Object>) object));
         }
         throw new IllegalArgumentException("Unable to convert object " + object.getClass().getName() + ": " + object.toString());
     }
@@ -46,6 +49,12 @@ public class ArgumentsUtil {
     public static Map<Expression, Expression> convertMap(Map<Object, Object> map) {
         Map<Expression, Expression> result = new HashMap<>();
         map.forEach((key, value) -> result.put(convert(key), convert(value)));
+        return result;
+    }
+
+    public static List<Expression> convertList(List<Object> list) {
+        List<Expression> result = new ArrayList<>();
+        list.forEach(o -> result.add(convert(o)));
         return result;
     }
 }
