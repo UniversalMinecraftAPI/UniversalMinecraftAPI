@@ -29,8 +29,6 @@ public class HelpCommand extends Command {
             commandSource.sendMessage(command.getDescription());
             commandSource.sendMessage(ChatColor.GREEN, "-------------------");
         }
-
-        return true;
     }
 
     @Override

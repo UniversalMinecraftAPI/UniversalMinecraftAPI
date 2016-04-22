@@ -21,13 +21,13 @@ public class CreateApiDocCommand extends Command {
     public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
         if (args.length < 1) {
             commandSource.sendMessage(ChatColor.RED, "Missing argument: file name");
-            return false;
+            return;
         }
 
         File file = new File(args[0]);
         if (file.exists()) {
             commandSource.sendMessage(ChatColor.RED, "File already exists, aborting");
-            return false;
+            return;
         }
 
         MethodInvoker methodInvoker = uma.getMethodInvoker();
@@ -63,12 +63,12 @@ public class CreateApiDocCommand extends Command {
         } catch (IOException e) {
             e.printStackTrace();
             commandSource.sendMessage(ChatColor.RED, "Failed to write to file: " + e.toString());
-            return false;
+            return;
         }
 
         commandSource.sendMessage(ChatColor.GREEN, "API documentation saved to file " + file.getPath());
 
-        return true;
+        return;
     }
 
     private JSONObject getJsonMethod(AbstractMethod methodEntry) {

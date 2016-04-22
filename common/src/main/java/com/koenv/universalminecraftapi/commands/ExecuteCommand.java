@@ -11,7 +11,7 @@ public class ExecuteCommand extends Command {
     public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource source, String[] args) {
         if (args.length < 1) {
             source.sendMessage(ChatColor.RED, "Please specify the expression.");
-            return true;
+            return;
         }
         StringBuilder execStringBuilder = new StringBuilder();
         for (String arg : args) {
@@ -22,11 +22,9 @@ public class ExecuteCommand extends Command {
             Expression expression = uma.getExpressionParser().parse(execStringBuilder.toString());
             Object result = uma.getMethodInvoker().invokeMethod(expression);
             source.sendMessage(ChatColor.GREEN, uma.getSerializerManager().serialize(result).toString());
-            return true;
         } catch (ParseException | MethodInvocationException e) {
             source.sendMessage(ChatColor.RED, "Failed to execute command: " + e.getMessage());
             e.printStackTrace();
-            return true;
         }
     }
 

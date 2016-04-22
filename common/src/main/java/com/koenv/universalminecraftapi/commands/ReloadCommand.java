@@ -14,14 +14,14 @@ public class ReloadCommand extends Command {
             case "global":
                 if (!commandSource.hasPermission("universalminecraftapi.reload.global")) {
                     commandSource.sendMessage(ChatColor.RED, "No permission to do a global reload");
-                    return false;
+                    return;
                 }
                 commandSource.sendMessage(ChatColor.GREEN, "Global reloaded (NOT IMPLEMENTED YET)");
                 break;
             case "users":
                 if (!commandSource.hasPermission("universalminecraftapi.reload.global")) {
                     commandSource.sendMessage(ChatColor.RED, "No permission to do a users reload");
-                    return false;
+                    return;
                 }
 
                 try {
@@ -39,10 +39,8 @@ public class ReloadCommand extends Command {
                 break;
             default:
                 commandSource.sendMessage(ChatColor.RED, "Invalid reload specified");
-                return false;
+                break;
         }
-
-        return true;
     }
 
     @Override
