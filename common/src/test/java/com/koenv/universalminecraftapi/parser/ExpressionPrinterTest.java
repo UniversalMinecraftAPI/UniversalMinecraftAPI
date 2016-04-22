@@ -102,7 +102,7 @@ public class ExpressionPrinterTest {
 
         expressions.add(new MethodCallExpression("getIt", Arrays.asList(new MapExpression(map), new DoubleExpression(12.67))));
 
-        assertEquals("getIt({\"double\"=12.67, \"map\"={12=\"value\", \"key\"=getIt()}}, 12.67)", ExpressionPrinter.printExpressions(expressions));
+        assertEquals("getIt({\"double\" = 12.67, \"map\" = {12 = \"value\", \"key\" = getIt()}}, 12.67)", ExpressionPrinter.printExpressions(expressions));
     }
 
     @Test

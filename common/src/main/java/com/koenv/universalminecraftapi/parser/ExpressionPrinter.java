@@ -19,15 +19,12 @@ public final class ExpressionPrinter {
      * @return The sequence of expressions
      */
     public static String printExpressions(List<Expression> expressions) {
-        StringBuilder builder = new StringBuilder();
+        StringJoiner joiner = new StringJoiner(".");
         for (Expression expression : expressions) {
-            builder.append(printExpression(expression));
-            builder.append(".");
+            joiner.add(printExpression(expression));
         }
 
-        builder.deleteCharAt(builder.length() - 1);
-
-        return builder.toString();
+        return joiner.toString();
     }
 
     /**
@@ -75,17 +72,11 @@ public final class ExpressionPrinter {
      * @return The printed expression
      */
     public static String printMethodCallExpression(MethodCallExpression methodCallExpression) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(methodCallExpression.getMethodName());
-        builder.append('(');
-        for (int i = 0; i < methodCallExpression.getParameters().size(); i++) {
-            builder.append(printExpression(methodCallExpression.getParameters().get(i)));
-            if (i != methodCallExpression.getParameters().size() - 1) {
-                builder.append(", ");
-            }
-        }
-        builder.append(')');
-        return builder.toString();
+        StringJoiner joiner = new StringJoiner(", ");
+        methodCallExpression.getParameters().forEach(expression -> {
+            joiner.add(printExpression(expression));
+        });
+        return methodCallExpression.getMethodName() + "(" + joiner.toString() + ")";
     }
 
     /**
@@ -95,19 +86,12 @@ public final class ExpressionPrinter {
      * @return The printed expression
      */
     public static String printMapExpression(MapExpression expression) {
-        StringBuilder builder = new StringBuilder();
-        builder.append('{');
+        StringJoiner joiner = new StringJoiner(", ");
         List<Map.Entry<Expression, Expression>> expressions = new LinkedList<>(expression.getValue().entrySet());
-        for (int i = 0; i < expressions.size(); i++) {
-            builder.append(printExpression(expressions.get(i).getKey()));
-            builder.append('=');
-            builder.append(printExpression(expressions.get(i).getValue()));
-            if (i != expressions.size() - 1) {
-                builder.append(", ");
-            }
-        }
-        builder.append('}');
-        return builder.toString();
+        expression.getValue().forEach((key, value) -> {
+            joiner.add(printExpression(key) + " = " + printExpression(value));
+        });
+        return "{" + joiner.toString() + "}";
     }
 
     /**
