@@ -78,6 +78,17 @@ public class MethodInvokerTest {
     }
 
     @Test
+    public void invokeChainedMethodWithNullIntermediateResult() throws MethodInvocationException {
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(new NamespaceExpression("objects"));
+        expressions.add(new MethodCallExpression("getNull", new ArrayList<>()));
+        expressions.add(new MethodCallExpression("getName", new ArrayList<>()));
+
+        // objects.getNull().getName()
+        assertEquals(null, buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
+    }
+
+    @Test
     public void convertParameter() throws Exception {
         List<Expression> expressions = new ArrayList<>();
         expressions.add(new NamespaceExpression("objects"));
@@ -262,6 +273,7 @@ public class MethodInvokerTest {
 
         expressions.add(new MethodCallExpression("getList", parameters));
 
+        // lists.getList(["test", 12.67, "expected"])
         assertEquals("expected", buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions)));
     }
 
@@ -557,6 +569,11 @@ public class MethodInvokerTest {
         @APIMethod(namespace = "objects")
         public static MethodInvokerTestObject getObject() {
             return new MethodInvokerTestObject();
+        }
+
+        @APIMethod(namespace = "objects")
+        public static MethodInvokerTestObject getNull() {
+            return null;
         }
 
         @APIMethod(namespace = "objects")

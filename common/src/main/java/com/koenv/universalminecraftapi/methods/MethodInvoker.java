@@ -96,6 +96,9 @@ public class MethodInvoker {
                     } else {
                         lastResult = invokeMethod(null, (MethodCallExpression) innerExpression, lastResult, invoker);
                     }
+                    if (lastResult == null) {
+                        return null;
+                    }
                 }
             }
             return lastResult;
