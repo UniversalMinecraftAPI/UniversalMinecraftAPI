@@ -71,25 +71,24 @@
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="${method.name}HTTP">
                         <pre><code class="language-http">POST /api/v1/call HTTP/1.1
-                            Host: localhost:20059
-                            Content-Type: application/json
-                            Authorization: Basic YWRtaW46Y2hhbmdlbWU=
+Host: localhost:20059
+Content-Type: application/json
+Authorization: Basic YWRtaW46Y2hhbmdlbWU=
 
-                            {
-                            "expression": ${method.jsonExample}
-                            }</code></pre>
+{
+    "expression": ${method.jsonExample}
+}</code></pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}Curl">
                         <pre><code class="language-bash">curl -X POST \
-                            -H "Content-Type: application/json" \
-                            -H "Authorization: Basic YWRtaW46Y2hhbmdlbWU=" -d '{
-                            "expression": ${method.jsonExample}
-                            }' "http://localhost:20059/api/v1/call"</code></pre>
+-H "Content-Type: application/json" \
+-H "Authorization: Basic YWRtaW46Y2hhbmdlbWU=" -d '{
+    "expression": ${method.jsonExample}
+}' "http://localhost:20059/api/v1/call"</code></pre>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="${method.name}HTTPie">
-                        <pre><code class="language-bash">http -a admin:changeme POST http://localhost:20059/api/v1/call
-                            \
-                            content-type:application/json expression=${method.jsonExample}</code></pre>
+                        <pre><code class="language-bash">http -a admin:changeme POST http://localhost:20059/api/v1/call \
+content-type:application/json expression=${method.jsonExample}</code></pre>
                     </div>
                 </div>
             </div>
