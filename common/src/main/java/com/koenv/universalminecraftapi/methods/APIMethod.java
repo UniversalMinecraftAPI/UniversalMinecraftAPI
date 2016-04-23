@@ -28,7 +28,7 @@ public @interface APIMethod {
      * <p>
      * For example, if the class `Player` needs a method `getName()`, create a method `getName()` as follows:
      * <pre>
-     *     &#64;APIMethod(operatesOn = Player.class, description = "Gets username of a player", returnDescription = "Username of the player")
+     *     &#64;APIMethod(operatesOn = Player.class)
      *     public static String getName(Player self) {
      *         return self.getName():
      *     }

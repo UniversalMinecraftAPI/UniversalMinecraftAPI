@@ -510,10 +510,20 @@ public class MethodInvoker {
         return methods.get(methodName);
     }
 
+    /**
+     * Get all registered namespace methods
+     *
+     * @return All registered namespace methods
+     */
     public Map<String, Map<String, NamespacedMethod>> getNamespaces() {
         return namespaceMethodsMap;
     }
 
+    /**
+     * Get all registered class methods
+     *
+     * @return All registered class methods
+     */
     public Map<Class<?>, Map<String, ClassMethod>> getClasses() {
         return classMethodsMap;
     }
