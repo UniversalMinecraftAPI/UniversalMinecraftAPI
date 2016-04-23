@@ -11,32 +11,23 @@ import com.koenv.universalminecraftapi.streams.StreamManager;
 import com.koenv.universalminecraftapi.users.UserManager;
 import com.koenv.universalminecraftapi.users.model.User;
 import com.koenv.universalminecraftapi.util.json.JSONValue;
-import org.eclipse.jetty.io.ByteBufferPool;
-import org.eclipse.jetty.websocket.api.*;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.api.extensions.IncomingFrames;
-import org.eclipse.jetty.websocket.common.LogicalConnection;
-import org.eclipse.jetty.websocket.common.WebSocketRemoteEndpoint;
-import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.io.IOState;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WriteCallback;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 
 @WebSocket
 public class UniversalMinecraftAPIWebSocket {
+    private final Logger logger = LoggerFactory.getLogger(UniversalMinecraftAPIWebSocket.class);
+
     private RequestHandler requestHandler;
     private SerializerManager serializerManager;
     private StreamManager streamManager;
@@ -65,6 +56,7 @@ public class UniversalMinecraftAPIWebSocket {
             if (user == null && userManager.getUser("default").isPresent()) {
                 user = userManager.getUser("default").get();
             } else if (user == null) {
+                logger.debug("No authentication found and no default user found for session {}",session.toString());
                 if (session.isOpen()) {
                     session.getRemote().sendString(
                             getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "No authentication found and no default user found"),
@@ -75,6 +67,7 @@ public class UniversalMinecraftAPIWebSocket {
             }
         } else {
             if (!authorizationHeader.startsWith("Basic")) {
+                logger.debug("Invalid authorization header for session {}", session);
                 if (session.isOpen()) {
                     session.getRemote().sendString(
                             getErrorResponse(ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"),
@@ -89,6 +82,7 @@ public class UniversalMinecraftAPIWebSocket {
             final String[] values = credentials.split(":", 2);
 
             if (values.length != 2) {
+                logger.debug("Invalid authorization header for session {}", session);
                 if (session.isOpen()) {
                     session.getRemote().sendString(
                             getErrorResponse(ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"),
@@ -102,6 +96,7 @@ public class UniversalMinecraftAPIWebSocket {
             String password = values[1];
 
             if (!userManager.checkCredentials(username, password)) {
+                logger.debug("Invalid credentials for session {}", session);
                 if (session.isOpen()) {
                     session.getRemote().sendString(
                             getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "Invalid credentials"),
@@ -119,6 +114,7 @@ public class UniversalMinecraftAPIWebSocket {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
+        logger.debug("Websocket closed for session {} because {} {}", session, statusCode, reason);
         streamManager.unsubscribe(new WebSocketStreamSubscriber(session));
         invokers.remove(session);
     }
@@ -129,6 +125,7 @@ public class UniversalMinecraftAPIWebSocket {
         try {
             requests = JsonRequest.fromJson(message);
         } catch (IllegalArgumentException e) {
+            logger.debug("Invalid content, must be a JSON object or array for session {}", session);
             if (session.isOpen()) {
                 session.getRemote().sendStringByFuture(getErrorResponse(ErrorCodes.JSON_INVALID, "Invalid content, must be a JSON object or array"));
             }
@@ -141,6 +138,11 @@ public class UniversalMinecraftAPIWebSocket {
         if (session.isOpen()) {
             session.getRemote().sendStringByFuture(response.toString());
         }
+    }
+
+    @OnWebSocketError
+    public void error(Session session, Throwable error) {
+        logger.error("Error in websocket for session {}", error);
     }
 
     private String getErrorResponse(int code, String message) {
@@ -179,186 +181,6 @@ public class UniversalMinecraftAPIWebSocket {
         @Override
         public void writeSuccess() {
             session.close(code, message);
-        }
-    }
-
-    private static class LogRemoteEndpoint extends WebSocketRemoteEndpoint {
-        private RemoteEndpoint delegate;
-
-        public LogRemoteEndpoint(WebSocketRemoteEndpoint delegate) {
-            super(new LogicalConnection() {
-                @Override
-                public void close() {
-
-                }
-
-                @Override
-                public void close(int statusCode, String reason) {
-
-                }
-
-                @Override
-                public void disconnect() {
-
-                }
-
-                @Override
-                public ByteBufferPool getBufferPool() {
-                    return null;
-                }
-
-                @Override
-                public Executor getExecutor() {
-                    return null;
-                }
-
-                @Override
-                public long getIdleTimeout() {
-                    return 0;
-                }
-
-                @Override
-                public IOState getIOState() {
-                    return null;
-                }
-
-                @Override
-                public InetSocketAddress getLocalAddress() {
-                    return null;
-                }
-
-                @Override
-                public long getMaxIdleTimeout() {
-                    return 0;
-                }
-
-                @Override
-                public WebSocketPolicy getPolicy() {
-                    return null;
-                }
-
-                @Override
-                public InetSocketAddress getRemoteAddress() {
-                    return null;
-                }
-
-                @Override
-                public WebSocketSession getSession() {
-                    return null;
-                }
-
-                @Override
-                public boolean isOpen() {
-                    return false;
-                }
-
-                @Override
-                public boolean isReading() {
-                    return false;
-                }
-
-                @Override
-                public void setMaxIdleTimeout(long ms) {
-
-                }
-
-                @Override
-                public void setNextIncomingFrames(IncomingFrames incoming) {
-
-                }
-
-                @Override
-                public void setSession(WebSocketSession session) {
-
-                }
-
-                @Override
-                public SuspendToken suspend() {
-                    return null;
-                }
-
-                @Override
-                public void outgoingFrame(Frame frame, WriteCallback callback, BatchMode batchMode) {
-
-                }
-
-                @Override
-                public void resume() {
-
-                }
-            }, null);
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void sendBytes(ByteBuffer data) throws IOException {
-            System.out.println("Sending bytes on " + Thread.currentThread().getName());
-            delegate.sendBytes(data);
-        }
-
-        @Override
-        public Future<Void> sendBytesByFuture(ByteBuffer data) {
-            System.out.println("Sending bytes by future on " + Thread.currentThread().getName());
-            return delegate.sendBytesByFuture(data);
-        }
-
-        @Override
-        public void sendBytes(ByteBuffer data, WriteCallback callback) {
-            System.out.println("Sending bytes by callback on " + Thread.currentThread().getName());
-            delegate.sendBytes(data, callback);
-        }
-
-        @Override
-        public void sendPartialBytes(ByteBuffer fragment, boolean isLast) throws IOException {
-            System.out.println("Sending partial bytes on " + Thread.currentThread().getName());
-            delegate.sendPartialBytes(fragment, isLast);
-        }
-
-        @Override
-        public void sendPartialString(String fragment, boolean isLast) throws IOException {
-            System.out.println("Sending partial string on " + Thread.currentThread().getName());
-            delegate.sendPartialString(fragment, isLast);
-        }
-
-        @Override
-        public void sendPing(ByteBuffer applicationData) throws IOException {
-            System.out.println("Sending ping on " + Thread.currentThread().getName());
-            delegate.sendPing(applicationData);
-        }
-
-        @Override
-        public void sendPong(ByteBuffer applicationData) throws IOException {
-            System.out.println("Sending pong on " + Thread.currentThread().getName());
-            delegate.sendPong(applicationData);
-        }
-
-        @Override
-        public void sendString(String text) throws IOException {
-            System.out.println("Sending string on " + Thread.currentThread().getName() + ": " + text);
-            delegate.sendString(text);
-        }
-
-        @Override
-        public Future<Void> sendStringByFuture(String text) {
-            System.out.println("Sending string by future on " + Thread.currentThread().getName());
-            return delegate.sendStringByFuture(text);
-        }
-
-        @Override
-        public void sendString(String text, WriteCallback callback) {
-            System.out.println("Sending string on " + Thread.currentThread().getName());
-            delegate.sendString(text, callback);
-        }
-
-        @Override
-        public BatchMode getBatchMode() {
-            return delegate.getBatchMode();
-        }
-
-        @Override
-        public void flush() throws IOException {
-            System.out.println("Flushing on " + Thread.currentThread().getName());
-            delegate.flush();
         }
     }
 }
