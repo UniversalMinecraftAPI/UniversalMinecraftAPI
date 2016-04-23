@@ -16,8 +16,14 @@ import com.koenv.universalminecraftapi.users.model.User;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.koenv.universalminecraftapi.util.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Spark;
 
+import java.io.IOException;
+import java.net.BindException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.List;
@@ -26,6 +32,8 @@ import java.util.Optional;
 import static spark.Spark.*;
 
 public class UniversalMinecraftAPIWebServer {
+    private final Logger logger = LoggerFactory.getLogger(UniversalMinecraftAPIWebServer.class);
+
     private UniversalMinecraftAPIRootConfiguration configuration;
     private RequestHandler requestHandler;
     private SerializerManager serializerManager;
@@ -41,14 +49,35 @@ public class UniversalMinecraftAPIWebServer {
     /**
      * Starts the web server
      */
-    public void start() {
+    public void start() throws IOException {
         if (configuration.getWebServer().getIpAddress() != null) {
             ipAddress(configuration.getWebServer().getIpAddress());
         }
 
-        if (configuration.getWebServer().getPort() > 0) {
-            port(configuration.getWebServer().getPort());
+        int port = configuration.getWebServer().getPort();
+
+        if (port > 0) {
+            if (!available(port)) {
+                port = 0;
+                logger.error("Port {} is already in use, binding to random port.", port);
+            }
+
         }
+
+        if (port == 0) {
+            try (ServerSocket s = new ServerSocket(0)) {
+                port = s.getLocalPort();
+            } catch (IOException e) {
+                logger.error("Could not get first available port (port set to 0), trying 4567");
+                port = 4567;
+                if (!available(port)) {
+                    throw new BindException("Unable to find an available port");
+                }
+            }
+        }
+
+        logger.info("Web server port has been selected to be {}", port);
+        port(port);
 
         if (configuration.getWebServer().getSecure().isEnabled()) {
             WebServerSecureSection secure = configuration.getWebServer().getSecure();
@@ -158,5 +187,38 @@ public class UniversalMinecraftAPIWebServer {
         object.put("message", message);
         array.put(object);
         return array.toString(4);
+    }
+
+    /**
+     * Checks to see if a specific port is available.
+     *
+     * @param port the port to check for availability
+     * @link http://svn.apache.org/viewvc/camel/trunk/components/camel-test/src/main/java/org/apache/camel/test/AvailablePortFinder.java?view=markup#l130
+     */
+    public static boolean available(int port) {
+        ServerSocket ss = null;
+        DatagramSocket ds = null;
+        try {
+            ss = new ServerSocket(port);
+            ss.setReuseAddress(true);
+            ds = new DatagramSocket(port);
+            ds.setReuseAddress(true);
+            return true;
+        } catch (IOException ignored) {
+        } finally {
+            if (ds != null) {
+                ds.close();
+            }
+
+            if (ss != null) {
+                try {
+                    ss.close();
+                } catch (IOException e) {
+                    /* should not be thrown */
+                }
+            }
+        }
+
+        return false;
     }
 }

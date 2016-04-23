@@ -2,8 +2,8 @@ package com.koenv.universalminecraftapi;
 
 import com.koenv.universalminecraftapi.commands.*;
 import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfiguration;
-import com.koenv.universalminecraftapi.http.UniversalMinecraftAPIWebServer;
 import com.koenv.universalminecraftapi.http.RequestHandler;
+import com.koenv.universalminecraftapi.http.UniversalMinecraftAPIWebServer;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
 import com.koenv.universalminecraftapi.serializer.DefaultSerializers;
@@ -14,6 +14,8 @@ import com.koenv.universalminecraftapi.users.UserManager;
 import com.koenv.universalminecraftapi.users.UserMethods;
 import com.koenv.universalminecraftapi.users.encoders.PlainTextEncoder;
 import com.koenv.universalminecraftapi.util.GenericServerMethods;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main UniversalMinecraftAPI delegate which must be called in implementations.
@@ -24,6 +26,8 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
     public static UniversalMinecraftAPIInterface getInstance() {
         return INSTANCE;
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(UniversalMinecraftAPI.class);
 
     private UniversalMinecraftAPIProvider provider;
 
@@ -78,7 +82,7 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
         try {
             webServer.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to start web server", e);
         }
     }
 
