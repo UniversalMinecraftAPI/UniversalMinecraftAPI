@@ -46,6 +46,11 @@ public class UniversalMinecraftAPIMethods {
         return new Methods(json);
     }
 
+    @APIMethod
+    public static String ping() {
+        return "pong";
+    }
+
     public static class Methods implements JsonSerializable {
         private JSONObject json;
 

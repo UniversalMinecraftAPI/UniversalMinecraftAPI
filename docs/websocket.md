@@ -3,6 +3,10 @@ The WebSocket can be accessed on the HTTP port by using the URL `/api/v1/websock
 just like the HTTP API with the addition of a few API methods that only work on WebSockets, 
 such as [streams.subscribe](namespaces/streams.html#subscribe) and [streams.unsubscribe](namespaces/streams.html#unsubscribe).
 
+The connection will be automatically closed if the timeout of 300 seconds (5 minutes) is reached. Therefore, make sure
+to send a message at least once every 5 minutes. For that, you can use the method [uma.ping](namespaces/uma.html#ping)
+which will always return `pong`.
+
 ## Authentication
 You can authenticate the same way as over HTTP by using the HTTP `Authorization` header. However, if you are unable to
 do so, such as in the browser, there is another possibility which requires you to first acquire an API key using HTTP. This can be done by 

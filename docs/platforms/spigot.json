@@ -1,8 +1,8 @@
 {
     "classes": [
         {
-            "operatesOn": "User",
-            "name": "getUsername",
+            "operatesOn": "Player",
+            "name": "getUUID",
             "arguments": [],
             "returns": "String"
         },
@@ -25,8 +25,8 @@
             "returns": "double"
         },
         {
-            "operatesOn": "Player",
-            "name": "getUUID",
+            "operatesOn": "User",
+            "name": "getUsername",
             "arguments": [],
             "returns": "String"
         }
@@ -101,6 +101,12 @@
         },
         {
             "name": "getVersion",
+            "namespace": "uma",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
+            "name": "ping",
             "namespace": "uma",
             "arguments": [],
             "returns": "String"

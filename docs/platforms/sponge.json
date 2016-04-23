@@ -1,6 +1,42 @@
 {
     "classes": [
         {
+            "operatesOn": "Server",
+            "name": "getPort",
+            "arguments": [],
+            "returns": "int"
+        },
+        {
+            "operatesOn": "Server",
+            "name": "getIp",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
+            "operatesOn": "Server",
+            "name": "getMaxPlayers",
+            "arguments": [],
+            "returns": "int"
+        },
+        {
+            "operatesOn": "Server",
+            "name": "getMotd",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
+            "operatesOn": "Player",
+            "name": "getUUID",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
+            "operatesOn": "User",
+            "name": "getUsername",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
             "operatesOn": "PerformanceHolder",
             "name": "getUsed",
             "arguments": [],
@@ -17,42 +53,6 @@
             "name": "getFree",
             "arguments": [],
             "returns": "double"
-        },
-        {
-            "operatesOn": "Server",
-            "name": "getPort",
-            "arguments": [],
-            "returns": "int"
-        },
-        {
-            "operatesOn": "Server",
-            "name": "getIp",
-            "arguments": [],
-            "returns": "String"
-        },
-        {
-            "operatesOn": "Server",
-            "name": "getMotd",
-            "arguments": [],
-            "returns": "String"
-        },
-        {
-            "operatesOn": "Server",
-            "name": "getMaxPlayers",
-            "arguments": [],
-            "returns": "int"
-        },
-        {
-            "operatesOn": "User",
-            "name": "getUsername",
-            "arguments": [],
-            "returns": "String"
-        },
-        {
-            "operatesOn": "Player",
-            "name": "getUUID",
-            "arguments": [],
-            "returns": "String"
         }
     ],
     "streams": [
@@ -166,6 +166,12 @@
         },
         {
             "name": "getVersion",
+            "namespace": "uma",
+            "arguments": [],
+            "returns": "String"
+        },
+        {
+            "name": "ping",
             "namespace": "uma",
             "arguments": [],
             "returns": "String"
