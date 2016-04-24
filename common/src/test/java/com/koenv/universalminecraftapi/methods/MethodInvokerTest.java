@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.methods;
 
 import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.parser.expressions.*;
+import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import org.junit.Test;
 
 import java.util.*;
@@ -414,25 +415,25 @@ public class MethodInvokerTest {
 
     @Test(expected = MethodRegistrationException.class)
     public void nonStaticMethodThrows() throws MethodRegistrationException {
-        MethodInvoker methodInvoker = new MethodInvoker();
+        MethodInvoker methodInvoker = new MethodInvoker(new ParameterConverterManager());
         methodInvoker.registerMethods(NonStaticMethod.class);
     }
 
     @Test(expected = MethodRegistrationException.class)
     public void invalidOperatesOnThrows() throws MethodRegistrationException {
-        MethodInvoker methodInvoker = new MethodInvoker();
+        MethodInvoker methodInvoker = new MethodInvoker(new ParameterConverterManager());
         methodInvoker.registerMethods(NoValidOperatesOn.class);
     }
 
     @Test(expected = MethodRegistrationException.class)
     public void unmatchingValidOperatesOn() throws MethodRegistrationException {
-        MethodInvoker methodInvoker = new MethodInvoker();
+        MethodInvoker methodInvoker = new MethodInvoker(new ParameterConverterManager());
         methodInvoker.registerMethods(UnmatchingValidOperatesOn.class);
     }
 
     @Test
     public void namespaceOnClass() throws MethodRegistrationException {
-        MethodInvoker methodInvoker = new MethodInvoker();
+        MethodInvoker methodInvoker = new MethodInvoker(new ParameterConverterManager());
         methodInvoker.registerMethods(NamespaceOnClass.class);
     }
 
@@ -495,13 +496,20 @@ public class MethodInvokerTest {
     }
 
     private MethodInvoker buildMethodInvoker() {
-        MethodInvoker methodInvoker = new MethodInvoker();
+        MethodInvoker methodInvoker = new MethodInvoker(buildParameterConverterManager());
         methodInvoker.registerMethods(new MethodInvokerTestClass());
-        methodInvoker.registerParameterConverter(String.class, UUID.class, UUID::fromString);
-        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestObject.class, int.class, MethodInvokerTestClass.MethodInvokerTestObject::getInt);
-        methodInvoker.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestInterface.class, boolean.class, MethodInvokerTestClass.MethodInvokerTestInterface::getBoolean);
 
         return methodInvoker;
+    }
+
+    private ParameterConverterManager buildParameterConverterManager() {
+        ParameterConverterManager manager = new ParameterConverterManager();
+
+        manager.registerParameterConverter(String.class, UUID.class, UUID::fromString);
+        manager.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestObject.class, int.class, MethodInvokerTestClass.MethodInvokerTestObject::getInt);
+        manager.registerParameterConverter(MethodInvokerTestClass.MethodInvokerTestInterface.class, boolean.class, MethodInvokerTestClass.MethodInvokerTestInterface::getBoolean);
+
+        return manager;
     }
 
     private static class MethodInvokerTestClass {

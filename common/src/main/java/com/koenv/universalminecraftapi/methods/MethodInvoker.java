@@ -1,6 +1,7 @@
 package com.koenv.universalminecraftapi.methods;
 
 import com.koenv.universalminecraftapi.parser.expressions.*;
+import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -17,6 +18,11 @@ public class MethodInvoker {
     protected static final String DEFAULT_NAMESPACE = "this";
 
     /**
+     * The parameter converter manager used for converting objects to the correct value for passing to a method.
+     */
+    protected ParameterConverterManager parameterConverterManager;
+
+    /**
      * Map of method names that do not operate on objects to their methods.
      */
     protected Map<String, Map<String, NamespacedMethod>> namespaceMethodsMap;
@@ -26,36 +32,10 @@ public class MethodInvoker {
      */
     protected Map<Class<?>, Map<String, ClassMethod>> classMethodsMap;
 
-    /**
-     * Map of from and to classes to their {@link ParameterConverter}.
-     */
-    protected Map<Class<?>, Map<Class<?>, ParameterConverter>> toFromParameterConverterMap;
-
-    /**
-     * Parameters that will be converted by Java automatically, such as an `int` to {@link Integer}
-     */
-    protected static Map<Class<?>, List<Class<?>>> alsoAllowed = new HashMap<>();
-
-    static {
-        alsoAllowed.put(Integer.class, Arrays.asList(int.class, long.class, Long.class, short.class, Short.class));
-        alsoAllowed.put(int.class, Arrays.asList(Integer.class, long.class, Long.class, short.class, Short.class));
-        alsoAllowed.put(Short.class, Arrays.asList(short.class, int.class, Integer.class, long.class, Long.class));
-        alsoAllowed.put(short.class, Arrays.asList(Short.class, int.class, Integer.class, long.class, Long.class));
-        alsoAllowed.put(Long.class, Arrays.asList(long.class, int.class, Integer.class, short.class, Short.class));
-        alsoAllowed.put(long.class, Arrays.asList(Long.class, int.class, Integer.class, short.class, Short.class));
-        alsoAllowed.put(Double.class, Collections.singletonList(double.class));
-        alsoAllowed.put(double.class, Collections.singletonList(Double.class));
-        alsoAllowed.put(Float.class, Collections.singletonList(float.class));
-        alsoAllowed.put(float.class, Collections.singletonList(Float.class));
-        alsoAllowed.put(Boolean.class, Collections.singletonList(boolean.class));
-        alsoAllowed.put(boolean.class, Collections.singletonList(Boolean.class));
-    }
-
-    public MethodInvoker() {
+    public MethodInvoker(ParameterConverterManager parameterConverterManager) {
+        this.parameterConverterManager = parameterConverterManager;
         this.namespaceMethodsMap = new HashMap<>();
         this.classMethodsMap = new HashMap<>();
-        this.toFromParameterConverterMap = new HashMap<>();
-        registerDefaultParameterConverters();
     }
 
     /**
@@ -161,22 +141,6 @@ public class MethodInvoker {
     }
 
     /**
-     * Registers a parameter converter.
-     *
-     * @param from               From which class to convert
-     * @param to                 To which class to convert
-     * @param parameterConverter The parameter converter
-     * @param <From>             From which class to convert
-     * @param <To>               To which class to convert
-     */
-    public <From, To> void registerParameterConverter(Class<From> from, Class<To> to, ParameterConverter<From, To> parameterConverter) {
-        if (toFromParameterConverterMap.get(to) == null) {
-            toFromParameterConverterMap.put(to, new HashMap<>());
-        }
-        toFromParameterConverterMap.get(to).put(from, parameterConverter);
-    }
-
-    /**
      * Invokes a single method
      *
      * @param namespace            Namespace of the method. Is usually null when lastResult is not null.
@@ -244,9 +208,9 @@ public class MethodInvoker {
                 break;
             }
             Object parameter = parameters.get(j);
-            boolean allowed = checkParameter(parameter, javaParameter);
+            boolean allowed = parameterConverterManager.checkParameter(parameter, javaParameter);
             if (!allowed) {
-                Object convertedParameter = convertParameterUntilFound(parameter, javaParameter);
+                Object convertedParameter = parameterConverterManager.convertParameterUntilFound(parameter, javaParameter);
                 if (convertedParameter == null) {
                     if (invoker != null) {
                         Object invokerObject = invoker.get(javaParameter.getType());
@@ -315,82 +279,6 @@ public class MethodInvoker {
             return method;
         }
 
-        return null;
-    }
-
-    /**
-     * Checks whether an object is valid for a Java parameter
-     *
-     * @param parameter     Desired parameter to method
-     * @param javaParameter The parameter of the method
-     * @return Whether this object can be passed to the parameter as is.
-     */
-    protected boolean checkParameter(Object parameter, Parameter javaParameter) {
-        if (javaParameter.getType().isInstance(parameter)) {
-            return true;
-        }
-        if (alsoAllowed.containsKey(javaParameter.getType())) {
-            for (Class<?> alsoAllowedClass : alsoAllowed.get(javaParameter.getType())) {
-                if (alsoAllowedClass.isInstance(parameter)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Converts a parameter until a valid parameter is found as specified by {@link #checkParameter(Object, Parameter)}
-     *
-     * @param parameter     Desired parameter of the method
-     * @param javaParameter The parameter of the method
-     * @return Null if this parameter cannot be converted to the parameter type of the method. The converted parameter otherwise.
-     */
-    protected Object convertParameterUntilFound(Object parameter, Parameter javaParameter) {
-        boolean allowed = checkParameter(parameter, javaParameter);
-        Object previousParameter;
-        while (!allowed) {
-            previousParameter = parameter;
-            parameter = convertParameter(parameter, javaParameter.getType(), null);
-            if (parameter == null) {
-                parameter = convertParameter(previousParameter, javaParameter.getType(), previousParameter.getClass().getSuperclass());
-                if (parameter == null) {
-                    for (Class<?> interfaceClass : previousParameter.getClass().getInterfaces()) {
-                        parameter = convertParameter(previousParameter, javaParameter.getType(), interfaceClass);
-                        if (parameter != null) {
-                            break;
-                        }
-                    }
-                    if (parameter == null) {
-                        return null;
-                    }
-                }
-            }
-            allowed = checkParameter(parameter, javaParameter);
-        }
-        return parameter;
-    }
-
-    /**
-     * Converts a parameter from one type to another
-     *
-     * @param parameter The parameter to convert
-     * @param to        To which class to convert
-     * @param from      From which class to convert, which is usually the class of from, from's superclass or one of from's interfaces
-     * @return The converted parameter. Null if it cannot be converted.
-     */
-    @SuppressWarnings("unchecked")
-    protected Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
-        if (from == null && parameter != null) {
-            from = parameter.getClass();
-        }
-        Map<Class<?>, ParameterConverter> toParameterMap = toFromParameterConverterMap.get(to);
-        if (toParameterMap != null) {
-            ParameterConverter parameterConverter = toParameterMap.get(from);
-            if (parameterConverter != null) {
-                return parameterConverter.convert(parameter);
-            }
-        }
         return null;
     }
 
@@ -529,22 +417,5 @@ public class MethodInvoker {
      */
     public Map<Class<?>, Map<String, ClassMethod>> getClasses() {
         return classMethodsMap;
-    }
-
-    /**
-     * Registers all default parameter converters, such as from float to double and the reverse.
-     */
-    protected void registerDefaultParameterConverters() {
-        ParameterConverter<Double, Float> doubleToFloatConverter = Double::floatValue;
-        ParameterConverter<Float, Double> floatToDoubleConverter = Float::doubleValue;
-        registerParameterConverter(double.class, float.class, doubleToFloatConverter);
-        registerParameterConverter(double.class, Float.class, doubleToFloatConverter);
-        registerParameterConverter(Double.class, float.class, doubleToFloatConverter);
-        registerParameterConverter(Double.class, Float.class, doubleToFloatConverter);
-
-        registerParameterConverter(float.class, double.class, floatToDoubleConverter);
-        registerParameterConverter(float.class, Double.class, floatToDoubleConverter);
-        registerParameterConverter(Float.class, double.class, floatToDoubleConverter);
-        registerParameterConverter(Float.class, Double.class, floatToDoubleConverter);
     }
 }

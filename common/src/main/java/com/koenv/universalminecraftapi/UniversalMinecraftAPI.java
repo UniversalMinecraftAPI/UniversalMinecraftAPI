@@ -6,6 +6,7 @@ import com.koenv.universalminecraftapi.http.RequestHandler;
 import com.koenv.universalminecraftapi.http.UniversalMinecraftAPIWebServer;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
+import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import com.koenv.universalminecraftapi.serializer.DefaultSerializers;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
 import com.koenv.universalminecraftapi.streams.StreamManager;
@@ -34,6 +35,7 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
     private UniversalMinecraftAPIRootConfiguration configuration;
 
     private ExpressionParser expressionParser;
+    private ParameterConverterManager parameterConverterManager;
     private MethodInvoker methodInvoker;
     private CommandManager commandManager;
     private SerializerManager serializerManager;
@@ -53,7 +55,8 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
         this.configuration = configuration;
 
         expressionParser = new ExpressionParser();
-        methodInvoker = new MethodInvoker();
+        parameterConverterManager = new ParameterConverterManager();
+        methodInvoker = new MethodInvoker(parameterConverterManager);
         commandManager = new CommandManager(this);
 
         serializerManager = new SerializerManager();

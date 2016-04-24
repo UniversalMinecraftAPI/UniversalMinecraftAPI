@@ -1,4 +1,4 @@
-package com.koenv.universalminecraftapi.methods;
+package com.koenv.universalminecraftapi.reflection;
 
 /**
  * Converts parameters from one type to another
