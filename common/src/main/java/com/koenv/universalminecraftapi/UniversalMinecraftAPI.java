@@ -3,7 +3,9 @@ package com.koenv.universalminecraftapi;
 import com.koenv.universalminecraftapi.commands.*;
 import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfiguration;
 import com.koenv.universalminecraftapi.http.RequestHandler;
+import com.koenv.universalminecraftapi.http.RestRequestHandler;
 import com.koenv.universalminecraftapi.http.UniversalMinecraftAPIWebServer;
+import com.koenv.universalminecraftapi.http.rest.RestHandler;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
@@ -37,9 +39,11 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
     private ExpressionParser expressionParser;
     private ParameterConverterManager parameterConverterManager;
     private MethodInvoker methodInvoker;
+    private RestHandler restHandler;
     private CommandManager commandManager;
     private SerializerManager serializerManager;
     private RequestHandler requestHandler;
+    private RestRequestHandler restRequestHandler;
     private StreamManager streamManager;
     private UserManager userManager;
 
@@ -57,12 +61,14 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
         expressionParser = new ExpressionParser();
         parameterConverterManager = new ParameterConverterManager();
         methodInvoker = new MethodInvoker(parameterConverterManager);
+        restHandler = new RestHandler(parameterConverterManager);
         commandManager = new CommandManager(this);
 
         serializerManager = new SerializerManager();
         DefaultSerializers.register(serializerManager);
 
         requestHandler = new RequestHandler(getExpressionParser(), getMethodInvoker());
+        restRequestHandler = new RestRequestHandler(restHandler);
         streamManager = new StreamManager();
 
         userManager = new UserManager();
@@ -110,6 +116,11 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
     }
 
     @Override
+    public RestHandler getRestHandler() {
+        return restHandler;
+    }
+
+    @Override
     public CommandManager getCommandManager() {
         return commandManager;
     }
@@ -127,6 +138,11 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
     @Override
     public RequestHandler getRequestHandler() {
         return requestHandler;
+    }
+
+    @Override
+    public RestRequestHandler getRestRequestHandler() {
+        return restRequestHandler;
     }
 
     @Override

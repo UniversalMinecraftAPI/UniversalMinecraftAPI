@@ -139,18 +139,45 @@ public class RestHandler {
         }
 
         int i = pathParts.size() - resourceParts.size();
-        if (i > 0) {// we have an operation
+        if (i > 0) {// we have at least one operation
+            List<RestOperationMethod> operationMethods = new ArrayList<>();
+
+            Class<?> resultClass = result.getClass();
+
             while (i > 0) {
                 String operation = pathParts.get(pathParts.size() - i);
 
-                RestOperationMethod operationMethod = operations.get(result.getClass()).get(operation);
+                RestOperationMethod operationMethod = operations.get(resultClass).get(operation);
 
                 if (operationMethod == null) {
+                    // TODO: Search for superclasses/interfaces
                     throw new RestNotFoundException("Unable to find operation " + operation + " on object of type " + result.getClass().getName());
                 }
 
+                operationMethods.add(operationMethod);
+
+                resultClass = operationMethod.getJavaMethod().getReturnType();
+
+                i--;
+            }
+
+            long postCount = operationMethods.stream().filter(restOperationMethod -> restOperationMethod.getRestMethod() == RestMethod.POST).count();
+
+            if (postCount > 1) {
+                throw new RestMethodInvocationException("Unable to invoke 2 methods with operation POST");
+            }
+
+            if (postCount == 1 && operationMethods.get(operationMethods.size() - 1).getRestMethod() != RestMethod.POST) {
+                throw new RestMethodInvocationException("Cannot have an intermediary POST operation, must be the last operation");
+            }
+
+            for (RestOperationMethod operationMethod : operationMethods) {
                 if (parameters != null && !parameters.hasPermission(operationMethod)) {
                     throw new RestForbiddenException("No permission to access operation " + operationMethod.getPath());
+                }
+
+                if (parameters != null && operationMethod.getRestMethod() != parameters.getMethod()) {
+                    throw new RestForbiddenException("Invalid method for operation " + operationMethod.getPath());
                 }
 
                 List<Object> operationArguments = new ArrayList<>();
@@ -160,7 +187,7 @@ public class RestHandler {
                     Parameter[] javaOperationParameters = operationMethod.getJavaMethod().getParameters();
 
                     for (int j = 1; j < operationMethod.getJavaMethod().getParameterCount(); j++) {
-                        Parameter javaParameter = javaOperationParameters[i];
+                        Parameter javaParameter = javaOperationParameters[j];
 
                         if (javaParameter.getAnnotation(RestBody.class) != null) {
                             Object bodyParameter = null;
@@ -197,7 +224,7 @@ public class RestHandler {
                             }
                         }
 
-                        throw new RestMethodInvocationException("Missing parameter " + javaParameter.getName() + " for REST operation " + operation);
+                        throw new RestMethodInvocationException("Missing parameter '" + javaParameter.getName() + "' for REST operation '" + operationMethod.getPath() + "'");
                     }
                 }
 
@@ -211,8 +238,6 @@ public class RestHandler {
                 } catch (Exception e) {
                     throw new RestMethodInvocationException("Unable to invoke method " + operationMethod.getPath() + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
                 }
-
-                i--;
             }
         }
 

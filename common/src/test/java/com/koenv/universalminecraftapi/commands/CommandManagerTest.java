@@ -5,6 +5,8 @@ import com.koenv.universalminecraftapi.UniversalMinecraftAPIInterface;
 import com.koenv.universalminecraftapi.UniversalMinecraftAPIProvider;
 import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfiguration;
 import com.koenv.universalminecraftapi.http.RequestHandler;
+import com.koenv.universalminecraftapi.http.RestRequestHandler;
+import com.koenv.universalminecraftapi.http.rest.RestHandler;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
@@ -179,6 +181,16 @@ public class CommandManagerTest {
 
         @Override
         public UserManager getUserManager() {
+            return null;
+        }
+
+        @Override
+        public RestHandler getRestHandler() {
+            return null;
+        }
+
+        @Override
+        public RestRequestHandler getRestRequestHandler() {
             return null;
         }
     }

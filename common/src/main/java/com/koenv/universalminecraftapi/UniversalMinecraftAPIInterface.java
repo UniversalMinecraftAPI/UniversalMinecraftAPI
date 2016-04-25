@@ -3,6 +3,8 @@ package com.koenv.universalminecraftapi;
 import com.koenv.universalminecraftapi.commands.CommandManager;
 import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfiguration;
 import com.koenv.universalminecraftapi.http.RequestHandler;
+import com.koenv.universalminecraftapi.http.RestRequestHandler;
+import com.koenv.universalminecraftapi.http.rest.RestHandler;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
@@ -39,6 +41,11 @@ public interface UniversalMinecraftAPIInterface {
     MethodInvoker getMethodInvoker();
 
     /**
+     * @return The currently in use {@link RestHandler}
+     */
+    RestHandler getRestHandler();
+
+    /**
      * @return The currently in use {@link CommandManager}
      */
     CommandManager getCommandManager();
@@ -57,6 +64,11 @@ public interface UniversalMinecraftAPIInterface {
      * @return The currently in use {@link RequestHandler}
      */
     RequestHandler getRequestHandler();
+
+    /**
+     * @return The currently in use {@link RestRequestHandler}
+     */
+    RestRequestHandler getRestRequestHandler();
 
     /**
      * @return The currently in use {@link StreamManager}

@@ -3,6 +3,7 @@ package com.koenv.universalminecraftapi.http.rest;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
@@ -355,6 +356,11 @@ public class RestHandlerTest {
             public @Nullable Object getBody() {
                 return "thisisatestvalue";
             }
+
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
         }));
     }
 
@@ -364,6 +370,11 @@ public class RestHandlerTest {
             @Override
             public @Nullable Object getBody() {
                 return new JSONArray(Arrays.asList("test", "testvalue2"));
+            }
+
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
             }
         }));
     }
@@ -377,7 +388,22 @@ public class RestHandlerTest {
                 result.put("key", "value");
                 return result;
             }
+
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
         }));
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testIntermediatePostThrows() throws Exception {
+        buildRestHandler().handle("players/test/bodyMap/hash", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+        });
     }
 
     private RestHandler buildRestHandler() throws Exception {
@@ -590,6 +616,11 @@ public class RestHandlerTest {
         @Override
         public @Nullable Object getBody() {
             return null;
+        }
+
+        @Override
+        public @NotNull RestMethod getMethod() {
+            return RestMethod.GET;
         }
     }
 

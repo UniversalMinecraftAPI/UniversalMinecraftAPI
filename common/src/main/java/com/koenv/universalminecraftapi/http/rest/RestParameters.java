@@ -1,5 +1,6 @@
 package com.koenv.universalminecraftapi.http.rest;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface RestParameters {
@@ -19,4 +20,6 @@ public interface RestParameters {
     @Nullable RestQueryParamsMap getQueryParams();
 
     @Nullable Object getBody();
+
+    @NotNull RestMethod getMethod();
 }

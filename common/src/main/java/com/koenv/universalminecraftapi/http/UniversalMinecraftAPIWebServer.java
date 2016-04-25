@@ -18,6 +18,7 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.koenv.universalminecraftapi.util.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Route;
 import spark.Spark;
 
 import java.io.IOException;
@@ -36,12 +37,14 @@ public class UniversalMinecraftAPIWebServer {
 
     private UniversalMinecraftAPIRootConfiguration configuration;
     private RequestHandler requestHandler;
+    private RestRequestHandler restRequestHandler;
     private SerializerManager serializerManager;
     private UserManager userManager;
 
     public UniversalMinecraftAPIWebServer(UniversalMinecraftAPIInterface uma) {
         this.configuration = uma.getConfiguration();
         this.requestHandler = uma.getRequestHandler();
+        this.restRequestHandler = uma.getRestRequestHandler();
         this.serializerManager = uma.getSerializerManager();
         this.userManager = uma.getUserManager();
     }
@@ -174,6 +177,25 @@ public class UniversalMinecraftAPIWebServer {
             JSONValue result = (JSONValue) serializerManager.serialize(responses);
             return result.toString(4);
         });
+
+        Route v2Route = (request, response) -> {
+            response.header("Content-Type", "application/json");
+
+            Optional<User> user = userManager.getUser(request.attribute("com.koenv.universalminecraftapi.user"));
+
+            if (!user.isPresent()) {
+                halt(401, getErrorResponse(ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
+            }
+
+            Object result = restRequestHandler.handle(request, user.get());
+
+            JSONValue jsonResult = (JSONValue) serializerManager.serialize(result);
+            return jsonResult.toString(4);
+        };
+
+        get("/api/v2/*", v2Route);
+
+        post("/api/v2/*", v2Route);
     }
 
     public void stop() {
