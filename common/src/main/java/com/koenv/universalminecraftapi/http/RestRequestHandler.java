@@ -22,7 +22,7 @@ public class RestRequestHandler {
         this.handler = handler;
     }
 
-    public Object handle(Request request, User user) {
+    public JsonSerializable handle(Request request, User user) {
         String bodyString = null;
         if (Objects.equals(request.requestMethod(), "POST")) {
             bodyString = request.body();
@@ -53,10 +53,10 @@ public class RestRequestHandler {
 
         WebServerRestParameters parameters = new WebServerRestParameters(user, new WebServerQueryParamsMap(request.queryMap()), body, method);
 
-        String path = request.pathInfo().substring(7);
+        String path = request.pathInfo().substring(8);
 
         try {
-            return handler.handle(path, parameters);
+            return createSuccessResponse(handler.handle(path, parameters));
         } catch (APIException e) {
             return createErrorResponse(e.getCode(), e.getMessage());
         } catch (RestException e) {
@@ -66,6 +66,10 @@ public class RestRequestHandler {
 
     private ErrorResponse createErrorResponse(int code, String message) {
         return new ErrorResponse(code, message);
+    }
+
+    private SuccessResponse createSuccessResponse(Object result) {
+        return new SuccessResponse(result);
     }
 
     public static class ErrorResponse implements JsonSerializable {
@@ -89,6 +93,24 @@ public class RestRequestHandler {
             JSONObject object = new JSONObject();
             object.put("code", code);
             object.put("message", message);
+            return object;
+        }
+    }
+
+    public static class SuccessResponse implements JsonSerializable {
+        private Object value;
+
+        public SuccessResponse(Object value) {
+            this.value = value;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public JSONObject toJson(SerializerManager serializerManager) {
+            JSONObject object = new JSONObject();
+            object.put("result", serializerManager.serialize(value));
             return object;
         }
     }

@@ -206,8 +206,8 @@ public class SpongeUniversalMinecraftAPI implements UniversalMinecraftAPIProvide
     }
 
     private void registerMethods() {
-        uma.getMethodInvoker().registerMethods(PlayerMethods.class);
-        uma.getMethodInvoker().registerMethods(ServerMethods.class);
+        uma.registerMethods(PlayerMethods.class);
+        uma.registerMethods(ServerMethods.class);
     }
 
     public UniversalMinecraftAPIInterface getUMA() {

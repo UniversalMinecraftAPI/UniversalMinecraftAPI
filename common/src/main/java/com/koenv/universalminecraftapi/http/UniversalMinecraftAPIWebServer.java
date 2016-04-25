@@ -94,7 +94,7 @@ public class UniversalMinecraftAPIWebServer {
 
         webSocket("/api/v1/websocket", UniversalMinecraftAPIWebSocket.class); // this needs to be first otherwise the web socket doesn't work
 
-        before("/api/v1/*", (request, response) -> {
+        before("/*", (request, response) -> {
             String authorizationHeader = request.headers("Authorization");
             if (authorizationHeader == null || authorizationHeader.isEmpty()) {
                 if (userManager.getUser("default").isPresent()) {

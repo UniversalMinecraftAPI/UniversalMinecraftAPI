@@ -79,4 +79,10 @@ public interface UniversalMinecraftAPIInterface {
      * @return The currently in use {@link UserManager}
      */
     UserManager getUserManager();
+
+    void registerMethods(Class<?> clazz);
+
+    default void registerMethods(Object object) {
+        registerMethods(object.getClass());
+    }
 }

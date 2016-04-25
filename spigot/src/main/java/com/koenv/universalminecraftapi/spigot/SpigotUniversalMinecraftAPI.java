@@ -114,6 +114,6 @@ public class SpigotUniversalMinecraftAPI extends JavaPlugin implements Universal
     }
 
     private void registerMethods() {
-        uma.getMethodInvoker().registerMethods(PlayerMethods.class);
+        uma.registerMethods(PlayerMethods.class);
     }
 }

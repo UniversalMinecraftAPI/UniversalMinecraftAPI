@@ -138,6 +138,10 @@ public class RestHandler {
             throw new RestMethodInvocationException("Unable to invoke method " + restMethod.getPath() + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
         }
 
+        if (result == null) {
+            return null;
+        }
+
         int i = pathParts.size() - resourceParts.size();
         if (i > 0) {// we have at least one operation
             List<RestOperationMethod> operationMethods = new ArrayList<>();
@@ -147,7 +151,7 @@ public class RestHandler {
             while (i > 0) {
                 String operation = pathParts.get(pathParts.size() - i);
 
-                RestOperationMethod operationMethod = operations.get(resultClass).get(operation);
+                RestOperationMethod operationMethod = findOperation(resultClass, operation);
 
                 if (operationMethod == null) {
                     // TODO: Search for superclasses/interfaces
@@ -237,6 +241,10 @@ public class RestHandler {
                     throw new RestMethodInvocationException("Unable to invoke operation: " + operationMethod.getPath() + ": " + e.getCause().getClass().getSimpleName() + " " + e.getCause().getMessage());
                 } catch (Exception e) {
                     throw new RestMethodInvocationException("Unable to invoke method " + operationMethod.getPath() + ": " + e.getClass().getSimpleName() + " " + e.getMessage(), e);
+                }
+
+                if (result == null) {
+                    return null;
                 }
             }
         }
@@ -366,6 +374,33 @@ public class RestHandler {
             }
         }
         return result;
+    }
+
+    private RestOperationMethod findOperation(Class<?> clazz, String operation) {
+        Map<String, RestOperationMethod> operations = this.operations.get(clazz);
+        RestOperationMethod method = null;
+        if (operations != null) {
+            method = operations.get(operation);
+        }
+
+        if (method == null) {
+            if (clazz.getSuperclass() != null) {
+                method = findOperation(clazz.getSuperclass(), operation);
+                if (method != null) {
+                    return method;
+                }
+            }
+            for (Class<?> interfaceClazz : clazz.getInterfaces()) {
+                method = findOperation(interfaceClazz, operation);
+                if (method != null) {
+                    return method;
+                }
+            }
+        } else {
+            return method;
+        }
+
+        return null;
     }
 
     public List<RestResourceMethod> getResources() {

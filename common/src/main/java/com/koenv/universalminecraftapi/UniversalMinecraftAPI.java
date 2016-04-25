@@ -6,7 +6,9 @@ import com.koenv.universalminecraftapi.http.RequestHandler;
 import com.koenv.universalminecraftapi.http.RestRequestHandler;
 import com.koenv.universalminecraftapi.http.UniversalMinecraftAPIWebServer;
 import com.koenv.universalminecraftapi.http.rest.RestHandler;
+import com.koenv.universalminecraftapi.http.rest.RestMethodRegistrationException;
 import com.koenv.universalminecraftapi.methods.MethodInvoker;
+import com.koenv.universalminecraftapi.methods.MethodRegistrationException;
 import com.koenv.universalminecraftapi.parser.ExpressionParser;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import com.koenv.universalminecraftapi.serializer.DefaultSerializers;
@@ -76,12 +78,13 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
 
         webServer = new UniversalMinecraftAPIWebServer(this);
 
-        methodInvoker.registerMethods(this);
-        methodInvoker.registerMethods(provider);
-        methodInvoker.registerMethods(StreamMethods.class);
-        methodInvoker.registerMethods(UserMethods.class);
-        methodInvoker.registerMethods(UniversalMinecraftAPIMethods.class);
-        methodInvoker.registerMethods(GenericServerMethods.class);
+        registerMethods(this);
+        registerMethods(provider);
+        registerMethods(StreamMethods.class);
+        registerMethods(UserMethods.class);
+        registerMethods(UniversalMinecraftAPIMethods.class);
+        registerMethods(GenericServerMethods.class);
+
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
         commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
@@ -93,6 +96,12 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
         } catch (Exception e) {
             logger.error("Failed to start web server", e);
         }
+    }
+
+    @Override
+    public void registerMethods(Class<?> clazz) throws MethodRegistrationException, RestMethodRegistrationException {
+        methodInvoker.registerMethods(clazz);
+        restHandler.registerClass(clazz);
     }
 
     @Override

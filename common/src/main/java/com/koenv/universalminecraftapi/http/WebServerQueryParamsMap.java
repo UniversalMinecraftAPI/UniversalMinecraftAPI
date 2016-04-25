@@ -13,7 +13,11 @@ public class WebServerQueryParamsMap implements RestQueryParamsMap {
 
     public WebServerQueryParamsMap(QueryParamsMap sparkQueryParams) {
         this.sparkQueryParams = sparkQueryParams;
-        this.values = sparkQueryParams.values(); // cache because it clones
+        if (sparkQueryParams.hasValue()) {
+            this.values = sparkQueryParams.values(); // cache because it clones
+        } else {
+            this.values = new String[]{};
+        }
     }
 
     @Override
