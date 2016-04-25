@@ -1,5 +1,7 @@
 package com.koenv.universalminecraftapi.http.rest;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface RestParameters {
     boolean hasPermission(RestResourceMethod method);
 
@@ -12,5 +14,9 @@ public interface RestParameters {
      * @param clazz The class of which to get an instance to
      * @return The object of this class or null if this class is not available
      */
-    Object get(Class<?> clazz);
+    @Nullable Object get(Class<?> clazz);
+
+    @Nullable RestQueryParamsMap getQueryParams();
+
+    @Nullable Object getBody();
 }
