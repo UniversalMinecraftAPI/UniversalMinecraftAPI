@@ -1,10 +1,12 @@
 package com.koenv.universalminecraftapi.docgenerator.model;
 
+import com.koenv.universalminecraftapi.docgenerator.model.v1.AbstractV1Method;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MethodDiffResult<T extends AbstractMethod> {
+public class MethodDiffResult<T extends AbstractV1Method> {
     private Platform platform1;
     private Set<T> onlyInPlatform1;
 
@@ -34,7 +36,7 @@ public class MethodDiffResult<T extends AbstractMethod> {
         return onlyInPlatform2;
     }
 
-    public static <T extends AbstractMethod> MethodDiffResult<T> diff(Platform platform1, List<T> platform1Methods, Platform platform2, List<T> platform2Methods) {
+    public static <T extends AbstractV1Method> MethodDiffResult<T> diff(Platform platform1, List<T> platform1Methods, Platform platform2, List<T> platform2Methods) {
         HashSet<T> onlyInPlatform1 = new HashSet<>(platform1Methods);
         onlyInPlatform1.removeAll(platform2Methods);
 

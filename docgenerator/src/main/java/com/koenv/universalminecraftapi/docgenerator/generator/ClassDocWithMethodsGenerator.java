@@ -1,6 +1,6 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
-import com.koenv.universalminecraftapi.docgenerator.model.ClassMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.ClassMethod;
 import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;

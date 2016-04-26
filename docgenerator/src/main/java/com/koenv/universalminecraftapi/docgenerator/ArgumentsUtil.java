@@ -1,6 +1,6 @@
 package com.koenv.universalminecraftapi.docgenerator;
 
-import com.koenv.universalminecraftapi.docgenerator.model.NamespacedMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.NamespacedMethod;
 import com.koenv.universalminecraftapi.parser.ExpressionPrinter;
 import com.koenv.universalminecraftapi.parser.expressions.*;
 

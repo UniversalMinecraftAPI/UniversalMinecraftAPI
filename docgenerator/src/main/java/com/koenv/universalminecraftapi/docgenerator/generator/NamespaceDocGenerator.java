@@ -1,7 +1,7 @@
 package com.koenv.universalminecraftapi.docgenerator.generator;
 
 import com.koenv.universalminecraftapi.docgenerator.ArgumentsUtil;
-import com.koenv.universalminecraftapi.docgenerator.model.NamespacedMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.NamespacedMethod;
 import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 import com.koenv.universalminecraftapi.docgenerator.model.UniversalMinecraftAPIClass;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;

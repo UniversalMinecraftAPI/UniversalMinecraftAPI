@@ -3,6 +3,9 @@ package com.koenv.universalminecraftapi.docgenerator;
 import com.google.common.io.Files;
 import com.koenv.universalminecraftapi.docgenerator.generator.*;
 import com.koenv.universalminecraftapi.docgenerator.model.*;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.AbstractV1Method;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.ClassMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.NamespacedMethod;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.ClassResolver;
 import com.koenv.universalminecraftapi.docgenerator.resolvers.PlatformResolver;
 import com.typesafe.config.Config;
@@ -131,28 +134,28 @@ public class Main {
             PlatformMethods platform2 = methods.get(1);
             MethodDiffResult<NamespacedMethod> namespacedMethodDiffResult = MethodDiffResult.diff(
                     platform1.getPlatform(),
-                    platform1.getNamespacedMethods(),
+                    platform1.getV1().getNamespacedMethods(),
                     platform2.getPlatform(),
-                    platform2.getNamespacedMethods()
+                    platform2.getV1().getNamespacedMethods()
             );
 
             MethodDiffResult<ClassMethod> classMethodDiffResult = MethodDiffResult.diff(
                     platform1.getPlatform(),
-                    platform1.getClassMethods(),
+                    platform1.getV1().getClassMethods(),
                     platform2.getPlatform(),
-                    platform2.getClassMethods()
+                    platform2.getV1().getClassMethods()
             );
 
-            List<AbstractMethod> onlyInPlatform1 = new ArrayList<>(namespacedMethodDiffResult.getOnlyInPlatform1());
+            List<AbstractV1Method> onlyInPlatform1 = new ArrayList<>(namespacedMethodDiffResult.getOnlyInPlatform1());
             onlyInPlatform1.addAll(classMethodDiffResult.getOnlyInPlatform1());
 
-            List<AbstractMethod> onlyInPlatform2 = new ArrayList<>(namespacedMethodDiffResult.getOnlyInPlatform2());
+            List<AbstractV1Method> onlyInPlatform2 = new ArrayList<>(namespacedMethodDiffResult.getOnlyInPlatform2());
             onlyInPlatform2.addAll(classMethodDiffResult.getOnlyInPlatform2());
 
             printDiffWarnings(platform1.getPlatform(), onlyInPlatform1);
             printDiffWarnings(platform2.getPlatform(), onlyInPlatform2);
 
-            printStreamDiffWarnings(platform1.getPlatform(), platform1.getStreams(), platform2.getPlatform(), platform2.getStreams());
+            printStreamDiffWarnings(platform1.getPlatform(), platform1.getV1().getStreams(), platform2.getPlatform(), platform2.getV1().getStreams());
 
             if (!Objects.equals(platform1.getPlatform().getUmaVersion(), platform2.getPlatform().getUmaVersion())) {
                 logger.warn("UMA versions don't match between the two platforms: " +
@@ -169,15 +172,15 @@ public class Main {
         PlatformResolver platformResolver = new PlatformResolver();
 
         methods.forEach(platformMethods -> {
-            allNamespacedMethods.addAll(platformMethods.getNamespacedMethods());
-            allClassMethods.addAll(platformMethods.getClassMethods());
-            streams.addAll(platformMethods.getStreams());
+            allNamespacedMethods.addAll(platformMethods.getV1().getNamespacedMethods());
+            allClassMethods.addAll(platformMethods.getV1().getClassMethods());
+            streams.addAll(platformMethods.getV1().getStreams());
 
-            Consumer<AbstractMethod> methodRegisterer = method -> platformResolver.addMethod(platformMethods.getPlatform(), method);
-            platformMethods.getNamespacedMethods().forEach(methodRegisterer);
-            platformMethods.getClassMethods().forEach(methodRegisterer);
+            Consumer<AbstractV1Method> methodRegisterer = method -> platformResolver.addMethod(platformMethods.getPlatform(), method);
+            platformMethods.getV1().getNamespacedMethods().forEach(methodRegisterer);
+            platformMethods.getV1().getClassMethods().forEach(methodRegisterer);
 
-            platformMethods.getStreams().forEach(s -> platformResolver.addStream(platformMethods.getPlatform(), s));
+            platformMethods.getV1().getStreams().forEach(s -> platformResolver.addStream(platformMethods.getPlatform(), s));
         });
 
         File classesDirectory = new File(extraDirectory, "classes");
@@ -321,10 +324,10 @@ public class Main {
         logger.info("Completed in " + time + " ms");
     }
 
-    private <T extends AbstractMethod> void printDiffWarnings(Platform platform, List<T> methods) {
+    private <T extends AbstractV1Method> void printDiffWarnings(Platform platform, List<T> methods) {
         if (methods.size() > 0) {
             logger.warn(methods.size() + " methods only available in " + platform.getName() + ":");
-            for (AbstractMethod method : methods) {
+            for (AbstractV1Method method : methods) {
                 logger.warn("* " + method.getDeclaration());
             }
         }

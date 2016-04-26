@@ -1,10 +1,10 @@
-package com.koenv.universalminecraftapi.docgenerator.model;
+package com.koenv.universalminecraftapi.docgenerator.model.v1;
 
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 
 import java.util.StringJoiner;
 
-public class ClassMethod extends AbstractMethod {
+public class ClassMethod extends AbstractV1Method {
     private String operatesOn;
 
     public ClassMethod(JSONObject jsonObject) {

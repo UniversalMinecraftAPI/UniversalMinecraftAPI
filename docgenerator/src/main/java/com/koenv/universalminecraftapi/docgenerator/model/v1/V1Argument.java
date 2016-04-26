@@ -1,13 +1,13 @@
-package com.koenv.universalminecraftapi.docgenerator.model;
+package com.koenv.universalminecraftapi.docgenerator.model.v1;
 
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 
-public class Argument {
+public class V1Argument {
     private String name;
     private String type;
     private boolean optional;
 
-    public Argument(JSONObject jsonObject) {
+    public V1Argument(JSONObject jsonObject) {
         this.populateFrom(jsonObject);
     }
 
@@ -32,9 +32,9 @@ public class Argument {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Argument)) return false;
+        if (!(o instanceof V1Argument)) return false;
 
-        Argument argument = (Argument) o;
+        V1Argument argument = (V1Argument) o;
 
         if (name != null ? !name.equals(argument.name) : argument.name != null) return false;
         return type != null ? type.equals(argument.type) : argument.type == null;

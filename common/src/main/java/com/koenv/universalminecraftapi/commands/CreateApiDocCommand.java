@@ -34,22 +34,33 @@ public class CreateApiDocCommand extends Command {
 
         JSONObject root = new JSONObject();
 
+        JSONObject v1 = new JSONObject();
+
         JSONArray namespaces = new JSONArray();
 
-        methodInvoker.getNamespaces().values().stream().flatMap(map -> map.values().stream()).forEach(method -> namespaces.put(getJsonMethod(method)));
+        methodInvoker.getNamespaces().values().stream().flatMap(map -> map.values().stream()).forEach(method -> namespaces.put(getV1JsonMethod(method)));
 
-        root.put("namespaces", namespaces);
+        v1.put("namespaces", namespaces);
 
         JSONArray classes = new JSONArray();
 
-        methodInvoker.getClasses().values().stream().flatMap(map -> map.values().stream()).forEach(method -> classes.put(getJsonMethod(method)));
+        methodInvoker.getClasses().values().stream().flatMap(map -> map.values().stream()).forEach(method -> classes.put(getV1JsonMethod(method)));
 
-        root.put("classes", classes);
+        v1.put("classes", classes);
 
         JSONArray streams = new JSONArray();
         uma.getStreamManager().getStreams().stream().forEach(streams::put);
 
-        root.put("streams", streams);
+        v1.put("streams", streams);
+
+        root.put("v1", v1);
+
+        // TODO: Add V2 method info
+        JSONObject v2 = new JSONObject();
+        v2.put("resources", new JSONArray());
+        v2.put("operations", new JSONArray());
+
+        root.put("v2", v2);
 
         JSONObject platform = new JSONObject();
         platform.put("name", uma.getProvider().getPlatform());
@@ -67,11 +78,9 @@ public class CreateApiDocCommand extends Command {
         }
 
         commandSource.sendMessage(ChatColor.GREEN, "API documentation saved to file " + file.getPath());
-
-        return;
     }
 
-    private JSONObject getJsonMethod(AbstractMethod methodEntry) {
+    private JSONObject getV1JsonMethod(AbstractMethod methodEntry) {
         JSONObject jsonMethod = new JSONObject();
 
         Method method = methodEntry.getJavaMethod();

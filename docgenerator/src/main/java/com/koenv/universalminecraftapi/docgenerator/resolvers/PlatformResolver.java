@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.docgenerator.resolvers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.koenv.universalminecraftapi.docgenerator.model.AbstractMethod;
+import com.koenv.universalminecraftapi.docgenerator.model.v1.AbstractV1Method;
 import com.koenv.universalminecraftapi.docgenerator.model.Platform;
 
 import java.util.Collection;
@@ -12,10 +12,10 @@ import java.util.Set;
 public class PlatformResolver {
     private Set<Platform> platforms = new HashSet<>();
 
-    private Multimap<AbstractMethod, Platform> methods = HashMultimap.create();
+    private Multimap<AbstractV1Method, Platform> methods = HashMultimap.create();
     private Multimap<String, Platform> streams = HashMultimap.create();
 
-    public void addMethod(Platform platform, AbstractMethod method) {
+    public void addMethod(Platform platform, AbstractV1Method method) {
         this.platforms.add(platform);
         this.methods.put(method, platform);
     }
@@ -25,11 +25,11 @@ public class PlatformResolver {
         this.streams.put(stream, platform);
     }
 
-    public boolean availableOnAllPlatforms(AbstractMethod method) {
+    public boolean availableOnAllPlatforms(AbstractV1Method method) {
         return methods.get(method).size() == platforms.size();
     }
 
-    public Collection<Platform> getPlatforms(AbstractMethod method) {
+    public Collection<Platform> getPlatforms(AbstractV1Method method) {
         return methods.get(method);
     }
 
