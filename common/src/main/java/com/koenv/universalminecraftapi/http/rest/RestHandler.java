@@ -1,5 +1,6 @@
 package com.koenv.universalminecraftapi.http.rest;
 
+import com.koenv.universalminecraftapi.methods.OptionalParam;
 import com.koenv.universalminecraftapi.methods.RethrowableException;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import com.koenv.universalminecraftapi.util.Pair;
@@ -62,12 +63,22 @@ public class RestHandler {
             String pathName = RestUtils.getParameterName(parameter);
             Optional<Pair<String, String>> value = paths.stream().filter(pair -> RestUtils.isParam(pair.getLeft())).filter(s -> Objects.equals(s.getLeft().substring(1), pathName)).findFirst();
             if (value.isPresent()) {
-                boolean allowed = parameterConverterManager.checkParameter(value, parameter);
+                boolean allowed = parameterConverterManager.checkParameter(value.get().getRight(), parameter);
                 if (allowed) {
                     arguments.add(value.get().getRight());
                     continue;
                 } else {
-                    Object convertedParameter = parameterConverterManager.convertParameterUntilFound(value.get().getRight(), parameter);
+                    Object convertedParameter = null;
+                    try {
+                        convertedParameter = parameterConverterManager.convertParameterUntilFound(value.get().getRight(), parameter);
+                    } catch (Exception e) {
+                        throw new RestMethodInvocationException(
+                                "Error while converting parameter " + pathName + " for REST resource " + restMethod.getPath() +
+                                        " from " + value.get().getRight().getClass().getSimpleName() + " to " + parameter.getType().getSimpleName()
+                                        + ". Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage(),
+                                e
+                        );
+                    }
                     if (convertedParameter == null) {
                         throw new RestMethodInvocationException("Wrong type for parameter " + parameter.getName() + " for REST resource " + restMethod.getPath());
                     }
@@ -81,7 +92,8 @@ public class RestHandler {
                     Object queryParameter = null;
                     RestQueryParamsMap map = parameters.getQueryParams();
                     if (map != null) {
-                        map = map.get(parameter.getAnnotation(RestQuery.class).value());
+                        String queryParamName = parameter.getAnnotation(RestQuery.class).value();
+                        map = map.get(queryParamName);
 
                         if (map != null) {
                             if (map.hasValue()) {
@@ -105,7 +117,17 @@ public class RestHandler {
                         continue;
                     }
 
-                    Object convertedParameter = parameterConverterManager.convertParameterUntilFound(queryParameter, parameter);
+                    Object convertedParameter;
+                    try {
+                        convertedParameter = parameterConverterManager.convertParameterUntilFound(queryParameter, parameter);
+                    } catch (Exception e) {
+                        throw new RestMethodInvocationException(
+                                "Error while converting query parameter " + queryParameter + " for REST resource " + restMethod.getPath() +
+                                        " from " + value.get().getRight().getClass().getSimpleName() + " to " + parameter.getType().getSimpleName()
+                                        + ". Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage(),
+                                e
+                        );
+                    }
                     if (convertedParameter == null) {
                         throw new RestMethodInvocationException("Wrong type for parameter " + parameter.getName() + " for REST resource " + restMethod.getPath());
                     }
@@ -154,7 +176,6 @@ public class RestHandler {
                 RestOperationMethod operationMethod = findOperation(resultClass, operation);
 
                 if (operationMethod == null) {
-                    // TODO: Search for superclasses/interfaces
                     throw new RestNotFoundException("Unable to find operation " + operation + " on object of type " + result.getClass().getName());
                 }
 
@@ -175,13 +196,20 @@ public class RestHandler {
                 throw new RestMethodInvocationException("Cannot have an intermediary POST operation, must be the last operation");
             }
 
+            Object body = null;
+
+            if (parameters != null) {
+                body = parameters.getBody();
+                if (body instanceof JSONObject) {
+                    body = ((JSONObject) body).toMap();
+                } else if (body instanceof JSONArray) {
+                    body = ((JSONArray) body).toList();
+                }
+            }
+
             for (RestOperationMethod operationMethod : operationMethods) {
                 if (parameters != null && !parameters.hasPermission(operationMethod)) {
                     throw new RestForbiddenException("No permission to access operation " + operationMethod.getPath());
-                }
-
-                if (parameters != null && operationMethod.getRestMethod() != parameters.getMethod()) {
-                    throw new RestForbiddenException("Invalid method for operation " + operationMethod.getPath());
                 }
 
                 List<Object> operationArguments = new ArrayList<>();
@@ -194,17 +222,28 @@ public class RestHandler {
                         Parameter javaParameter = javaOperationParameters[j];
 
                         if (javaParameter.getAnnotation(RestBody.class) != null) {
+                            String nameInBody = javaParameter.getAnnotation(RestBody.class).value();
+
                             Object bodyParameter = null;
 
-                            if (parameters != null) {
-                                Object body = parameters.getBody();
-                                if (body instanceof JSONObject) {
-                                    bodyParameter = ((JSONObject) body).toMap();
-                                } else if (body instanceof JSONArray) {
-                                    bodyParameter = ((JSONArray) body).toList();
-                                } else if (body != null) {
-                                    bodyParameter = body;
+                            if (!nameInBody.isEmpty()) {
+                                if (body != null && body instanceof Map) {
+                                    bodyParameter = ((Map) body).get(nameInBody);
                                 }
+                            } else {
+                                bodyParameter = body;
+                            }
+
+                            if (bodyParameter == null) {
+                                if (javaParameter.getAnnotation(OptionalParam.class) == null) {
+                                    if (!nameInBody.isEmpty()) {
+                                        throw new RestMethodInvocationException("Missing parameter in body: " + nameInBody + " for REST operation " + restMethod.getPath());
+                                    } else {
+                                        throw new RestMethodInvocationException("Missing body for REST operation " + restMethod.getPath());
+                                    }
+                                }
+                                operationArguments.add(null);
+                                continue;
                             }
 
                             boolean allowed = parameterConverterManager.checkParameter(bodyParameter, javaParameter);
@@ -213,7 +252,26 @@ public class RestHandler {
                                 continue;
                             }
 
-                            Object convertedParameter = parameterConverterManager.convertParameterUntilFound(bodyParameter, javaParameter);
+                            Object convertedParameter;
+                            try {
+                                convertedParameter = parameterConverterManager.convertParameterUntilFound(bodyParameter, javaParameter);
+                            } catch (Exception e) {
+                                if (!nameInBody.isEmpty()) {
+                                    throw new RestMethodInvocationException(
+                                            "Error while converting parameter " + nameInBody + " for REST operation " + operationMethod.getPath() +
+                                                    " from " + bodyParameter.getClass().getSimpleName() + " to " + javaParameter.getType().getSimpleName()
+                                                    + ". Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage(),
+                                            e
+                                    );
+                                } else {
+                                    throw new RestMethodInvocationException(
+                                            "Error while converting body for REST operation " + operationMethod.getPath() +
+                                                    " from " + bodyParameter.getClass().getSimpleName() + " to " + javaParameter.getType().getSimpleName()
+                                                    + ". Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage(),
+                                            e
+                                    );
+                                }
+                            }
                             if (convertedParameter == null) {
                                 throw new RestMethodInvocationException("Wrong type for body for REST operation " + restMethod.getPath());
                             }
@@ -332,11 +390,24 @@ public class RestHandler {
                     }
                 }
 
-                boolean foundBody = false;
+                boolean foundMultipleBodies = false;
+                boolean foundSingleBody = false;
                 for (Parameter parameter : objectMethod.getParameters()) {
                     if (parameter.getAnnotation(RestBody.class) != null) {
-                        if (foundBody) {
-                            throw new RestMethodRegistrationException("Only 1 @" + RestBody.class.getSimpleName() + " can be specified", objectMethod);
+                        RestBody restBody = parameter.getAnnotation(RestBody.class);
+                        if (restBody.value().isEmpty()) {
+                            if (foundSingleBody) {
+                                throw new RestMethodRegistrationException("Only 1 empty @" + RestBody.class.getSimpleName() + " can be specified", objectMethod);
+                            }
+                            if (foundMultipleBodies) {
+                                throw new RestMethodRegistrationException("No empty @" + RestBody.class.getSimpleName() + "s can be specified if there are @" + RestBody.class.getSimpleName() + "s with names", objectMethod);
+                            }
+                            foundSingleBody = true;
+                        } else {
+                            if (foundSingleBody) {
+                                throw new RestMethodRegistrationException("No empty @" + RestBody.class.getSimpleName() + "s can be specified if there are @" + RestBody.class.getSimpleName() + "s with names", objectMethod);
+                            }
+                            foundMultipleBodies = true;
                         }
                         if (restMethod != RestMethod.POST) {
                             if (restMethod == RestMethod.DEFAULT) {
@@ -345,7 +416,6 @@ public class RestHandler {
                                 throw new RestMethodRegistrationException("When a @" + RestBody.class.getSimpleName() + " is specified, the method must be POST", objectMethod);
                             }
                         }
-                        foundBody = true;
                     }
                 }
 

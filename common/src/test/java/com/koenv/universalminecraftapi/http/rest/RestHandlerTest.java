@@ -1,5 +1,6 @@
 package com.koenv.universalminecraftapi.http.rest;
 
+import com.koenv.universalminecraftapi.methods.OptionalParam;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
@@ -49,6 +50,18 @@ public class RestHandlerTest {
         handler.registerClass(BadResource4.class);
     }
 
+    @Test(expected = RestMethodRegistrationException.class)
+    public void badRestResource5() throws Exception {
+        RestHandler handler = new RestHandler(null);
+        handler.registerClass(BadResource5.class);
+    }
+
+    @Test(expected = RestMethodRegistrationException.class)
+    public void badRestResource6() throws Exception {
+        RestHandler handler = new RestHandler(null);
+        handler.registerClass(BadResource6.class);
+    }
+
     @Test
     public void operationRegistration() throws Exception {
         RestHandler handler = new RestHandler(null);
@@ -78,12 +91,18 @@ public class RestHandlerTest {
                     assertEquals(TestPlayer.class, method.getOperatesOn());
                     count++;
                     break;
+                case "pm":
+                    assertEquals("pm", method.getPath());
+                    assertEquals(RestMethod.POST, method.getRestMethod());
+                    assertEquals(TestPlayer.class, method.getOperatesOn());
+                    count++;
+                    break;
                 default:
-                    fail("Invalid operation method found");
+                    fail("Invalid operation method found: " + method.getPath());
             }
         }
 
-        assertEquals("Not all expected registered methods were found", 3, count);
+        assertEquals("Not all expected registered methods were found", 4, count);
     }
 
     @Test(expected = RestMethodRegistrationException.class)
@@ -109,6 +128,21 @@ public class RestHandlerTest {
     @Test(expected = RestMethodRegistrationException.class)
     public void badRestOperation5() throws Exception {
         new RestHandler(null).registerClass(BadRestOperation5.class);
+    }
+
+    @Test(expected = RestMethodRegistrationException.class)
+    public void badRestOperation6() throws Exception {
+        new RestHandler(null).registerClass(BadRestOperation6.class);
+    }
+
+    @Test(expected = RestMethodRegistrationException.class)
+    public void badRestOperation7() throws Exception {
+        new RestHandler(null).registerClass(BadRestOperation7.class);
+    }
+
+    @Test(expected = RestMethodRegistrationException.class)
+    public void badRestOperation8() throws Exception {
+        new RestHandler(null).registerClass(BadRestOperation8.class);
     }
 
     @Test
@@ -216,6 +250,16 @@ public class RestHandlerTest {
                         return null;
                     }
                 };
+            }
+        }));
+    }
+
+    @Test
+    public void missingQueryParameter() throws Exception {
+        assertEquals(null, buildRestHandler().handle("queries/single", new TestRestParameters() {
+            @Override
+            public RestQueryParamsMap getQueryParams() {
+                return new TestRestQueryParamMap();
             }
         }));
     }
@@ -406,6 +450,127 @@ public class RestHandlerTest {
         });
     }
 
+    @Test(expected = RestMethodInvocationException.class)
+    public void testMultiplePostsThrow() throws Exception {
+        buildRestHandler().handle("players/test/bodyMap/value", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+        });
+    }
+
+    @Test
+    public void multipleOperationsWithDifferentMethods() throws Exception {
+        assertEquals("test", buildRestHandler().handle("players/test/copy/body", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+
+            @Override
+            public @Nullable Object getBody() {
+                return "test";
+            }
+        }));
+    }
+
+    @Test
+    public void testJSONObjectBodyWithRestBodiesWithNames() throws Exception {
+        assertEquals("value,{key=value}", buildRestHandler().handle("players/test/bodyNames", new TestRestParameters() {
+            @Override
+            public @Nullable Object getBody() {
+                JSONObject result = new JSONObject();
+                result.put("body1", "value");
+
+                JSONObject nested = new JSONObject();
+                nested.put("key", "value");
+
+                result.put("body2", nested);
+                return result;
+            }
+
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+        }));
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testMissingBody() throws Exception {
+        buildRestHandler().handle("players/test/body", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+        });
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testMissingBodyWithParameters() throws Exception {
+        buildRestHandler().handle("players/test/bodyNames", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+
+            @Override
+            public @Nullable Object getBody() {
+                JSONObject result = new JSONObject();
+                result.put("body1", "value");
+                return result;
+            }
+        });
+    }
+
+    @Test
+    public void testOptionalBody() throws Exception {
+        assertEquals("value,null", buildRestHandler().handle("players/test/bodyOptional", new TestRestParameters() {
+            @Override
+            public @NotNull RestMethod getMethod() {
+                return RestMethod.POST;
+            }
+
+            @Override
+            public @Nullable Object getBody() {
+                JSONObject result = new JSONObject();
+                result.put("body1", "value");
+                return result;
+            }
+        }));
+    }
+
+    @Test(expected = RestNotFoundException.class)
+    public void testMultipleMatches() throws Exception {
+        buildRestHandler().handle("test/myname", null);
+    }
+
+    @Test
+    public void testStringToInt() throws Exception {
+        assertEquals("12", buildRestHandler().handle("types/int/12", null));
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testInvalidInt() throws Exception {
+        buildRestHandler().handle("types/int/test", null);
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testInvalidTypeInPath() throws Exception {
+        buildRestHandler().handle("types/invalid/test", null);
+    }
+
+    @Test(expected = RestMethodInvocationException.class)
+    public void testThrowing() throws Exception {
+        buildRestHandler().handle("types/throwing", null);
+    }
+
+    @Test(expected = RestNotFoundException.class)
+    public void testUnknownOperation() throws Exception {
+        buildRestHandler().handle("players/test/inventory", null);
+    }
+
     private RestHandler buildRestHandler() throws Exception {
         RestHandler handler = new RestHandler(new ParameterConverterManager());
         handler.registerClass(TestResourcesAndOperations.class);
@@ -448,6 +613,20 @@ public class RestHandlerTest {
         }
     }
 
+    public static class BadResource5 {
+        @RestResource("")
+        public static TestPlayer getPlayer(@RestBody String body) {
+            return new TestPlayer(body);
+        }
+    }
+
+    public static class BadResource6 {
+        @RestResource("players/:name")
+        public TestPlayer getPlayer(@RestPath("name") String name) {
+            return new TestPlayer(name);
+        }
+    }
+
     public static class GoodRestOperations {
         @RestOperation(TestPlayer.class)
         public static String getName(TestPlayer self) {
@@ -462,6 +641,11 @@ public class RestHandlerTest {
         @RestOperation(value = TestPlayer.class)
         public static boolean setNickname(TestPlayer self, @RestBody String nickname) {
             return true;
+        }
+
+        @RestOperation(value = TestPlayer.class, path = "pm")
+        public static void sendPrivateMessage(TestPlayer self, @RestBody("to") String to, @RestBody("message") String message) {
+
         }
     }
 
@@ -500,6 +684,27 @@ public class RestHandlerTest {
         }
     }
 
+    public static class BadRestOperation6 {
+        @RestOperation(TestPlayer.class)
+        public static String getName(TestPlayer self, @RestBody String body, @RestBody("message") String body2) {
+            return "test";
+        }
+    }
+
+    public static class BadRestOperation7 {
+        @RestOperation(TestPlayer.class)
+        public static String getName(TestPlayer self, @RestBody("message") String body, @RestBody String body2) {
+            return "test";
+        }
+    }
+
+    public static class BadRestOperation8 {
+        @RestOperation(TestPlayer.class)
+        public String getName(TestPlayer self) {
+            return "test";
+        }
+    }
+
     public static class TestResourcesAndOperations {
         @RestResource("players/:name")
         public static TestPlayer getPlayer(@RestPath("name") String name) {
@@ -531,6 +736,26 @@ public class RestHandlerTest {
             return body.toString();
         }
 
+        @RestOperation(TestPlayer.class)
+        public static String setBodyNames(TestPlayer self, @RestBody("body1") String body1, @RestBody("body2") Map<String, Object> body2) {
+            return body1 + "," + body2.toString();
+        }
+
+        @RestOperation(TestPlayer.class)
+        public static String setBodyOptional(TestPlayer self, @RestBody("body1") String body1, @OptionalParam @RestBody("body2") Map<String, Object> body2) {
+            return body1 + "," + String.valueOf(body2);
+        }
+
+        @RestOperation(value = TestPlayer.class, path = "copy")
+        public static TestPlayer copy(TestPlayer self) {
+            return self;
+        }
+
+        @RestOperation(String.class)
+        public static String setValue(String self, @RestBody String newValue) {
+            return newValue;
+        }
+
         @RestResource("objects/:test")
         public static TestPlayer getTest(@RestPath("test") String test, String extra) {
             return new TestPlayer(test + extra);
@@ -554,6 +779,31 @@ public class RestHandlerTest {
         @RestResource("queries/map")
         public static String getFromQueryMap(@RestQuery("parameters") Map<String, Object> parameters) {
             return parameters.toString();
+        }
+
+        @RestResource("test/:test")
+        public static void test(@RestPath("test") String test) {
+
+        }
+
+        @RestResource("test/:another")
+        public static void testAnother(@RestPath("another") String test) {
+
+        }
+
+        @RestResource("types/int/:int")
+        public static String testInteger(@RestPath("int") int value) {
+            return Integer.toString(value);
+        }
+
+        @RestResource("types/invalid/:player")
+        public static String testPlayer(@RestPath("player") TestPlayer player) {
+            return player.getName();
+        }
+
+        @RestResource("types/throwing")
+        public static void testThrowing() {
+            throw new NullPointerException();
         }
     }
 

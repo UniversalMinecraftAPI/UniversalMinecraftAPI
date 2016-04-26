@@ -193,6 +193,11 @@ public class CommandManagerTest {
         public RestRequestHandler getRestRequestHandler() {
             return null;
         }
+
+        @Override
+        public void registerMethods(Class<?> clazz) {
+
+        }
     }
 
     private static class TestHelpCommand extends Command {

@@ -524,7 +524,7 @@ public class MethodInvokerTest {
         }
 
         @APIMethod(namespace = "test")
-        public static String getOptional(@Optional String that) {
+        public static String getOptional(@OptionalParam String that) {
             return String.valueOf(that);
         }
 
@@ -560,7 +560,7 @@ public class MethodInvokerTest {
         }
 
         @APIMethod(namespace = "maps")
-        public static String getOptionalMap(@Optional Map<Object, Object> arg) {
+        public static String getOptionalMap(@OptionalParam Map<Object, Object> arg) {
             return String.valueOf(arg);
         }
 

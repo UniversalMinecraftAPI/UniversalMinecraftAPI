@@ -10,11 +10,6 @@ public class RestMethodRegistrationException extends RuntimeException {
         this.method = method;
     }
 
-    public RestMethodRegistrationException(String message, Throwable cause, Method method) {
-        super(method.getName() + ": " + message, cause);
-        this.method = method;
-    }
-
     public Method getMethod() {
         return method;
     }

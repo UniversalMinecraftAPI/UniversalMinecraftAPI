@@ -93,7 +93,7 @@ public class CreateApiDocCommand extends Command {
                         JSONObject json = new JSONObject();
                         json.put("name", parameter.getName());
                         json.put("type", parameter.getType().getSimpleName());
-                        json.put("optional", parameter.getAnnotation(Optional.class) != null);
+                        json.put("optional", parameter.getAnnotation(OptionalParam.class) != null);
                         arguments.put(json);
                     });
             jsonMethod.put("arguments", arguments);

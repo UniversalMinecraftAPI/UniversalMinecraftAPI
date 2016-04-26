@@ -200,7 +200,7 @@ public class MethodInvoker {
                         continue;
                     }
                 }
-                if (javaParameter.getAnnotation(Optional.class) != null) {
+                if (javaParameter.getAnnotation(OptionalParam.class) != null) {
                     convertedParameters.add(null);
                     requiredParameters--;
                     continue;
@@ -210,7 +210,19 @@ public class MethodInvoker {
             Object parameter = parameters.get(j);
             boolean allowed = parameterConverterManager.checkParameter(parameter, javaParameter);
             if (!allowed) {
-                Object convertedParameter = parameterConverterManager.convertParameterUntilFound(parameter, javaParameter);
+                Object convertedParameter = null;
+                try {
+                    convertedParameter = parameterConverterManager.convertParameterUntilFound(parameter, javaParameter);
+                } catch (Exception e) {
+                    throw new MethodInvocationException(
+                            "Error while converting parameter for place " + j +
+                                    " from " + parameters.get(j).getClass().getSimpleName() +
+                                    " to " + javaParameter.getType().getSimpleName() +
+                                    ". Exception: " + e.getClass().getName() +
+                                    ": " + e.getMessage(),
+                            e
+                    );
+                }
                 if (convertedParameter == null) {
                     if (invoker != null) {
                         Object invokerObject = invoker.get(javaParameter.getType());

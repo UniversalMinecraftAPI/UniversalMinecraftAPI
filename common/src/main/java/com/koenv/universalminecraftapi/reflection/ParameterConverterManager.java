@@ -21,16 +21,24 @@ public class ParameterConverterManager {
 
     private void registerDefaultParameterConverters() {
         ParameterConverter<Double, Float> doubleToFloatConverter = Double::floatValue;
-        ParameterConverter<Float, Double> floatToDoubleConverter = Float::doubleValue;
         registerParameterConverter(double.class, float.class, doubleToFloatConverter);
         registerParameterConverter(double.class, Float.class, doubleToFloatConverter);
         registerParameterConverter(Double.class, float.class, doubleToFloatConverter);
         registerParameterConverter(Double.class, Float.class, doubleToFloatConverter);
 
+        ParameterConverter<Float, Double> floatToDoubleConverter = Float::doubleValue;
         registerParameterConverter(float.class, double.class, floatToDoubleConverter);
         registerParameterConverter(float.class, Double.class, floatToDoubleConverter);
         registerParameterConverter(Float.class, double.class, floatToDoubleConverter);
         registerParameterConverter(Float.class, Double.class, floatToDoubleConverter);
+
+        ParameterConverter<String, Integer> intToStringConverter = Integer::valueOf;
+        registerParameterConverter(String.class, int.class, intToStringConverter);
+        registerParameterConverter(String.class, Integer.class, intToStringConverter);
+
+        ParameterConverter<Integer, String> stringToIntConverter = i -> Integer.toString(i);
+        registerParameterConverter(int.class, String.class, stringToIntConverter);
+        registerParameterConverter(Integer.class, String.class, stringToIntConverter);
     }
 
     private void registerDefaultAlsoAllowed() {
@@ -76,7 +84,7 @@ public class ParameterConverterManager {
      * @param javaParameter The parameter of the method
      * @return Null if this parameter cannot be converted to the parameter type of the method. The converted parameter otherwise.
      */
-    public Object convertParameterUntilFound(Object parameter, Parameter javaParameter) {
+    public Object convertParameterUntilFound(Object parameter, Parameter javaParameter) throws Exception {
         boolean allowed = checkParameter(parameter, javaParameter);
         Object previousParameter;
         while (!allowed) {
@@ -110,7 +118,7 @@ public class ParameterConverterManager {
      * @return The converted parameter. Null if it cannot be converted.
      */
     @SuppressWarnings("unchecked")
-    public Object convertParameter(Object parameter, Class<?> to, Class<?> from) {
+    public Object convertParameter(Object parameter, Class<?> to, Class<?> from) throws Exception {
         if (from == null && parameter != null) {
             from = parameter.getClass();
         }

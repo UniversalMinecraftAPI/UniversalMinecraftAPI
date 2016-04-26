@@ -9,7 +9,7 @@ import com.koenv.universalminecraftapi.http.websocket.WebSocketStreamSubscriber;
 import com.koenv.universalminecraftapi.methods.APIMethod;
 import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.methods.Invoker;
-import com.koenv.universalminecraftapi.methods.Optional;
+import com.koenv.universalminecraftapi.methods.OptionalParam;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.Map;
 @APINamespace("streams")
 public class StreamMethods {
     @APIMethod
-    public static boolean subscribe(Invoker invoker, JsonRequest request, String stream, @Optional Map<Object, Object> parameters) {
+    public static boolean subscribe(Invoker invoker, JsonRequest request, String stream, @OptionalParam Map<Object, Object> parameters) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);
         }
