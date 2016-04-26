@@ -483,7 +483,7 @@ public class MethodInvokerTest {
 
         // objects.getString("test")
         assertEquals(
-                "testtest",
+                "testtest12",
                 buildMethodInvoker().invokeMethod(new ChainedMethodCallExpression(expressions), invoker)
         );
     }
@@ -600,8 +600,8 @@ public class MethodInvokerTest {
         }
 
         @APIMethod(namespace = "objects")
-        public static String getMultipleString(String string, int arg, String it) {
-            return string + it;
+        public static String getMultipleString(String string, String it, int arg) {
+            return string + it + arg;
         }
 
         @APIMethod(namespace = "exceptions")
@@ -610,7 +610,7 @@ public class MethodInvokerTest {
         }
 
         @APIMethod(namespace = "exceptions")
-        public static void throwRethrowable() throws Exception{
+        public static void throwRethrowable() throws Exception {
             throw new APIException("Test", 12);
         }
 

@@ -210,7 +210,7 @@ public class MethodInvoker {
             Object parameter = parameters.get(j);
             boolean allowed = parameterConverterManager.checkParameter(parameter, javaParameter);
             if (!allowed) {
-                Object convertedParameter = null;
+                Object convertedParameter;
                 try {
                     convertedParameter = parameterConverterManager.convertParameterUntilFound(parameter, javaParameter);
                 } catch (Exception e) {
