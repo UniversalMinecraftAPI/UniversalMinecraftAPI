@@ -1,7 +1,26 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.net.ellune:blossom:1.0.1"
+    }
+}
+
+apply plugin: 'net.ellune.blossom'
+
 repositories {
     maven {
         url 'http://repo.spongepowered.org/maven'
     }
+}
+
+blossom {
+    def location = 'src/main/java/com/koenv/universalminecraftapi/sponge/PluginInfo.java'
+
+    replaceToken '@version@', project.version, location
 }
 
 dependencies {

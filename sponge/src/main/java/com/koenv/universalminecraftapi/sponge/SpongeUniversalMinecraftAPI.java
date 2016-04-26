@@ -43,10 +43,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "com.koenv.universalminecraftapi.sponge", name = "UniversalMinecraftAPI", version = SpongeUniversalMinecraftAPI.VERSION, description = "A JSON API for Sponge")
+@Plugin(id = "com.koenv.universalminecraftapi.sponge", name = "UniversalMinecraftAPI", version = PluginInfo.VERSION, description = "A JSON API for Sponge")
 public class SpongeUniversalMinecraftAPI implements UniversalMinecraftAPIProvider {
-    public static final String VERSION = "0.1-SNAPSHOT";
-
     private UniversalMinecraftAPIInterface uma;
 
     @Inject
@@ -120,7 +118,7 @@ public class SpongeUniversalMinecraftAPI implements UniversalMinecraftAPIProvide
 
     @Override
     public String getUMAVersion() {
-        return VERSION;
+        return container.getVersion().orElse("UNKNOWN");
     }
 
     @Override

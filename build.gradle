@@ -15,7 +15,6 @@ subprojects {
 
     apply plugin: 'java'
 
-    // when updating this version number, also update the version number in SpongeUniversalMinecraftAPI
     version = '0.1-SNAPSHOT'
     archivesBaseName = "$rootProject.name-$project.name"
 
