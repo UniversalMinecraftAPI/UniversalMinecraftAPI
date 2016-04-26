@@ -20,14 +20,14 @@
                 "returns": "double"
             },
             {
-                "operatesOn": "Player",
-                "name": "getUUID",
+                "operatesOn": "User",
+                "name": "getUsername",
                 "arguments": [],
                 "returns": "String"
             },
             {
-                "operatesOn": "User",
-                "name": "getUsername",
+                "operatesOn": "Player",
+                "name": "getUUID",
                 "arguments": [],
                 "returns": "String"
             }
@@ -57,16 +57,6 @@
                 "returns": "Player"
             },
             {
-                "name": "unsubscribe",
-                "namespace": "streams",
-                "arguments": [{
-                    "name": "stream",
-                    "optional": false,
-                    "type": "String"
-                }],
-                "returns": "int"
-            },
-            {
                 "name": "subscribe",
                 "namespace": "streams",
                 "arguments": [
@@ -82,6 +72,16 @@
                     }
                 ],
                 "returns": "boolean"
+            },
+            {
+                "name": "unsubscribe",
+                "namespace": "streams",
+                "arguments": [{
+                    "name": "stream",
+                    "optional": false,
+                    "type": "String"
+                }],
+                "returns": "int"
             },
             {
                 "name": "subscriptionCount",
@@ -152,8 +152,132 @@
         ]
     },
     "v2": {
-        "operations": [],
-        "resources": []
+        "operations": [
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "total",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "used",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "free",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "User",
+                "path": "username",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "Player",
+                "path": "uuid",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            }
+        ],
+        "resources": [
+            {
+                "path": "streams",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String[]"
+            },
+            {
+                "path": "streams/subscriptions/count",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "int"
+            },
+            {
+                "path": "users/current",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User"
+            },
+            {
+                "path": "users/apikey",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "users",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User[]"
+            },
+            {
+                "path": "uma/version",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/platform/name",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/methods",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "Methods"
+            },
+            {
+                "path": "uma/invoker",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/ping",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/platform/version",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "server/disk",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder"
+            },
+            {
+                "path": "server/memory",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder"
+            },
+            {
+                "path": "players/:name",
+                "pathParams": [{
+                    "name": "name",
+                    "type": "String"
+                }],
+                "queryParams": [],
+                "returns": "Player"
+            }
+        ]
     },
     "platform": {
         "name": "CraftBukkit",

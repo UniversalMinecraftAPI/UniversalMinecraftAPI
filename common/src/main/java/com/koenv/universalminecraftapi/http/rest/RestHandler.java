@@ -57,7 +57,7 @@ public class RestHandler {
             paths.add(Pair.of(resourceParts.get(i), pathParts.get(i)));
         }
 
-        Method method = restMethod.getMethod();
+        Method method = restMethod.getJavaMethod();
 
         if (parameters != null && !parameters.hasPermission(restMethod)) {
             throw new RestForbiddenException("No permission to access resource " + restMethod.getPath());
@@ -158,7 +158,7 @@ public class RestHandler {
 
         Object result;
         try {
-            result = restMethod.getMethod().invoke(null, arguments.toArray());
+            result = restMethod.getJavaMethod().invoke(null, arguments.toArray());
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof RuntimeException && e.getCause() instanceof RethrowableException) {
                 throw (RuntimeException) e.getCause();

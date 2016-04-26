@@ -2,6 +2,18 @@
     "v1": {
         "classes": [
             {
+                "operatesOn": "User",
+                "name": "getUsername",
+                "arguments": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "Player",
+                "name": "getUUID",
+                "arguments": [],
+                "returns": "String"
+            },
+            {
                 "operatesOn": "PerformanceHolder",
                 "name": "getUsed",
                 "arguments": [],
@@ -18,12 +30,6 @@
                 "name": "getFree",
                 "arguments": [],
                 "returns": "double"
-            },
-            {
-                "operatesOn": "Player",
-                "name": "getUUID",
-                "arguments": [],
-                "returns": "String"
             },
             {
                 "operatesOn": "Server",
@@ -46,12 +52,6 @@
             {
                 "operatesOn": "Server",
                 "name": "getMotd",
-                "arguments": [],
-                "returns": "String"
-            },
-            {
-                "operatesOn": "User",
-                "name": "getUsername",
                 "arguments": [],
                 "returns": "String"
             }
@@ -217,8 +217,198 @@
         ]
     },
     "v2": {
-        "operations": [],
-        "resources": []
+        "operations": [
+            {
+                "operatesOn": "User",
+                "path": "username",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "Player",
+                "path": "uuid",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "total",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "used",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "free",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "broadcast",
+                "method": "POST",
+                "bodyParams": [{
+                    "name": "message",
+                    "type": "String"
+                }],
+                "returns": "boolean"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "motd",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "maxPlayers",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "int"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "port",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "int"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "ip",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String"
+            },
+            {
+                "operatesOn": "Server",
+                "path": "runCommand",
+                "method": "POST",
+                "bodyParams": [{
+                    "name": "command",
+                    "type": "String"
+                }],
+                "returns": "void"
+            }
+        ],
+        "resources": [
+            {
+                "path": "streams",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String[]"
+            },
+            {
+                "path": "streams/subscriptions/count",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "int"
+            },
+            {
+                "path": "users/apikey",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "users/current",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User"
+            },
+            {
+                "path": "users",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User[]"
+            },
+            {
+                "path": "uma/version",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/platform/name",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/methods",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "Methods"
+            },
+            {
+                "path": "uma/invoker",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/ping",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "uma/platform/version",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String"
+            },
+            {
+                "path": "server/memory",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder"
+            },
+            {
+                "path": "server/disk",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder"
+            },
+            {
+                "path": "players/:name",
+                "pathParams": [{
+                    "name": "name",
+                    "type": "String"
+                }],
+                "queryParams": [],
+                "returns": "Player"
+            },
+            {
+                "path": "server",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "Server"
+            },
+            {
+                "path": "server/commands",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "Command[]"
+            },
+            {
+                "path": "server/commands/names",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String[]"
+            }
+        ]
     },
     "platform": {
         "name": "sponge",

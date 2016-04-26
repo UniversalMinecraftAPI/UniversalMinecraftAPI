@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.http.rest;
 
 import java.lang.reflect.Method;
 
-public class RestOperationMethod {
+public class RestOperationMethod implements IRestMethod {
     private Class<?> operatesOn;
     private String path;
     private RestMethod restMethod;

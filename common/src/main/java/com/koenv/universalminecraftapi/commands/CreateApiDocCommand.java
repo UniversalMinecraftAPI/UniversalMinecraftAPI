@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.commands;
 
 import com.koenv.universalminecraftapi.ChatColor;
 import com.koenv.universalminecraftapi.UniversalMinecraftAPIInterface;
+import com.koenv.universalminecraftapi.http.rest.*;
 import com.koenv.universalminecraftapi.methods.*;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
@@ -20,16 +21,16 @@ public class CreateApiDocCommand extends Command {
     @Override
     public void onCommand(UniversalMinecraftAPIInterface uma, CommandSource commandSource, String[] args) {
         if (args.length < 1) {
-            commandSource.sendMessage(ChatColor.RED, "Missing argument: file name");
-            return;
+            args = new String[]{uma.getProvider().getPlatform() + ".json"}; // default file name: <platform>.json
         }
 
         File file = new File(args[0]);
         if (file.exists()) {
-            commandSource.sendMessage(ChatColor.RED, "File already exists, aborting");
+            commandSource.sendMessage(ChatColor.RED, "File " + file.getPath() + " already exists, aborting");
             return;
         }
 
+        // v1 methods
         MethodInvoker methodInvoker = uma.getMethodInvoker();
 
         JSONObject root = new JSONObject();
@@ -55,10 +56,21 @@ public class CreateApiDocCommand extends Command {
 
         root.put("v1", v1);
 
-        // TODO: Add V2 method info
+        // v2 methods
+        RestHandler restHandler = uma.getRestHandler();
         JSONObject v2 = new JSONObject();
-        v2.put("resources", new JSONArray());
-        v2.put("operations", new JSONArray());
+
+        JSONArray resources = new JSONArray();
+
+        restHandler.getResources().stream().forEach(method -> resources.put(getV2RestResourceMethod(method)));
+
+        v2.put("resources", resources);
+
+        JSONArray operations = new JSONArray();
+
+        restHandler.getOperations().values().stream().flatMap(map -> map.values().stream()).forEach(method -> operations.put(getV2RestOperationMethod(method)));
+
+        v2.put("operations", operations);
 
         root.put("v2", v2);
 
@@ -110,13 +122,7 @@ public class CreateApiDocCommand extends Command {
             jsonMethod.put("arguments", new JSONArray());
         }
 
-        if (Collection.class.isAssignableFrom(method.getReturnType())) {
-            ParameterizedType type = (ParameterizedType) method.getGenericReturnType();
-            Class<?> realType = (Class<?>) type.getActualTypeArguments()[0];
-            jsonMethod.put("returns", realType.getSimpleName() + "[]");
-        } else {
-            jsonMethod.put("returns", method.getReturnType().getSimpleName());
-        }
+        jsonMethod.put("returns", getReturnType(method));
 
         if (methodEntry instanceof ClassMethod) {
             jsonMethod.put("operatesOn", ((ClassMethod) methodEntry).getOperatesOn().getSimpleName());
@@ -125,6 +131,78 @@ public class CreateApiDocCommand extends Command {
         }
 
         return jsonMethod;
+    }
+
+    private JSONObject getV2RestResourceMethod(RestResourceMethod methodEntry) {
+        JSONObject jsonMethod = new JSONObject();
+
+        Method method = methodEntry.getJavaMethod();
+
+        jsonMethod.put("path", methodEntry.getPath());
+
+        JSONArray pathParams = new JSONArray();
+        JSONArray queryParams = new JSONArray();
+
+        Arrays.stream(method.getParameters())
+                .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                .forEach(parameter -> {
+                    if (parameter.getAnnotation(RestPath.class) != null) {
+                        JSONObject json = new JSONObject();
+                        json.put("name", parameter.getAnnotation(RestPath.class).value());
+                        json.put("type", parameter.getType().getSimpleName());
+                        pathParams.put(json);
+                    } else if (parameter.getAnnotation(RestQuery.class) != null) {
+                        JSONObject json = new JSONObject();
+                        json.put("name", parameter.getAnnotation(RestQuery.class).value());
+                        json.put("type", parameter.getType().getSimpleName());
+                        queryParams.put(json);
+                    }
+                });
+
+        jsonMethod.put("pathParams", pathParams);
+        jsonMethod.put("queryParams", queryParams);
+
+        jsonMethod.put("returns", getReturnType(method));
+
+        return jsonMethod;
+    }
+
+    private JSONObject getV2RestOperationMethod(RestOperationMethod methodEntry) {
+        JSONObject jsonMethod = new JSONObject();
+
+        Method method = methodEntry.getJavaMethod();
+
+        jsonMethod.put("path", methodEntry.getPath());
+
+        JSONArray bodyParams = new JSONArray();
+
+        Arrays.stream(method.getParameters())
+                .filter(parameter -> !MethodUtils.shouldExcludeFromDoc(parameter))
+                .forEach(parameter -> {
+                    if (parameter.getAnnotation(RestBody.class) != null) {
+                        JSONObject json = new JSONObject();
+                        json.put("name", parameter.getAnnotation(RestBody.class).value());
+                        json.put("type", parameter.getType().getSimpleName());
+                        bodyParams.put(json);
+                    }
+                });
+
+        jsonMethod.put("bodyParams", bodyParams);
+
+        jsonMethod.put("returns", getReturnType(method));
+        jsonMethod.put("operatesOn", methodEntry.getOperatesOn().getSimpleName());
+        jsonMethod.put("method", methodEntry.getRestMethod().name());
+
+        return jsonMethod;
+    }
+
+    private String getReturnType(Method method) {
+        if (Collection.class.isAssignableFrom(method.getReturnType())) {
+            ParameterizedType type = (ParameterizedType) method.getGenericReturnType();
+            Class<?> realType = (Class<?>) type.getActualTypeArguments()[0];
+            return realType.getSimpleName() + "[]";
+        }
+        return method.getReturnType().getSimpleName();
     }
 
     @Override

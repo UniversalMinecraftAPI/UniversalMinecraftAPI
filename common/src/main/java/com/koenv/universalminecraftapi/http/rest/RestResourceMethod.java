@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
-public class RestResourceMethod {
+public class RestResourceMethod implements IRestMethod {
     private String path;
     private Method method;
 
@@ -17,7 +17,8 @@ public class RestResourceMethod {
         return path;
     }
 
-    public Method getMethod() {
+    @Override
+    public Method getJavaMethod() {
         return method;
     }
 

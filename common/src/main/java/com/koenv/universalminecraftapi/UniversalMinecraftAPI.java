@@ -86,7 +86,7 @@ public class UniversalMinecraftAPI implements UniversalMinecraftAPIInterface {
         registerMethods(GenericServerMethods.class);
 
         commandManager.registerCommand(new String[]{"exec", "execute"}, new ExecuteCommand());
-        commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc"}, new CreateApiDocCommand());
+        commandManager.registerCommand(new String[]{"createapidoc", "create_api_doc", "cad"}, new CreateApiDocCommand());
         commandManager.registerCommand(new String[]{"reload"}, new ReloadCommand());
         commandManager.registerCommand(new String[]{"help"}, new HelpCommand());
 
