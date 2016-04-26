@@ -1,18 +1,20 @@
 package com.koenv.universalminecraftapi.http;
 
 import com.koenv.universalminecraftapi.http.rest.*;
-import com.koenv.universalminecraftapi.users.model.User;
+import com.koenv.universalminecraftapi.methods.Invoker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class WebServerRestParameters implements RestParameters {
-    private User user;
+    private Invoker invoker;
     private WebServerQueryParamsMap queryParamsMap;
     private Object body;
     private RestMethod method;
 
-    public WebServerRestParameters(User user, WebServerQueryParamsMap queryParamsMap, Object body, RestMethod method) {
-        this.user = user;
+    public WebServerRestParameters(Invoker invoker, WebServerQueryParamsMap queryParamsMap, Object body, RestMethod method) {
+        this.invoker = invoker;
         this.queryParamsMap = queryParamsMap;
         this.body = body;
         this.method = method;
@@ -30,6 +32,9 @@ public class WebServerRestParameters implements RestParameters {
 
     @Override
     public @Nullable Object get(Class<?> clazz) {
+        if (Objects.equals(clazz, Invoker.class)) {
+            return invoker;
+        }
         return null;
     }
 

@@ -3,11 +3,11 @@ package com.koenv.universalminecraftapi.http;
 import com.koenv.universalminecraftapi.ErrorCodes;
 import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
+import com.koenv.universalminecraftapi.http.model.WebServerInvoker;
 import com.koenv.universalminecraftapi.http.rest.RestException;
 import com.koenv.universalminecraftapi.http.rest.RestHandler;
 import com.koenv.universalminecraftapi.http.rest.RestMethod;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.users.model.User;
 import com.koenv.universalminecraftapi.util.json.JSONException;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.koenv.universalminecraftapi.util.json.JSONTokener;
@@ -22,7 +22,7 @@ public class RestRequestHandler {
         this.handler = handler;
     }
 
-    public JsonSerializable handle(Request request, User user) {
+    public JsonSerializable handle(Request request, WebServerInvoker user) {
         String bodyString = null;
         if (Objects.equals(request.requestMethod(), "POST")) {
             bodyString = request.body();
@@ -39,7 +39,7 @@ public class RestRequestHandler {
             }
         }
 
-        RestMethod method = null;
+        RestMethod method;
         switch (request.requestMethod()) {
             case "POST":
                 method = RestMethod.POST;

@@ -187,7 +187,9 @@ public class UniversalMinecraftAPIWebServer {
                 halt(401, getErrorResponse(ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
             }
 
-            Object result = restRequestHandler.handle(request, user.get());
+            WebServerInvoker invoker = new WebServerInvoker(user.get(), request, response);
+
+            Object result = restRequestHandler.handle(request, invoker);
 
             JSONValue jsonResult = (JSONValue) serializerManager.serialize(result);
             return jsonResult.toString(4);

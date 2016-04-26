@@ -4,6 +4,7 @@ import com.koenv.universalminecraftapi.ErrorCodes;
 import com.koenv.universalminecraftapi.UniversalMinecraftAPI;
 import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.http.model.JsonRequest;
+import com.koenv.universalminecraftapi.http.rest.RestResource;
 import com.koenv.universalminecraftapi.http.websocket.WebSocketInvoker;
 import com.koenv.universalminecraftapi.http.websocket.WebSocketStreamSubscriber;
 import com.koenv.universalminecraftapi.methods.APIMethod;
@@ -66,11 +67,13 @@ public class StreamMethods {
     }
 
     @APIMethod
+    @RestResource("streams")
     public static List<String> listStreams() {
         return UniversalMinecraftAPI.getInstance().getStreamManager().getStreams();
     }
 
     @APIMethod
+    @RestResource("streams/subscriptions/count")
     public static int subscriptionCount() {
         return UniversalMinecraftAPI.getInstance().getStreamManager().getSubscriptionCount();
     }

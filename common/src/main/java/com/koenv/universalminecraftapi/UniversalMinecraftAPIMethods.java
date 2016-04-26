@@ -1,6 +1,7 @@
 package com.koenv.universalminecraftapi;
 
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
+import com.koenv.universalminecraftapi.http.rest.RestResource;
 import com.koenv.universalminecraftapi.methods.*;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
@@ -9,26 +10,31 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 @APINamespace("uma")
 public class UniversalMinecraftAPIMethods {
     @APIMethod
+    @RestResource("uma/invoker")
     public static String getInvoker(Invoker invoker) {
         return invoker.toString();
     }
 
     @APIMethod
+    @RestResource("uma/version")
     public static String getVersion() {
         return UniversalMinecraftAPI.getInstance().getProvider().getUMAVersion();
     }
 
     @APIMethod
+    @RestResource("uma/platform/name")
     public static String getPlatform() {
         return UniversalMinecraftAPI.getInstance().getProvider().getPlatform();
     }
 
     @APIMethod
+    @RestResource("uma/platform/version")
     public static String getPlatformVersion() {
         return UniversalMinecraftAPI.getInstance().getProvider().getPlatformVersion();
     }
 
     @APIMethod
+    @RestResource("uma/methods")
     public static Methods listMethods() {
         JSONObject json = new JSONObject();
 
@@ -47,6 +53,7 @@ public class UniversalMinecraftAPIMethods {
     }
 
     @APIMethod
+    @RestResource("uma/ping")
     public static String ping() {
         return "pong";
     }

@@ -54,4 +54,31 @@ public class RestResourceMethod {
 
         return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RestResourceMethod that = (RestResourceMethod) o;
+
+        if (path != null ? !path.equals(that.path) : that.path != null) return false;
+        return method != null ? method.equals(that.method) : that.method == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = path != null ? path.hashCode() : 0;
+        result = 31 * result + (method != null ? method.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RestResourceMethod{" +
+                "path='" + path + '\'' +
+                ", method=" + method +
+                '}';
+    }
 }

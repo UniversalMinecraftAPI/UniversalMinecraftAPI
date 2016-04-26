@@ -34,14 +34,22 @@ public class RestHandler {
         }
 
         if (resources.size() > 1) {
-            // TODO: Check for more levels deep
-            throw new RestNotFoundException("More than one resource for path " + path);
+            resources.sort((o1, o2) -> Integer.compare(RestUtils.splitPathByParts(o2.getPath()).size(), RestUtils.splitPathByParts(o1.getPath()).size())); // sort by number of path parts
+            if (RestUtils.splitPathByParts(resources.get(0).getPath()).size() == RestUtils.splitPathByParts(resources.get(1).getPath()).size()) { // same specificity
+                throw new RestNotFoundException("More than one resource for path " + path);
+            }
         }
 
         RestResourceMethod restMethod = resources.get(0);
 
         List<String> resourceParts = RestUtils.splitPathByParts(restMethod.getPath());
         List<String> pathParts = RestUtils.splitPathByParts(path);
+
+        int otherPathPartsSize = pathParts.size() - resourceParts.size();
+
+        if (otherPathPartsSize == 0 && parameters != null && parameters.getMethod() != RestMethod.GET) {
+            throw new RestMethodInvocationException("Unable to get resource " + path + " with method other than GET");
+        }
 
         List<Pair<String, String>> paths = new ArrayList<>();
 
@@ -164,14 +172,13 @@ public class RestHandler {
             return null;
         }
 
-        int i = pathParts.size() - resourceParts.size();
-        if (i > 0) {// we have at least one operation
+        if (otherPathPartsSize > 0) {// we have at least one operation
             List<RestOperationMethod> operationMethods = new ArrayList<>();
 
             Class<?> resultClass = result.getClass();
 
-            while (i > 0) {
-                String operation = pathParts.get(pathParts.size() - i);
+            while (otherPathPartsSize > 0) {
+                String operation = pathParts.get(pathParts.size() - otherPathPartsSize);
 
                 RestOperationMethod operationMethod = findOperation(resultClass, operation);
 
@@ -183,7 +190,7 @@ public class RestHandler {
 
                 resultClass = operationMethod.getJavaMethod().getReturnType();
 
-                i--;
+                otherPathPartsSize--;
             }
 
             long postCount = operationMethods.stream().filter(restOperationMethod -> restOperationMethod.getRestMethod() == RestMethod.POST).count();
@@ -192,8 +199,17 @@ public class RestHandler {
                 throw new RestMethodInvocationException("Unable to invoke 2 methods with operation POST");
             }
 
-            if (postCount == 1 && operationMethods.get(operationMethods.size() - 1).getRestMethod() != RestMethod.POST) {
-                throw new RestMethodInvocationException("Cannot have an intermediary POST operation, must be the last operation");
+            if (postCount == 1) {
+                if (operationMethods.get(operationMethods.size() - 1).getRestMethod() != RestMethod.POST) {
+                    throw new RestMethodInvocationException("Cannot have an intermediary POST operation, must be the last operation");
+                }
+                if (parameters != null && parameters.getMethod() != RestMethod.POST) {
+                    throw new RestMethodInvocationException("The last operation is a POST operation, but did not receive POST method");
+                }
+            } else {
+                if (parameters != null && parameters.getMethod() != RestMethod.GET) {
+                    throw new RestMethodInvocationException("The last operation is a GET operation, but did not receive GET method");
+                }
             }
 
             Object body = null;
@@ -373,20 +389,18 @@ public class RestHandler {
                 RestMethod restMethod = operationAnnotation.method();
                 if (path.isEmpty()) {
                     path = objectMethod.getName();
-                    if (objectMethod.getName().startsWith("get")) {
+                    if (path.startsWith("get")) {
                         path = path.substring(3);
                         path = path.substring(0, 1).toLowerCase() + path.substring(1);
                         if (restMethod == RestMethod.DEFAULT) {
                             restMethod = RestMethod.GET;
                         }
-                    } else if (objectMethod.getName().startsWith("set")) {
+                    } else if (path.startsWith("set")) {
                         path = path.substring(3);
                         path = path.substring(0, 1).toLowerCase() + path.substring(1);
                         if (restMethod == RestMethod.DEFAULT) {
                             restMethod = RestMethod.POST;
                         }
-                    } else {
-                        throw new RestMethodRegistrationException("Path must be set for method unless the name starts with get or set", objectMethod);
                     }
                 }
 
