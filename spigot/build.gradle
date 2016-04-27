@@ -5,11 +5,9 @@ repositories {
 }
 
 dependencies {
-    compile ('org.bukkit:bukkit:1.9.2-R0.1-SNAPSHOT') {
-        exclude group: 'org.junit'
-        exclude group: 'org.hamcrest'
-    }
+    compile 'org.bukkit:bukkit:1.9.2-R0.1-SNAPSHOT'
     fatJar 'org.slf4j:slf4j-jdk14:1.7.12'
+    testCompile project(':common').sourceSets.test.output
 }
 
 shadowJar {
