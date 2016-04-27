@@ -15,7 +15,7 @@ subprojects {
 
     apply plugin: 'java'
 
-    version = '0.1-SNAPSHOT'
+    version = '0.1'
     archivesBaseName = "$rootProject.name-$project.name"
 
     dependencies {
