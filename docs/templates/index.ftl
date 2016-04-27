@@ -5,7 +5,7 @@
     <div class="col-md-7">
         <h1>UniversalMinecraftAPI</h1>
 
-    ${introduction}
+        ${introduction}
 
         <h2>Table of contents</h2>
         <ol>

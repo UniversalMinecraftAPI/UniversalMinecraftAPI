@@ -1,8 +1,8 @@
 # UniversalMinecraftAPI
 
-[![GitHub release](https://img.shields.io/github/release/UniversalMinecraftAPI/UniversalMinecraftAPI.svg?maxAge=2592000)](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI)
-[![Jenkins](https://img.shields.io/jenkins/s/http/ci.koenv.com/UniversalMinecraftAPI.svg?maxAge=2592000)](http://ci.koenv.com/job/UniversalMinecraftAPI/)
-[![Jenkins tests](https://img.shields.io/jenkins/t/http/ci.koenv.com/UniversalMinecraftAPI.svg?maxAge=2592000)](http://ci.koenv.com/job/UniversalMinecraftAPI/)
+[![GitHub release](https://img.shields.io/github/release/UniversalMinecraftAPI/UniversalMinecraftAPI.svg?maxAge=3600)](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI/releases)
+[![Jenkins](https://img.shields.io/jenkins/s/http/ci.koenv.com/UniversalMinecraftAPI.svg?maxAge=3600)](http://ci.koenv.com/job/UniversalMinecraftAPI/)
+[![Jenkins tests](https://img.shields.io/jenkins/t/http/ci.koenv.com/UniversalMinecraftAPI.svg?maxAge=3600)](http://ci.koenv.com/job/UniversalMinecraftAPI/)
 
 Welcome to the repository of UniversalMinecraftAPI. UniversalMinecraftAPI is a plugin for multiple platforms, 
 currently Spigot and Sponge, that allows external scripts to  access data on the server by use of HTTP and WebSocket. 

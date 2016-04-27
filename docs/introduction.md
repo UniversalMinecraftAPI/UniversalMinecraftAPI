@@ -1,6 +1,6 @@
 Welcome to the UniversalMinecraftAPI documentation!
 
-[![GitHub release](https://img.shields.io/github/release/UniversalMinecraftAPI/UniversalMinecraftAPI.svg?maxAge=2592000)](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI)
+[![GitHub release](https://img.shields.io/github/release/UniversalMinecraftAPI/UniversalMinecraftAPI.svg?maxAge=3600)](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI/releases)
 
 ## About UniversalMinecraftAPI
 UniversalMinecraftAPI is a plugin for multiple platforms, currently Spigot and Sponge, that allows external scripts to 
