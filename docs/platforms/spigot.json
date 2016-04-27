@@ -23,13 +23,6 @@
                 "permission": "server.performance.free"
             },
             {
-                "operatesOn": "Player",
-                "name": "getUUID",
-                "arguments": [],
-                "returns": "String",
-                "permission": "players.uuid"
-            },
-            {
                 "operatesOn": "User",
                 "name": "getPermission",
                 "arguments": [{
@@ -46,6 +39,13 @@
                 "arguments": [],
                 "returns": "String",
                 "permission": "users.username"
+            },
+            {
+                "operatesOn": "Player",
+                "name": "getUUID",
+                "arguments": [],
+                "returns": "String",
+                "permission": "players.uuid"
             }
         ],
         "streams": ["chat"],
@@ -76,17 +76,6 @@
                 "permission": "players.get"
             },
             {
-                "name": "unsubscribe",
-                "namespace": "streams",
-                "arguments": [{
-                    "name": "stream",
-                    "optional": false,
-                    "type": "String"
-                }],
-                "returns": "int",
-                "permission": "streams.unsubscribe"
-            },
-            {
                 "name": "subscribe",
                 "namespace": "streams",
                 "arguments": [
@@ -103,6 +92,17 @@
                 ],
                 "returns": "boolean",
                 "permission": "streams.subscribe"
+            },
+            {
+                "name": "unsubscribe",
+                "namespace": "streams",
+                "arguments": [{
+                    "name": "stream",
+                    "optional": false,
+                    "type": "String"
+                }],
+                "returns": "int",
+                "permission": "streams.unsubscribe"
             },
             {
                 "name": "subscriptionCount",
@@ -210,14 +210,6 @@
                 "permission": "server.performance.free"
             },
             {
-                "operatesOn": "Player",
-                "path": "uuid",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "String",
-                "permission": "players.uuid"
-            },
-            {
                 "operatesOn": "User",
                 "path": "hasPermission",
                 "method": "POST",
@@ -235,16 +227,17 @@
                 "bodyParams": [],
                 "returns": "String",
                 "permission": "users.username"
+            },
+            {
+                "operatesOn": "Player",
+                "path": "uuid",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String",
+                "permission": "players.uuid"
             }
         ],
         "resources": [
-            {
-                "path": "streams",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "String[]",
-                "permission": "streams"
-            },
             {
                 "path": "streams/subscriptions/count",
                 "pathParams": [],
@@ -253,11 +246,11 @@
                 "permission": "streams.subscriptions.count"
             },
             {
-                "path": "users",
+                "path": "streams",
                 "pathParams": [],
                 "queryParams": [],
-                "returns": "User[]",
-                "permission": "users.get"
+                "returns": "String[]",
+                "permission": "streams"
             },
             {
                 "path": "users/apikey",
@@ -272,6 +265,13 @@
                 "queryParams": [],
                 "returns": "User",
                 "permission": "users.current"
+            },
+            {
+                "path": "users",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User[]",
+                "permission": "users.get"
             },
             {
                 "path": "uma/version",
@@ -316,18 +316,18 @@
                 "permission": "uma.methods"
             },
             {
-                "path": "server/memory",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "PerformanceHolder",
-                "permission": "server.memory"
-            },
-            {
                 "path": "server/disk",
                 "pathParams": [],
                 "queryParams": [],
                 "returns": "PerformanceHolder",
                 "permission": "server.disk"
+            },
+            {
+                "path": "server/memory",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder",
+                "permission": "server.memory"
             },
             {
                 "path": "players/:name",
@@ -343,7 +343,7 @@
     },
     "platform": {
         "name": "CraftBukkit",
-        "umaVersion": "0.1",
+        "umaVersion": "0.2-SNAPSHOT",
         "version": "git-Spigot-5a40365-f631379 (MC: 1.9.2)"
     }
 }
