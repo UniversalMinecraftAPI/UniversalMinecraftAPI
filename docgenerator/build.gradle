@@ -19,5 +19,9 @@ task generateDoc(type: JavaExec) {
     args rootProject.file('docs/config.conf')
     args rootProject.buildDir.path + '/docs/universalminecraftapi'
 
+    if (project.hasProperty('docBaseDir')) {
+        args project.property('docBaseDir')
+    }
+
     workingDir = rootProject.rootDir
 }
