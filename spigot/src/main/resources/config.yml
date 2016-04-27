@@ -1,6 +1,7 @@
 web_server:
   ip_address: null # the IP address to bind to, null to bind to all interfaces
   port: 20059 # the port to bind to, -1 to choose automatically
+  ip_whitelist: [] # an IP whitelist which will be used if it contains at least one value
   secure:
     enabled: false # make the web server SSL secured
     keystore:

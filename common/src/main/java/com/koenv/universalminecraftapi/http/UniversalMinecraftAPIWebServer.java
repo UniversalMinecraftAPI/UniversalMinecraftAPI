@@ -18,6 +18,7 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.koenv.universalminecraftapi.util.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Request;
 import spark.Route;
 import spark.Spark;
 
@@ -92,16 +93,27 @@ public class UniversalMinecraftAPIWebServer {
             threadPool(threadPool.getMaxThreads(), threadPool.getMinThreads(), threadPool.getIdleTimeoutMillis());
         }
 
+        List<String> ipWhitelist = configuration.getWebServer().getIpWhitelist();
+        boolean useIpWhitelist = ipWhitelist != null && ipWhitelist.size() > 0;
+
         webSocket("/api/v1/websocket", UniversalMinecraftAPIWebSocket.class); // this needs to be first otherwise the web socket doesn't work
 
         before("/*", (request, response) -> {
+            if (useIpWhitelist) {
+                if (!ipWhitelist.contains(request.ip())) {
+                    response.header("Content-Type", "application/json");
+                    halt(401, getErrorResponse(request, ErrorCodes.NOT_ALLOWED, "IP is not allowed to make API calls"));
+                    return;
+                }
+            }
+
             String authorizationHeader = request.headers("Authorization");
             if (authorizationHeader == null || authorizationHeader.isEmpty()) {
                 if (userManager.getUser("default").isPresent()) {
                     request.attribute("com.koenv.universalminecraftapi.user", "default");
                 } else {
                     response.header("Content-Type", "application/json");
-                    halt(401, getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "No authentication found and no default user found"));
+                    halt(401, getErrorResponse(request, ErrorCodes.INVALID_CREDENTIALS, "No authentication found and no default user found"));
                 }
 
                 return;
@@ -109,7 +121,7 @@ public class UniversalMinecraftAPIWebServer {
 
             if (!authorizationHeader.startsWith("Basic")) {
                 response.header("Content-Type", "application/json");
-                halt(401, getErrorResponse(ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"));
+                halt(401, getErrorResponse(request, ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"));
                 return;
             }
 
@@ -119,7 +131,7 @@ public class UniversalMinecraftAPIWebServer {
 
             if (values.length != 2) {
                 response.header("Content-Type", "application/json");
-                halt(401, getErrorResponse(ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"));
+                halt(401, getErrorResponse(request, ErrorCodes.INVALID_AUTHORIZATION_HEADER, "Invalid Authorization header"));
                 return;
             }
 
@@ -128,7 +140,7 @@ public class UniversalMinecraftAPIWebServer {
 
             if (!userManager.checkCredentials(username, password)) {
                 response.header("Content-Type", "application/json");
-                halt(401, getErrorResponse(ErrorCodes.INVALID_CREDENTIALS, "Invalid credentials"));
+                halt(401, getErrorResponse(request, ErrorCodes.INVALID_CREDENTIALS, "Invalid credentials"));
                 return;
             }
 
@@ -161,13 +173,13 @@ public class UniversalMinecraftAPIWebServer {
         post("/api/v1/call", (request, response) -> {
             response.header("Content-Type", "application/json");
             if (!request.contentType().contains("application/json")) {
-                halt(400, getErrorResponse(ErrorCodes.INVALID_CONTENT_TYPE, "Invalid content type"));
+                halt(400, getErrorResponse(request, ErrorCodes.INVALID_CONTENT_TYPE, "Invalid content type"));
             }
 
             Optional<User> user = userManager.getUser(request.attribute("com.koenv.universalminecraftapi.user"));
 
             if (!user.isPresent()) {
-                halt(401, getErrorResponse(ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
+                halt(401, getErrorResponse(request, ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
             }
 
             WebServerInvoker invoker = new WebServerInvoker(user.get(), request, response);
@@ -184,7 +196,7 @@ public class UniversalMinecraftAPIWebServer {
             Optional<User> user = userManager.getUser(request.attribute("com.koenv.universalminecraftapi.user"));
 
             if (!user.isPresent()) {
-                halt(401, getErrorResponse(ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
+                halt(401, getErrorResponse(request, ErrorCodes.AUTHENTICATION_ERROR, "Authentication error"));
             }
 
             WebServerInvoker invoker = new WebServerInvoker(user.get(), request, response);
@@ -204,13 +216,18 @@ public class UniversalMinecraftAPIWebServer {
         Spark.stop();
     }
 
-    private String getErrorResponse(int code, String message) {
-        JSONArray array = new JSONArray();
+    private String getErrorResponse(Request request, int code, String message) {
         JSONObject object = new JSONObject();
         object.put("code", code);
         object.put("message", message);
-        array.put(object);
-        return array.toString(4);
+
+        if (request.pathInfo().startsWith("/api/v1")) {
+            JSONArray array = new JSONArray();
+            array.put(object);
+            return array.toString(4);
+        }
+
+        return object.toString(4);
     }
 
     /**

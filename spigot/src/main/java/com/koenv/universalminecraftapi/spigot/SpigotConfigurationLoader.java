@@ -30,6 +30,7 @@ public class SpigotConfigurationLoader {
         return WebServerSection.builder()
                 .ipAddress(node.getString("ip_address"))
                 .port(node.getInt("port", -1))
+                .ipWhitelist(node.getStringList("ip_whitelist"))
                 .secure(loadWebServerSecure(node.getConfigurationSection("secure")))
                 .threadPool(loadWebServerThreadPool(node.getConfigurationSection("thread_pool")))
                 .build();
@@ -86,8 +87,8 @@ public class SpigotConfigurationLoader {
     private static GroupSection loadGroup(ConfigurationSection node) {
         return GroupSection.builder()
                 .name(node.getName())
-                .defaultPermission(node.getInt("default-permission", 0))
-                .inheritsFrom(node.getStringList("inherits-from"))
+                .defaultPermission(node.getInt("default_permission", 0))
+                .inheritsFrom(node.getStringList("inherits_from"))
                 .permissions(loadPermissions(node.getConfigurationSection("permissions")))
                 .build();
     }

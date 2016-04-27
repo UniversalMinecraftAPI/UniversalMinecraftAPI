@@ -10,6 +10,7 @@ public class ErrorCodes {
     public static final int ACCESS_DENIED = 7;
     public static final int JSON_INVALID = 8;
     public static final int NOT_FOUND = 9;
+    public static final int NOT_ALLOWED = 10;
     public static final int INVALID_STREAM_USAGE = 12;
     public static final int INVALID_STREAM = 13;
     public static final int DUPLICATE_SUBSCRIPTION = 14;

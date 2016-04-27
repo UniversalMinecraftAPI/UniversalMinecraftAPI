@@ -12,7 +12,7 @@ users:
 
 groups:
   default:
-    inherits-from: [streams]
+    inherits_from: [streams]
     permissions:
       players:
         default: 10
@@ -26,5 +26,5 @@ groups:
         chat: 1
         console: -1
   admin:
-    inherits-from: [streams]
-    default-permission: 1
+    inherits_from: [streams]
+    default_permission: 1

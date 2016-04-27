@@ -30,6 +30,7 @@ public final class SpongeConfigurationLoader {
         return WebServerSection.builder()
                 .ipAddress(node.getNode("ip_address").getString())
                 .port(node.getNode("port").getInt(-1))
+                .ipWhitelist(loadStringList(node.getNode("ip_whitelist")))
                 .secure(loadWebServerSecure(node.getNode("secure")))
                 .threadPool(loadWebServerThreadPool(node.getNode("thread_pool")))
                 .build();
@@ -80,8 +81,8 @@ public final class SpongeConfigurationLoader {
     private static GroupSection loadGroup(CommentedConfigurationNode node) {
         return GroupSection.builder()
                 .name(node.getNode("name").getString())
-                .defaultPermission(node.getNode("default-permission").getInt(0))
-                .inheritsFrom(loadStringList(node.getNode("inherits-from")))
+                .defaultPermission(node.getNode("default_permission").getInt(0))
+                .inheritsFrom(loadStringList(node.getNode("inherits_from")))
                 .permissions(loadPermissions(node.getNode("permissions")))
                 .build();
     }

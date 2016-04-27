@@ -18,6 +18,15 @@ bind to all addresses.
 This option determines the port that will be used by the web server. If it is set to `-1`, the port will be chosen
 automatically.
 
+### ip_whitelist
+**Default value**: `[]`
+
+This option can contain IPs which are allowed to access the web server. It will only be used if it contains at least
+one value.
+
+If you want to put the server behind a proxy and that proxy runs on the same system as the server, it is better to set
+the `ip_address` to one so it can never be accessed from the outside and thus can't be DDOS'ed.
+
 ### secure
 This section specifies the HTTPS/SSL options for the web server, which is recommended for secure use. The following
 options are available:
@@ -72,9 +81,9 @@ consumer would be SHA1-encoded and checked against the value stored in `password
 The `groups` section is a bit more difficult to understand than `users`. Again, how the name is specified depends on 
 the format. The following options are present in all implementations:
 
-* `default-permission`: The default permission for this group. See the description of the permission model below
+* `default_permission`: The default permission for this group. See the description of the permission model below
 for more information about this value.
-* `inherits-from`: A list of the groups this group inherits from. Again, see the description of the permission model 
+* `inherits_from`: A list of the groups this group inherits from. Again, see the description of the permission model 
 below for more information about this value.
 * `permissions`: Contains a map of permission paths to their values.  It can also contain a nested map. In that case, 
 the key `default` specifies the permission for the parent value. So, for example
@@ -125,21 +134,21 @@ is larger than 0 (not 0 itself), the permission is allowed, otherwise it is deni
 adding all values on all the levels that this permission is specified.
 
 First of all, the value specified in the configuration file is used. So, if the permission `players.get` is checked,
-it first checks for the value of an empty string. This value is determined by the `default-permission` value
+it first checks for the value of an empty string. This value is determined by the `default-_permission` value
 of the group. For more information about this value, see below. Then, the value of `players` is added to the
 previously determined value. Lastly, the value of `players.get` is added to this value. Then, if the value is larger
 than 0, the action is allowed, if not it is denied.
 
-The `default-permission` value of the group is not only determined by the `default-permission` of the group, but is also
-dependent on the `default-permission` of all groups it inherits from. So, if `group1` has a `default-permission` of 1
-and `group2` has a default-permission of `-2` and `group3` inherits from `group1` and `group2` and doesn't specify
-a `default-permission`, the `default-permission` wil be `1+(-2) = -1`.
+The `default_permission` value of the group is not only determined by the `default_permission` of the group, but is also
+dependent on the `default_permission` of all groups it inherits from. So, if `group1` has a `default_permission` of 1
+and `group2` has a default_permission of `-2` and `group3` inherits from `group1` and `group2` and doesn't specify
+a `default_permission`, the `default_permission` wil be `1+(-2) = -1`.
 
 The value of a permission path is also dependent on the groups it inherits from. If `group1` specifies `players` as `-1`
 and `group2` inherits from `group1` and specifies `players.get` as `1`, the final value will be `-1+1 = 0` (and thus the action
 would not be allowed).
 
-So, to give a user access to everything, specify the `default-permission` to a high value. If there is no inheritance
+So, to give a user access to everything, specify the `default_permission` to a high value. If there is no inheritance
 involved, the value could even be `1`.
 
 ## Example files
@@ -151,6 +160,7 @@ involved, the value could even be `1`.
 web_server:
   ip_address: null # the IP address to bind to, null to bind to all interfaces
   port: 20059 # the port to bind to, -1 to choose automatically
+  ip_whitelist: [] # an IP whitelist which will be used if it contains at least one value
   secure:
     enabled: false # make the web server SSL secured
     keystore:
@@ -172,6 +182,8 @@ web_server {
     ip_address=null
     # the port to bind to, -1 to choose automatically
     port=20059
+    # an IP whitelist which will be used if it contains at least one value
+    ip_whitelist=[]
     secure {
         # make the web server SSL secured
         enabled=false
@@ -213,7 +225,7 @@ users:
 
 groups:
   default:
-    inherits-from: [streams]
+    inherits_from: [streams]
     permissions:
       players:
         default: 10
@@ -227,8 +239,8 @@ groups:
         chat: 1
         console: -1
   admin:
-    inherits-from: [streams]
-    default-permission: 1
+    inherits_from: [streams]
+    default_permission: 1
 ```
 
 #### Sponge `users.conf`
@@ -255,7 +267,7 @@ users = [
 groups = [
     {
         name = "default"
-        inherits-from = [streams]
+        inherits_from = [streams]
         permissions {
             players {
                 default = 10
@@ -277,8 +289,8 @@ groups = [
     },
     {
         name = "admin"
-        inherits-from = [streams]
-        default-permission = 1
+        inherits_from = [streams]
+        default_permission = 1
     }
 ]
 ```
