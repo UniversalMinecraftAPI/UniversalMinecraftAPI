@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.methods;
 
 import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.parser.expressions.*;
+import com.koenv.universalminecraftapi.permissions.Permissible;
 import com.koenv.universalminecraftapi.reflection.ParameterConverterManager;
 import org.junit.Test;
 
@@ -698,7 +699,7 @@ public class MethodInvokerTest {
         }
 
         @Override
-        public boolean checkPermission(AbstractMethod method) {
+        public boolean checkPermission(Permissible object) {
             if (hasPermissions == null) {
                 return true;
             }

@@ -1,11 +1,13 @@
 package com.koenv.universalminecraftapi.methods;
 
+import com.koenv.universalminecraftapi.permissions.Permissible;
+
 import java.lang.reflect.Method;
 
 /**
  * A saved API method.
  */
-public abstract class AbstractMethod {
+public abstract class AbstractMethod implements Permissible {
     private String name;
     private Method javaMethod;
 

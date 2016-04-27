@@ -1,7 +1,7 @@
 package com.koenv.universalminecraftapi.http.rest;
 
-import java.lang.reflect.Method;
+import com.koenv.universalminecraftapi.permissions.Permissible;
 
-public interface IRestMethod {
-    Method getJavaMethod();
+public interface IRestMethod extends Permissible {
+    
 }

@@ -1,5 +1,7 @@
 package com.koenv.universalminecraftapi.config.user;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class UserSection {
@@ -39,7 +41,7 @@ public class UserSection {
         private String username;
         private String password;
         private String passwordType;
-        private List<String> groups;
+        private List<String> groups = Collections.emptyList();
 
         private Builder() {
         }
@@ -62,6 +64,10 @@ public class UserSection {
         public Builder groups(List<String> groups) {
             this.groups = groups;
             return this;
+        }
+
+        public Builder groups(String... groups) {
+            return groups(Arrays.asList(groups));
         }
 
         public UserSection build() {

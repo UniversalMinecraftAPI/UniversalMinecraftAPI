@@ -200,8 +200,8 @@ public class RestHandlerTest {
     public void resourceWithNoPermission() throws Exception {
         buildRestHandler().handle("players/newname", new TestRestParameters() {
             @Override
-            public boolean hasPermission(RestResourceMethod method) {
-                return !Objects.equals(method.getPath(), "players/:name");
+            public boolean hasPermission(IRestMethod method) {
+                return !Objects.equals(((RestResourceMethod) method).getPath(), "players/:name");
             }
         });
     }
@@ -210,8 +210,8 @@ public class RestHandlerTest {
     public void operationWithNoPermission() throws Exception {
         buildRestHandler().handle("players/newname/name", new TestRestParameters() {
             @Override
-            public boolean hasPermission(RestOperationMethod method) {
-                return !Objects.equals(method.getPath(), "name");
+            public boolean hasPermission(IRestMethod method) {
+                return !(method instanceof RestOperationMethod) || !Objects.equals(((RestOperationMethod) method).getPath(), "name");
             }
         });
     }
@@ -844,12 +844,7 @@ public class RestHandlerTest {
 
     private static class TestRestParameters implements RestParameters {
         @Override
-        public boolean hasPermission(RestResourceMethod method) {
-            return true;
-        }
-
-        @Override
-        public boolean hasPermission(RestOperationMethod method) {
+        public boolean hasPermission(IRestMethod method) {
             return true;
         }
 

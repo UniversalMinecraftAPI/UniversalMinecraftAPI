@@ -31,7 +31,7 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
             String returnDescription = "";
             UniversalMinecraftAPIClass returnType = classResolver.resolve(method.getReturns());
             List<ArgumentWrapper> arguments = method.getArguments().stream()
-                    .map(argument -> new ArgumentWrapper(argument.getName(), classResolver.resolve(argument.getType())))
+                    .map(argument -> new ArgumentWrapper(argument.getName(), classResolver.resolve(argument.getType()), argument.isOptional()))
                     .collect(Collectors.toList());
 
             File methodFile = new File(rootDirectory, className + "/" + method.getName() + ".conf");
@@ -72,6 +72,7 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
         private String returnDescription;
         private boolean availableOnAllPlatforms;
         private List<Platform> platforms;
+        private String permission;
 
         public MethodWrapper(
                 ClassMethod method, List<ArgumentWrapper> arguments, UniversalMinecraftAPIClass returns,
@@ -120,6 +121,10 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
             return method.getName();
         }
 
+        public String getPermission() {
+            return method.getPermission();
+        }
+
         public String getDeclaration() {
             return method.getDeclaration();
         }
@@ -133,10 +138,12 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
     public static class ArgumentWrapper {
         private String name;
         private UniversalMinecraftAPIClass type;
+        private boolean optional;
 
-        public ArgumentWrapper(String name, UniversalMinecraftAPIClass type) {
+        public ArgumentWrapper(String name, UniversalMinecraftAPIClass type, boolean optional) {
             this.name = name;
             this.type = type;
+            this.optional = optional;
         }
 
         public String getName() {
@@ -145,6 +152,10 @@ public class ClassDocWithMethodsGenerator extends ClassDocGenerator {
 
         public UniversalMinecraftAPIClass getType() {
             return type;
+        }
+
+        public boolean isOptional() {
+            return optional;
         }
     }
 }

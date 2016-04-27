@@ -9,17 +9,10 @@ public class ClassMethod extends AbstractV1Method {
 
     public ClassMethod(JSONObject jsonObject) {
         super(jsonObject);
-        this.populateFrom(jsonObject);
     }
 
     public String getOperatesOn() {
         return operatesOn;
-    }
-
-    @Override
-    public void populateFrom(JSONObject jsonObject) {
-        super.populateFrom(jsonObject);
-        this.populateRestFrom(jsonObject);
     }
 
     @Override
@@ -51,7 +44,8 @@ public class ClassMethod extends AbstractV1Method {
         return stringBuilder.toString();
     }
 
-    private void populateRestFrom(JSONObject jsonObject) {
+    @Override
+    protected void populateRestFrom(JSONObject jsonObject) {
         this.operatesOn = jsonObject.getString("operatesOn");
     }
 

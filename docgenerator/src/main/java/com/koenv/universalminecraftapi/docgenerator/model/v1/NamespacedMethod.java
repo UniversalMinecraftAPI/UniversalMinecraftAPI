@@ -9,17 +9,10 @@ public class NamespacedMethod extends AbstractV1Method {
 
     public NamespacedMethod(JSONObject jsonObject) {
         super(jsonObject);
-        this.populateRestFrom(jsonObject);
     }
 
     public String getNamespace() {
         return namespace;
-    }
-
-    @Override
-    public void populateFrom(JSONObject jsonObject) {
-        super.populateFrom(jsonObject);
-        this.populateRestFrom(jsonObject);
     }
 
     @Override
@@ -48,7 +41,8 @@ public class NamespacedMethod extends AbstractV1Method {
         return stringBuilder.toString();
     }
 
-    private void populateRestFrom(JSONObject jsonObject) {
+    @Override
+    protected void populateRestFrom(JSONObject jsonObject) {
         this.namespace = jsonObject.getString("namespace");
     }
 

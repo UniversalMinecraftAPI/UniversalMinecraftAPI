@@ -13,45 +13,9 @@ users:
 groups:
   default:
     permissions:
-      - default
+      players:
+        default: 10
+        get: 1
+      uma: 1
   admin:
-    permissions:
-      - players
-      - streams
-      - uma
-      - ALLOW_ALL
-
-permissions:
-  default:
-    namespaces:
-      players:
-        type: whitelist
-        methods:
-          - getPlayer
-    classes:
-      Player:
-        type: whitelist
-        methods:
-          - getUUID
-  players:
-    namespaces:
-      players:
-        type: blacklist
-        methods: []
-    classes:
-      Player:
-        type: blacklist
-        methods: []
-  uma:
-    namespaces:
-      uma:
-        type: blacklist
-        methods: []
-  streams:
-    namespaces:
-      streams:
-        type: blacklist
-        methods: []
-    streams:
-      type: blacklist
-      streams: []
+    default-permission: 1

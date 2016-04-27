@@ -11,6 +11,7 @@ import com.koenv.universalminecraftapi.methods.APIMethod;
 import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.methods.Invoker;
 import com.koenv.universalminecraftapi.methods.OptionalParam;
+import com.koenv.universalminecraftapi.permissions.RequiresPermission;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map;
 @APINamespace("streams")
 public class StreamMethods {
     @APIMethod
+    @RequiresPermission("streams.subscribe")
     public static boolean subscribe(Invoker invoker, JsonRequest request, String stream, @OptionalParam Map<Object, Object> parameters) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);
@@ -26,13 +28,15 @@ public class StreamMethods {
 
         WebSocketInvoker webSocketInvoker = (WebSocketInvoker) invoker;
 
-        if (!webSocketInvoker.getUser().canAccessStream(stream)) {
+        if (!webSocketInvoker.getUser().hasPermission("streams." + stream)) {
             throw new APIException("No access to stream " + stream, ErrorCodes.ACCESS_DENIED);
         }
 
         Map<String, String> params = new HashMap<>();
 
-        parameters.forEach((key, value) -> params.put(key.toString(), value.toString()));
+        if (parameters != null) {
+            parameters.forEach((key, value) -> params.put(key.toString(), value.toString()));
+        }
 
         StreamSubscriber streamSubscriber = new WebSocketStreamSubscriber(webSocketInvoker.getSession());
 
@@ -50,6 +54,7 @@ public class StreamMethods {
     }
 
     @APIMethod
+    @RequiresPermission("streams.unsubscribe")
     public static int unsubscribe(Invoker invoker, JsonRequest request, String stream) {
         if (!(invoker instanceof WebSocketInvoker)) {
             throw new APIException("Subscriptions only work while connected to a web socket", ErrorCodes.INVALID_STREAM_USAGE);
@@ -57,7 +62,7 @@ public class StreamMethods {
 
         WebSocketInvoker webSocketInvoker = (WebSocketInvoker) invoker;
 
-        if (!webSocketInvoker.getUser().canAccessStream(stream)) {
+        if (!webSocketInvoker.getUser().hasPermission("streams." + stream)) {
             throw new APIException("No access to stream " + stream, ErrorCodes.ACCESS_DENIED);
         }
 

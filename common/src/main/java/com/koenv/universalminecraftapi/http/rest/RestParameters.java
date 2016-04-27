@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface RestParameters {
-    boolean hasPermission(RestResourceMethod method);
-
-    boolean hasPermission(RestOperationMethod method);
+    boolean hasPermission(IRestMethod method);
 
     /**
      * Gets an object to use in a method call, should not be an expensive call. This is mostly used for global objects

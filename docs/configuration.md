@@ -47,14 +47,13 @@ The following options are available:
 **Important**: This section will only work if `max_threads` is also configured to a value higher than 1.
 
 ## Users configuration
-The second file called `users` specifies the users, groups and permissions used.
+The second file called `users` specifies the users and groups.
 
 ### Permission model
-The permission model consists of three parts: users, groups and permissions. They are related as follows:
+The permission model consists of two parts: users and groups. They are related as follows:
 
-1. A user can be a member of multiple groups
-2. A group can contain multiple permissions
-3. A permission can contain multiple permission white/blacklists.
+1. A user can be a member of multiple groups.
+2. A group has a default permission level, can inherit from multiple groups and has permissions for itself.
 
 ### users
 The `users` section is easy to understand. It contains a list of users, of which the format can be seen by
@@ -70,119 +69,236 @@ consumer would be SHA1-encoded and checked against the value stored in `password
 * `groups`: Contains a simple list of group names which must be specified in the `groups` section.
 
 ### groups
-The `groups` section is even easier to understand than `users` as it contains only one or two values, depending
-on the implementation. Again, how the name is specified depends on the format. There is one option which is present in
-all implementations:
+The `groups` section is a bit more difficult to understand than `users`. Again, how the name is specified depends on 
+the format. The following options are present in all implementations:
 
-* `permissions`: Contains a simple list of permission names which must be specified in the `permissions` section. There
-is one special permission which is `ALLOW_ALL`. This makes it possible for an admin to gain full control without
-needing to specify every single namespace/class/stream. However, make sure to read the section below for information
-about the permission system as this is **not** an overriding permission.
+* `default-permission`: The default permission for this group. See the description of the permission model below
+for more information about this value.
+* `inherits-from`: A list of the groups this group inherits from. Again, see the description of the permission model 
+below for more information about this value.
+* `permissions`: Contains a map of permission paths to their values.  It can also contain a nested map. In that case, 
+the key `default` specifies the permission for the parent value. So, for example
+the following group sections are valid:
 
-### permissions
-The `permissions` section is the most difficult one to understand. Again, the name is specified in different ways
-depending on the implementation, so we will focus on all the other values.
-
-This section can best be explained by the use of an example, so we will use the following (YAML) configuration as an
-example:
-```yaml
-permissions:
-  default:
-    namespaces:
-      players:
-        type: whitelist
-        methods:
-          - getPlayer
-      streams:
-        type: blacklist
-        methods:
-          - subscriptionCount
-    classes:
-      Player:
-        type: whitelist
-        methods:
-          - getUUID
-    streams:
-      type: blacklist
-      streams:
-        - console
+Spigot (YAML):
+```
+groups:
+    default:
+        permissions:
+            players:
+                default: 1
+                get: -1
+            uma: 1
 ```
 
-The permissions section first contains the name of this permission, which differs per implementation. Here it is
-specified as the key of the section. Then, the section contains three keys. We will discuss each of the keys.
-
-#### namespaces
-The `namespaces` section contains all namespaced method permissions. Namespaced methods are the methods that can be
-called by the use of `<namespace>.<method>`. This in contrast with class method which can only be called on intermediate
-objects, which are normally obtained by the use of a namespaced method.
-
-There are 2 namespaces in the example. The first one is the [`players`](namespaces/players.html) namespace which
-contains all player related methods. The type of the permissions is `whitelist`, which means that **only** the method
-listed here are allowed to be called. So, in this case only the method
-[`players.getPlayer`](namespaces/players.html#getPlayer) can be called by a user which is in a group that has this
-permission.
-
-The second namespace listed is the [`streams`](namespaces/streams.html) namespace which has a type of `blacklist`. In
-this case, all methods in this namespace can be called, **except** for the methods listed here. So, in this case only
-the method [`streams.subscriptionCount`](namespaces/streams.html#subscriptionCount) cannot be called, all the other
-methods in [`streams`](namespaces/streams.html) can be called.
-
-#### classes
-The `classes` section contains all class method permissions. For an explanation of class methods, please see the
-namespaces section. The example above only contains the class [`Player`](classes/Player.html) which has a type of
-`whitelist`. So, in this case only the method [`getUUID`](classes/Player.html#getUUID) can be called on the player.
-For example, the following expression is valid:
+Sponge (HOCON):
 ```
-players.getPlayer('Koen').getUUID()
+groups = [
+    {
+        name = "default"
+        permissions {
+            players {
+                default = 1
+                get = -1
+            }
+            uma = 1
+        }
+    }
+]
 ```
 
-However, the following is not:
-```
-players.getPlayer('Koen').getUsername()
-```
+Both would resolve to the following values for the permission paths:
 
-#### streams
-The last section is the streams section, which defines which streams the user is allowed to subscribe to. The white- and
-blacklist work the same as before, so in this case the user can access all streams except for the
-[`console`](streams/console.html) stream.
+| Path | Value |
+| ---- | ----- |
+| `players` | `1`|
+| `players.get` | `1+(-1) = 0` |
+| `uma` | `1` |
 
-It needs to be noted that adding a stream to the whitelist or adding a blacklist without any methods is not enough for
-the user to be able to subscribe to a stream. For that, the user will also need access to the
-[`streams`](namespaces/streams.html) namespace and its [`subscribe`](namespaces/streams.html#subscribe) and
-[`unsubscribe`](namespaces/streams.html#unsubscribe) methods.
+For a more extensive example, see below.
 
 ## The permission model
-This section will explain how permissions are checked and is for advanced users. However, if you are having problems
-with permissions not working as intended, this section can help you troubleshoot the issues.
+This section will explain how permissions are checked.
 
-As explained before, there are three layers involved: users, groups and permissions. The system checks whether a method
-or stream is allowed to be accessed on the user level. The user then asks the groups whether they have permission to
-execute this method or subscribe to this stream who in their turn ask the permissions the same question. The permissions
-respond by the means of a few possible values:
+The system works based on integer values which specify whether a permission path gets an allow or a deny. If this value
+is larger than 0 (not 0 itself), the permission is allowed, otherwise it is denied. This value is calculated by
+adding all values on all the levels that this permission is specified.
 
-* `NEUTRAL`
-* `ALLOWED`
-* `DENIED`
-* `OVERRIDE_ALLOWED`
-* `OVERRIDE_DENIED`
+First of all, the value specified in the configuration file is used. So, if the permission `players.get` is checked,
+it first checks for the value of an empty string. This value is determined by the `default-permission` value
+of the group. For more information about this value, see below. Then, the value of `players` is added to the
+previously determined value. Lastly, the value of `players.get` is added to this value. Then, if the value is larger
+than 0, the action is allowed, if not it is denied.
 
-These responses are accumulated in the group and the group will return a list of these responses to the user, which in
-its turn will accumulate the responses of the groups. The user will then check the responses and determine whether the
-user has this permission. It does does by an unanimous voting method: all responses must be ALLOWED for the user to be
-granted this permission. There are a few rules while doing this:
+The `default-permission` value of the group is not only determined by the `default-permission` of the group, but is also
+dependent on the `default-permission` of all groups it inherits from. So, if `group1` has a `default-permission` of 1
+and `group2` has a default-permission of `-2` and `group3` inherits from `group1` and `group2` and doesn't specify
+a `default-permission`, the `default-permission` wil be `1+(-2) = -1`.
 
-1. All NEUTRAL responses are removed from the responses list and have no influence on the voting process.
-2. If the list is empty now, the user doesn't have permission. In other words, no permissions defined for this
-particular namespace/class/stream equals no permission.
-3. If the list contains `OVERRIDE_ALLOWED` the user does have permission.
-4. If the list contains `OVERRIDE_DENIED` the user doesn't have permission.
-5. If all responses match `ALLOWED` the user does have permission. In other words, if there is only one permission
-denying access (i.e. one `DENIED` response) while an infinite number of permissions is allowing access, the access will
-still be denied.
+The value of a permission path is also dependent on the groups it inherits from. If `group1` specifies `players` as `-1`
+and `group2` inherits from `group1` and specifies `players.get` as `1`, the final value will be `-1+1 = 0` (and thus the action
+would not be allowed).
 
-Even the special permission `ALLOW_ALL` doesn't return the `OVERRIDE_ALLOWED` response, instead it functions as if the
-permission was normally allowed. So, if you want to be sure a user has access to all methods, only specify the 
-`ALLOW_ALL` permission on that user and don't add any additional permissions. They might have a whitelist permission 
-type which means that if the method is not listed in that whitelist, you will be denied access, even while having
-`ALLOW_ALl` permission. This does mean that you can give a user access to almost everything while still denying a few
-things without needing to do the inverse of specifying everything.
+So, to give a user access to everything, specify the `default-permission` to a high value. If there is no inheritance
+involved, the value could even be `1`.
+
+## Example files
+
+### Main configuration file
+
+#### Spigot `config.yml`
+```
+web_server:
+  ip_address: null # the IP address to bind to, null to bind to all interfaces
+  port: 20059 # the port to bind to, -1 to choose automatically
+  secure:
+    enabled: false # make the web server SSL secured
+    keystore:
+      file: "keystore"
+      password: "password"
+    truststore:
+      file: "truststore"
+      password: "password"
+  thread_pool:
+    max_threads: -1 # specify the max number of threads to use for the web server
+    min_threads: -1 # specify the min number of threads to use for the web server, only available if max_threads is also set to a number higher than 0
+    idle_timeout: -1 # specify the timeout of a thread, only available if max_threads is also set to a number higher than 0
+```
+
+#### Sponge `config.conf`
+```
+web_server {
+    # the IP address to bind to, null to bind to all interfaces
+    ip_address=null
+    # the port to bind to, -1 to choose automatically
+    port=20059
+    secure {
+        # make the web server SSL secured
+        enabled=false
+        keystore {
+            file="keystore"
+            password="password"
+        }
+        truststore {
+            file="truststore"
+            password="password"
+        }
+    }
+    thread_pool {
+        # specify the max number of threads to use for the web server
+        max_threads=-1
+        # specify the min number of threads to use for the web server, only available if max_threads is also set to a number higher than 0
+        min_threads=-1
+        # specify the timeout of a thread, only available if max_threads is also set to a number higher than 0
+        idle_timeout=-1
+    }
+}
+```
+
+### Users configuration
+
+#### Spigot `users.yml`
+```
+users:
+  admin:
+    password: changeme
+    password_type: plain
+    groups:
+      - admin
+  default:
+    password: default
+    password_type: plain
+    groups:
+      - default
+
+groups:
+  default:
+    inherits-from: [streams]
+    permissions:
+      players:
+        default: 10
+        get: 1
+      uma: 1
+  streams:
+    permissions:
+      streams:
+        subscribe: 1
+        unsubscribe: -1
+        chat: 1
+        console: -1
+  admin:
+    inherits-from: [streams]
+    default-permission: 1
+```
+
+#### Sponge `users.conf`
+```
+users = [
+    {
+        username = "default"
+        password = "default"
+        password_type = "plain"
+        groups = [
+            "default"
+        ]
+    }
+    {
+        username = "admin"
+        password = "changeme"
+        password_type = "plain"
+        groups = [
+            "admin"
+        ]
+    }
+]
+
+groups = [
+    {
+        name = "default"
+        inherits-from = [streams]
+        permissions {
+            players {
+                default = 10
+                get = 1
+            }
+            uma = 1
+        }
+    },
+    {
+        name = "streams"
+        permissions {
+            streams {
+                subscribe = 1
+                unsubscribe = -1
+                chat = 1
+                console = -1
+            }
+        }
+    },
+    {
+        name = "admin"
+        inherits-from = [streams]
+        default-permission = 1
+    }
+]
+```
+
+#### Resolved values
+Both of these files are equivalent and resolve to the same permission values:
+
+| User      | Path                      | Value         | Result        |
+| --------- | ------------------------- | ------------- | ------------- |
+| `default` | `players.get`             | `11`          | Allow         |
+| `default` | `players.chat`            | `10`          | Allow         |
+| `default` | `uma.platform`            | `1`           | Allow         |
+| `default` | `streams.subscribe`       | `1`           | Allow         |
+| `default` | `streams.unsubscribe`     | `-1`          | Deny          |
+| `default` | `streams.chat`            | `1`           | Allow         |
+| `default` | `streams.console`         | `-1`          | Deny          |
+| `default` | `server.broadcast`        | `0`           | Deny          |
+| `admin`   | `players.get`             | `1`           | Allow         |
+| `admin`   | `server.broadcast`        | `1`           | Allow         |
+| `admin`   | `streams.subscribe`       | `2`           | Allow         |
+| `admin`   | `streams.unsubscribe`     | `0`           | Deny          |
+| `admin`   | `streams.chat`            | `2`           | Allow         |
+| `admin`   | `streams.console`         | `0`           | Deny          |

@@ -195,6 +195,10 @@ public class NamespaceDocGenerator extends AbstractGenerator {
             return method.getName();
         }
 
+        public String getPermission() {
+            return method.getPermission();
+        }
+
         public String getDeclaration() {
             return method.getDeclaration();
         }

@@ -3,7 +3,7 @@ package com.koenv.universalminecraftapi.methods;
 /**
  * Can be used to pass around extra parameters when invoking a method
  */
-public interface InvokeParameters extends Invoker{
+public interface InvokeParameters extends Invoker {
     /**
      * Gets an object to use in a method call, should not be an expensive call. This is mostly used for global objects
      * that are otherwise not available to the method and can via this method be supplied via this method.

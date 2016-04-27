@@ -1,18 +1,12 @@
 package com.koenv.universalminecraftapi.config.user;
 
-import java.util.List;
-
 public class PermissionSection {
     private String name;
-    private List<NamespacePermissionSection> namespaces;
-    private List<ClassPermissionSection> classes;
-    private StreamPermissionSection streams;
+    private int value;
 
     private PermissionSection(Builder builder) {
         this.name = builder.name;
-        this.namespaces = builder.namespaces;
-        this.classes = builder.classes;
-        this.streams = builder.streams;
+        this.value = builder.value;
     }
 
     public static Builder builder() {
@@ -23,23 +17,40 @@ public class PermissionSection {
         return name;
     }
 
-    public List<NamespacePermissionSection> getNamespaces() {
-        return namespaces;
+    public int getValue() {
+        return value;
     }
 
-    public List<ClassPermissionSection> getClasses() {
-        return classes;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PermissionSection that = (PermissionSection) o;
+
+        if (value != that.value) return false;
+        return name != null ? name.equals(that.name) : that.name == null;
+
     }
 
-    public StreamPermissionSection getStreams() {
-        return streams;
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + value;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PermissionSection{" +
+                "name='" + name + '\'' +
+                ", value=" + value +
+                '}';
     }
 
     public static class Builder {
         private String name;
-        private List<NamespacePermissionSection> namespaces;
-        private List<ClassPermissionSection> classes;
-        private StreamPermissionSection streams;
+        private int value;
 
         private Builder() {
         }
@@ -49,18 +60,8 @@ public class PermissionSection {
             return this;
         }
 
-        public Builder namespaces(List<NamespacePermissionSection> namespaces) {
-            this.namespaces = namespaces;
-            return this;
-        }
-
-        public Builder classes(List<ClassPermissionSection> classes) {
-            this.classes = classes;
-            return this;
-        }
-
-        public Builder streams(StreamPermissionSection streams) {
-            this.streams = streams;
+        public Builder value(int value) {
+            this.value = value;
             return this;
         }
 

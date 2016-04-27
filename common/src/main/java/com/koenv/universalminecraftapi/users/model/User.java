@@ -1,6 +1,6 @@
 package com.koenv.universalminecraftapi.users.model;
 
-import com.koenv.universalminecraftapi.users.voters.VoterUtils;
+import com.koenv.universalminecraftapi.permissions.PermissionTree;
 
 import java.util.List;
 
@@ -9,12 +9,14 @@ public class User {
     private String password;
     private String passwordType;
     private List<Group> groups;
+    private PermissionTree permissions;
 
     private User(Builder builder) {
         this.username = builder.username;
         this.password = builder.password;
         this.passwordType = builder.passwordType;
         this.groups = builder.groups;
+        this.permissions = builder.permissions;
     }
 
     public static Builder builder() {
@@ -37,16 +39,24 @@ public class User {
         return groups;
     }
 
-    public boolean canAccessNamespaceMethod(String namespace, String method) {
-        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessNamespaceMethod(namespace, method)));
+    public PermissionTree getPermissions() {
+        return permissions;
     }
 
-    public boolean canAccessClassMethod(String clazz, String method) {
-        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessClassMethod(clazz, method)));
+    public int getPermission(String path) {
+        return permissions.get(path);
     }
 
-    public boolean canAccessStream(String stream) {
-        return VoterUtils.isUnanimous(groups.stream().flatMap(group -> group.canAccessStream(stream)));
+    public int getPermission(String[] parts) {
+        return permissions.get(parts);
+    }
+
+    public boolean hasPermission(String path) {
+        return getPermission(path) > 0;
+    }
+
+    public boolean hasPermission(String[] parts) {
+        return getPermission(parts) > 0;
     }
 
     public static class Builder {
@@ -54,6 +64,7 @@ public class User {
         private String password;
         private String passwordType;
         private List<Group> groups;
+        private PermissionTree permissions;
 
         private Builder() {
         }
@@ -75,6 +86,11 @@ public class User {
 
         public Builder groups(List<Group> groups) {
             this.groups = groups;
+            return this;
+        }
+
+        public Builder permissions(PermissionTree permissions) {
+            this.permissions = permissions;
             return this;
         }
 

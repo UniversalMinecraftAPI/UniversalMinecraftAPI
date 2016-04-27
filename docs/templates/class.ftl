@@ -35,6 +35,10 @@
 
             <div class="table-responsive">
                 <table class="table">
+                    <tr>
+                        <td width="30%">Permission</td>
+                        <td width="70%"><code>${method.permission}</code></td>
+                    </tr>
                     <#if method.arguments?size != 0>
                         <tr>
                             <td width="30%">Arguments</td>

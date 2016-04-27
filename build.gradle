@@ -18,6 +18,12 @@ subprojects {
     version = '0.1-SNAPSHOT'
     archivesBaseName = "$rootProject.name-$project.name"
 
+    dependencies {
+        testCompile 'junit:junit:4.12'
+        testCompile 'com.google.guava:guava:19.0'
+        testCompile 'org.apache.commons:commons-lang3:3.4'
+    }
+
     tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
     }

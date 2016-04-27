@@ -4,11 +4,13 @@ import com.koenv.universalminecraftapi.ErrorCodes;
 import com.koenv.universalminecraftapi.UniversalMinecraftAPI;
 import com.koenv.universalminecraftapi.http.model.APIException;
 import com.koenv.universalminecraftapi.http.model.BaseHttpInvoker;
+import com.koenv.universalminecraftapi.http.rest.RestBody;
 import com.koenv.universalminecraftapi.http.rest.RestOperation;
 import com.koenv.universalminecraftapi.http.rest.RestResource;
 import com.koenv.universalminecraftapi.methods.APIMethod;
 import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.methods.Invoker;
+import com.koenv.universalminecraftapi.permissions.RequiresPermission;
 import com.koenv.universalminecraftapi.users.model.User;
 
 import java.util.Collection;
@@ -17,14 +19,23 @@ import java.util.Collection;
 public class UserMethods {
     @APIMethod
     @RestResource("users")
+    @RequiresPermission("users.get")
     public static Collection<User> getUsers() {
         return UniversalMinecraftAPI.getInstance().getUserManager().getUsers();
     }
 
     @APIMethod(operatesOn = User.class)
     @RestOperation(User.class)
+    @RequiresPermission("users.username")
     public static String getUsername(User user) {
         return user.getUsername();
+    }
+
+    @APIMethod(operatesOn = User.class)
+    @RestOperation(value = User.class, path = "hasPermission")
+    @RequiresPermission("users.permission")
+    public static int getPermission(User user, @RestBody("permission") String permission) {
+        return user.getPermission(permission);
     }
 
     @APIMethod

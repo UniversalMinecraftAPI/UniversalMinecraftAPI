@@ -4,6 +4,7 @@ import com.koenv.universalminecraftapi.ChatColor;
 import com.koenv.universalminecraftapi.UniversalMinecraftAPIInterface;
 import com.koenv.universalminecraftapi.http.rest.*;
 import com.koenv.universalminecraftapi.methods.*;
+import com.koenv.universalminecraftapi.permissions.PermissionUtils;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
 
@@ -130,6 +131,8 @@ public class CreateApiDocCommand extends Command {
             jsonMethod.put("namespace", ((NamespacedMethod) methodEntry).getNamespace());
         }
 
+        jsonMethod.put("permission", PermissionUtils.getPermissionPath(methodEntry.getJavaMethod()));
+
         return jsonMethod;
     }
 
@@ -164,6 +167,8 @@ public class CreateApiDocCommand extends Command {
 
         jsonMethod.put("returns", getReturnType(method));
 
+        jsonMethod.put("permission", PermissionUtils.getPermissionPath(method));
+
         return jsonMethod;
     }
 
@@ -192,6 +197,8 @@ public class CreateApiDocCommand extends Command {
         jsonMethod.put("returns", getReturnType(method));
         jsonMethod.put("operatesOn", methodEntry.getOperatesOn().getSimpleName());
         jsonMethod.put("method", methodEntry.getRestMethod().name());
+
+        jsonMethod.put("permission", PermissionUtils.getPermissionPath(method));
 
         return jsonMethod;
     }

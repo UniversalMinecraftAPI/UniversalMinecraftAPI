@@ -1,0 +1,11 @@
+users:
+  default:
+    groups: [default]
+
+groups:
+    default:
+        permissions:
+            players:
+                default: 1
+                get: -1
+            uma: 1

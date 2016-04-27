@@ -4,11 +4,15 @@ import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfigura
 import com.koenv.universalminecraftapi.config.WebServerSection;
 import com.koenv.universalminecraftapi.config.WebServerSecureSection;
 import com.koenv.universalminecraftapi.config.WebServerThreadPoolSection;
-import com.koenv.universalminecraftapi.config.user.*;
-import com.koenv.universalminecraftapi.users.model.PermissionType;
+import com.koenv.universalminecraftapi.config.user.GroupSection;
+import com.koenv.universalminecraftapi.config.user.PermissionSection;
+import com.koenv.universalminecraftapi.config.user.UserSection;
+import com.koenv.universalminecraftapi.config.user.UsersConfiguration;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class SpongeConfigurationLoader {
@@ -53,7 +57,6 @@ public final class SpongeConfigurationLoader {
         return UsersConfiguration.builder()
                 .users(loadUsers(node.getNode("users")))
                 .groups(loadGroups(node.getNode("groups")))
-                .permissions(loadPermissions(node.getNode("permissions")))
                 .build();
     }
 
@@ -77,52 +80,37 @@ public final class SpongeConfigurationLoader {
     private static GroupSection loadGroup(CommentedConfigurationNode node) {
         return GroupSection.builder()
                 .name(node.getNode("name").getString())
-                .permissions(loadStringList(node.getNode("permissions")))
+                .defaultPermission(node.getNode("default-permission").getInt(0))
+                .inheritsFrom(loadStringList(node.getNode("inherits-from")))
+                .permissions(loadPermissions(node.getNode("permissions")))
                 .build();
     }
 
     private static List<PermissionSection> loadPermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadPermission).collect(Collectors.toList());
+        List<PermissionSection> permissionSections = new ArrayList<>();
+        node.getChildrenMap().forEach((key, value) -> {
+            loadPermissionAndAdd(permissionSections, key, value);
+        });
+        return permissionSections;
     }
 
-    private static PermissionSection loadPermission(CommentedConfigurationNode node) {
-        return PermissionSection.builder()
-                .name(node.getNode("name").getString())
-                .namespaces(loadNamespacePermissions(node.getNode("namespaces")))
-                .classes(loadClassPermissions(node.getNode("classes")))
-                .streams(loadStreamPermission(node.getNode("streams")))
-                .build();
-    }
-
-    private static List<NamespacePermissionSection> loadNamespacePermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadNamespacePermission).collect(Collectors.toList());
-    }
-
-    private static NamespacePermissionSection loadNamespacePermission(CommentedConfigurationNode node) {
-        return NamespacePermissionSection.builder()
-                .name(node.getNode("name").getString())
-                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
-                .methods(loadStringList(node.getNode("methods")))
-                .build();
-    }
-
-    private static List<ClassPermissionSection> loadClassPermissions(CommentedConfigurationNode node) {
-        return node.getChildrenList().stream().map(SpongeConfigurationLoader::loadClassPermission).collect(Collectors.toList());
-    }
-
-    private static ClassPermissionSection loadClassPermission(CommentedConfigurationNode node) {
-        return ClassPermissionSection.builder()
-                .name(node.getNode("name").getString())
-                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
-                .methods(loadStringList(node.getNode("methods")))
-                .build();
-    }
-
-    private static StreamPermissionSection loadStreamPermission(CommentedConfigurationNode node) {
-        return StreamPermissionSection.builder()
-                .type(PermissionType.valueOf(node.getNode("type").getString("BLACKLIST").toUpperCase()))
-                .streams(loadStringList(node.getNode("streams")))
-                .build();
+    private static void loadPermissionAndAdd(List<PermissionSection> permissionSections, Object key, CommentedConfigurationNode value) {
+        if (value.hasMapChildren()) {
+            value.getChildrenMap().forEach((childKey, childValue) -> {
+                if (Objects.equals(childKey, "default")) {
+                    loadPermissionAndAdd(permissionSections, key, childValue);
+                    return;
+                }
+                loadPermissionAndAdd(permissionSections, key + "." + childKey, childValue);
+            });
+            return;
+        }
+        permissionSections.add(
+                PermissionSection.builder()
+                        .name(key.toString())
+                        .value(value.getInt(0))
+                        .build()
+        );
     }
 
     private static List<String> loadStringList(CommentedConfigurationNode node) {

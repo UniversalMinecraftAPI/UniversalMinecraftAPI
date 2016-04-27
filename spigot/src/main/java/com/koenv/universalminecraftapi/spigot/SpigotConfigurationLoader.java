@@ -4,11 +4,14 @@ import com.koenv.universalminecraftapi.config.UniversalMinecraftAPIRootConfigura
 import com.koenv.universalminecraftapi.config.WebServerSection;
 import com.koenv.universalminecraftapi.config.WebServerSecureSection;
 import com.koenv.universalminecraftapi.config.WebServerThreadPoolSection;
-import com.koenv.universalminecraftapi.config.user.*;
-import com.koenv.universalminecraftapi.users.model.PermissionType;
+import com.koenv.universalminecraftapi.config.user.GroupSection;
+import com.koenv.universalminecraftapi.config.user.PermissionSection;
+import com.koenv.universalminecraftapi.config.user.UserSection;
+import com.koenv.universalminecraftapi.config.user.UsersConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +57,6 @@ public class SpigotConfigurationLoader {
         return UsersConfiguration.builder()
                 .users(loadUsers(node.getConfigurationSection("users")))
                 .groups(loadGroups(node.getConfigurationSection("groups")))
-                .permissions(loadPermissions(node.getConfigurationSection("permissions")))
                 .build();
     }
 
@@ -84,7 +86,9 @@ public class SpigotConfigurationLoader {
     private static GroupSection loadGroup(ConfigurationSection node) {
         return GroupSection.builder()
                 .name(node.getName())
-                .permissions(node.getStringList("permissions"))
+                .defaultPermission(node.getInt("default-permission", 0))
+                .inheritsFrom(node.getStringList("inherits-from"))
+                .permissions(loadPermissions(node.getConfigurationSection("permissions")))
                 .build();
     }
 
@@ -92,58 +96,30 @@ public class SpigotConfigurationLoader {
         if (node == null) {
             return Collections.emptyList();
         }
-        return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadPermission).collect(Collectors.toList());
-    }
 
-    private static PermissionSection loadPermission(ConfigurationSection node) {
-        return PermissionSection.builder()
-                .name(node.getName())
-                .namespaces(loadNamespacePermissions(node.getConfigurationSection("namespaces")))
-                .classes(loadClassPermissions(node.getConfigurationSection("classes")))
-                .streams(loadStreamPermission(node.getConfigurationSection("streams")))
-                .build();
-    }
+        List<PermissionSection> sections = new ArrayList<>();
+        node.getKeys(true).forEach(s -> {
+                    if (node.isConfigurationSection(s)) {
+                        return;
+                    }
+                    if (s.endsWith("default")) {
+                        sections.add(
+                                PermissionSection.builder()
+                                        .name(s.substring(0, s.length() - 8))
+                                        .value(node.getInt(s, 0))
+                                        .build()
+                        );
+                        return;
+                    }
+                    sections.add(
+                            PermissionSection.builder()
+                                    .name(s)
+                                    .value(node.getInt(s, 0))
+                                    .build()
+                    );
+                }
+        );
 
-    private static List<NamespacePermissionSection> loadNamespacePermissions(ConfigurationSection node) {
-        if (node == null) {
-            return Collections.emptyList();
-        }
-        return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadNamespacePermission).collect(Collectors.toList());
-    }
-
-    private static NamespacePermissionSection loadNamespacePermission(ConfigurationSection node) {
-        return NamespacePermissionSection.builder()
-                .name(node.getName())
-                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
-                .methods(node.getStringList("methods"))
-                .build();
-    }
-
-    private static List<ClassPermissionSection> loadClassPermissions(ConfigurationSection node) {
-        if (node == null) {
-            return Collections.emptyList();
-        }
-        return node.getKeys(false).stream().map(node::getConfigurationSection).map(SpigotConfigurationLoader::loadClassPermission).collect(Collectors.toList());
-    }
-
-    private static ClassPermissionSection loadClassPermission(ConfigurationSection node) {
-        return ClassPermissionSection.builder()
-                .name(node.getName())
-                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
-                .methods(node.getStringList("methods"))
-                .build();
-    }
-
-    private static StreamPermissionSection loadStreamPermission(ConfigurationSection node) {
-        if (node == null) {
-            return StreamPermissionSection.builder()
-                    .type(PermissionType.WHITELIST)
-                    .streams(Collections.emptyList())
-                    .build();
-        }
-        return StreamPermissionSection.builder()
-                .type(PermissionType.valueOf(node.getString("type", "BLACKLIST").toUpperCase()))
-                .streams(node.getStringList("streams"))
-                .build();
+        return sections;
     }
 }

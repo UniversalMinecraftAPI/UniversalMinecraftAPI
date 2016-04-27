@@ -1,9 +1,9 @@
 package com.koenv.universalminecraftapi.http;
 
 import com.koenv.universalminecraftapi.http.model.JsonRequest;
-import com.koenv.universalminecraftapi.methods.AbstractMethod;
 import com.koenv.universalminecraftapi.methods.InvokeParameters;
 import com.koenv.universalminecraftapi.methods.Invoker;
+import com.koenv.universalminecraftapi.permissions.Permissible;
 
 import java.util.Objects;
 
@@ -28,7 +28,7 @@ public class HttpInvokerParameters implements InvokeParameters {
     }
 
     @Override
-    public boolean checkPermission(AbstractMethod method) {
-        return invoker.checkPermission(method);
+    public boolean checkPermission(Permissible object) {
+        return invoker.checkPermission(object);
     }
 }

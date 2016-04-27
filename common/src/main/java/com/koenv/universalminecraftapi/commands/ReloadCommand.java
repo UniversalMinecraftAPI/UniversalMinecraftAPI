@@ -29,7 +29,6 @@ public class ReloadCommand extends Command {
                     commandSource.sendMessage(ChatColor.GREEN, "Users reloaded:");
                     commandSource.sendMessage(ChatColor.GREEN, "Total users: " + uma.getUserManager().getUsers().size());
                     commandSource.sendMessage(ChatColor.GREEN, "Total groups: " + uma.getUserManager().getGroups().size());
-                    commandSource.sendMessage(ChatColor.GREEN, "Total permissions: " + uma.getUserManager().getPermissions().size());
 
                 } catch (Throwable t) {
                     t.printStackTrace();

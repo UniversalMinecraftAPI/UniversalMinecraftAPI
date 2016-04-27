@@ -21,13 +21,8 @@ public class WebServerRestParameters implements RestParameters {
     }
 
     @Override
-    public boolean hasPermission(RestResourceMethod method) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(RestOperationMethod method) {
-        return true;
+    public boolean hasPermission(IRestMethod method) {
+        return invoker.checkPermission(method);
     }
 
     @Override
