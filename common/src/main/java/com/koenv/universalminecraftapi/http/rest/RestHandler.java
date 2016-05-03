@@ -9,10 +9,7 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,14 +30,48 @@ public class RestHandler {
             throw new RestNotFoundException("No resources found that match " + path);
         }
 
-        if (resources.size() > 1) {
-            resources.sort((o1, o2) -> Integer.compare(RestUtils.splitPathByParts(o2.getPath()).size(), RestUtils.splitPathByParts(o1.getPath()).size())); // sort by number of path parts
-            if (RestUtils.splitPathByParts(resources.get(0).getPath()).size() == RestUtils.splitPathByParts(resources.get(1).getPath()).size()) { // same specificity
-                throw new RestNotFoundException("More than one resource for path " + path);
-            }
-        }
+        RestResourceMethod restMethod = null;
 
-        RestResourceMethod restMethod = resources.get(0);
+        if (resources.size() > 1) {
+            List<Pair<RestResourceMethod, List<String>>> resourceParts = resources.stream()
+                    .map(method -> Pair.of(method, RestUtils.splitPathByParts(method.getPath())))
+                    .collect(Collectors.toList());
+            resourceParts.sort((o1, o2) -> Integer.compare(o2.getRight().size(), o1.getRight().size())); // sort by number of path parts
+            if (resourceParts.get(0).getRight().size() == resourceParts.get(1).getRight().size()) { // same specificity
+                int size = resourceParts.get(0).getRight().size();
+                resourceParts = resourceParts.stream().filter(pair -> pair.getRight().size() == size).collect(Collectors.toList());
+
+                int numberOfGood;
+                RestResourceMethod last = null;
+                int pathSize = RestUtils.splitPathByParts(path).size();
+                for (int i = 0; i < pathSize; i++) {
+                    numberOfGood = 0;
+
+                    for (Pair<RestResourceMethod, List<String>> part : resourceParts) {
+                        if (part.getRight().size() > i) {
+                            String it = part.getRight().get(i);
+                            if (!RestUtils.isParam(it)) {
+                                numberOfGood++;
+                                last = part.getLeft();
+                            }
+                        }
+                    }
+
+                    if (numberOfGood == 1) {
+                        restMethod = last;
+                        break;
+                    }
+                }
+
+                if (restMethod == null) {
+                    throw new RestNotFoundException("More than one resource for path " + path);
+                }
+            } else {
+                restMethod = resources.get(0);
+            }
+        } else {
+            restMethod = resources.get(0);
+        }
 
         List<String> resourceParts = RestUtils.splitPathByParts(restMethod.getPath());
         List<String> pathParts = RestUtils.splitPathByParts(path);
@@ -68,7 +99,7 @@ public class RestHandler {
         }
 
         if (otherPathPartsSize > 0) {// we have at least one operation
-            List<RestOperationMethod> operationMethods = getOperationMethods(pathParts, otherPathPartsSize, result.getClass());
+            List<RestOperationMethod> operationMethods = getOperationMethods(pathParts, otherPathPartsSize, result.getClass(), restMethod.getJavaMethod());
 
             checkCorrectMethod(parameters, operationMethods);
 
@@ -88,7 +119,15 @@ public class RestHandler {
                     throw new RestForbiddenException("No permission to access operation " + operationMethod.getPath());
                 }
 
-                result = invokeOperation(parameters, result, body, operationMethod);
+                if (result instanceof Collection) {
+                    List<Object> results = new ArrayList<>();
+                    for (Object r : (Collection) result) {
+                        results.add(invokeOperation(parameters, r, body, operationMethod));
+                    }
+                    result = results;
+                } else {
+                    result = invokeOperation(parameters, result, body, operationMethod);
+                }
 
                 if (result == null) {
                     return null;
@@ -121,19 +160,33 @@ public class RestHandler {
     }
 
     @NotNull
-    private List<RestOperationMethod> getOperationMethods(List<String> pathParts, int i, Class<?> resultClass) throws RestNotFoundException {
+    private List<RestOperationMethod> getOperationMethods(List<String> pathParts, int i, Class<?> resultClass, Method resourceMethod) throws RestNotFoundException {
         List<RestOperationMethod> operationMethods = new ArrayList<>();
 
+        RestOperationMethod lastOperationMethod = null;
         while (i > 0) {
             String operation = pathParts.get(pathParts.size() - i);
 
             RestOperationMethod operationMethod = findOperation(resultClass, operation);
 
             if (operationMethod == null) {
-                throw new RestNotFoundException("Unable to find operation " + operation + " on object of type " + resultClass.getName());
+                if (Collection.class.isAssignableFrom(resultClass)) {
+                    if (lastOperationMethod != null) {
+                        operationMethod = findOperation((Class<?>) ((ParameterizedType) lastOperationMethod.getJavaMethod().getGenericReturnType()).getActualTypeArguments()[0], operation);
+                    } else {
+                        if (resourceMethod.getGenericReturnType() instanceof ParameterizedType) {
+                            operationMethod = findOperation((Class<?>) ((ParameterizedType) resourceMethod.getGenericReturnType()).getActualTypeArguments()[0], operation);
+                        }
+                    }
+                }
+                if (operationMethod == null) {
+                    throw new RestNotFoundException("Unable to find operation " + operation + " on object of type " + resultClass.getName());
+                }
             }
 
             operationMethods.add(operationMethod);
+
+            lastOperationMethod = operationMethod;
 
             resultClass = operationMethod.getJavaMethod().getReturnType();
 

@@ -541,6 +541,16 @@ public class RestHandlerTest {
         }));
     }
 
+    @Test
+    public void testOperationOnCollection() throws Exception {
+        assertEquals(Arrays.asList("test1", "test2", "test3"), buildRestHandler().handle("players/list/name", null));
+    }
+
+    @Test(expected = RestNotFoundException.class)
+    public void testOperationOnCollectionWithoutGenerics() throws Exception {
+        assertEquals(Arrays.asList("test1", "test2", "test3"), buildRestHandler().handle("players/noparameterslist/name", null));
+    }
+
     @Test(expected = RestNotFoundException.class)
     public void testMultipleMatches() throws Exception {
         buildRestHandler().handle("test/myname", null);
@@ -709,6 +719,20 @@ public class RestHandlerTest {
         @RestResource("players/:name")
         public static TestPlayer getPlayer(@RestPath("name") String name) {
             return new TestPlayer(name);
+        }
+
+        @RestResource("players/list")
+        public static List<TestPlayer> listPlayers() {
+            return Arrays.asList(
+                    new TestPlayer("test1"),
+                    new TestPlayer("test2"),
+                    new TestPlayer("test3")
+            );
+        }
+
+        @RestResource("players/noparameterslist")
+        public static List listWithoutParameters() {
+            return listPlayers();
         }
 
         @RestOperation(TestPlayer.class)
