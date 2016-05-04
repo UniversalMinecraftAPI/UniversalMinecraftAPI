@@ -546,6 +546,11 @@ public class RestHandlerTest {
         assertEquals(Arrays.asList("test1", "test2", "test3"), buildRestHandler().handle("players/list/name", null));
     }
 
+    @Test
+    public void testMultipleOperationsOnCollection() throws Exception {
+        assertEquals(Arrays.asList("test1", "test2", "test3"), buildRestHandler().handle("players/list/copy/name", null));
+    }
+
     @Test(expected = RestNotFoundException.class)
     public void testOperationOnCollectionWithoutGenerics() throws Exception {
         assertEquals(Arrays.asList("test1", "test2", "test3"), buildRestHandler().handle("players/noparameterslist/name", null));
