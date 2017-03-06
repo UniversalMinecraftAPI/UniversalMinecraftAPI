@@ -2,6 +2,52 @@
     "v1": {
         "classes": [
             {
+                "operatesOn": "Player",
+                "name": "getUUID",
+                "arguments": [],
+                "returns": "String",
+                "permission": "players.uuid"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "name": "getUsed",
+                "arguments": [],
+                "returns": "double",
+                "permission": "server.performance.used"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "name": "getTotal",
+                "arguments": [],
+                "returns": "double",
+                "permission": "server.performance.total"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "name": "getFree",
+                "arguments": [],
+                "returns": "double",
+                "permission": "server.performance.free"
+            },
+            {
+                "operatesOn": "User",
+                "name": "getPermission",
+                "arguments": [{
+                    "name": "permission",
+                    "optional": false,
+                    "type": "String"
+                }],
+                "returns": "int",
+                "permission": "users.permission"
+            },
+            {
+                "operatesOn": "User",
+                "name": "getUsername",
+                "arguments": [],
+                "returns": "String",
+                "permission": "users.username"
+            },
+            {
                 "operatesOn": "Server",
                 "name": "getPort",
                 "arguments": [],
@@ -28,52 +74,6 @@
                 "arguments": [],
                 "returns": "int",
                 "permission": "server.max_players"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "name": "getUsed",
-                "arguments": [],
-                "returns": "double",
-                "permission": "server.performance.used"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "name": "getTotal",
-                "arguments": [],
-                "returns": "double",
-                "permission": "server.performance.total"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "name": "getFree",
-                "arguments": [],
-                "returns": "double",
-                "permission": "server.performance.free"
-            },
-            {
-                "operatesOn": "Player",
-                "name": "getUUID",
-                "arguments": [],
-                "returns": "String",
-                "permission": "players.uuid"
-            },
-            {
-                "operatesOn": "User",
-                "name": "getPermission",
-                "arguments": [{
-                    "name": "permission",
-                    "optional": false,
-                    "type": "String"
-                }],
-                "returns": "int",
-                "permission": "users.permission"
-            },
-            {
-                "operatesOn": "User",
-                "name": "getUsername",
-                "arguments": [],
-                "returns": "String",
-                "permission": "users.username"
             }
         ],
         "streams": [
@@ -150,6 +150,17 @@
                 "permission": "players.get"
             },
             {
+                "name": "unsubscribe",
+                "namespace": "streams",
+                "arguments": [{
+                    "name": "stream",
+                    "optional": false,
+                    "type": "String"
+                }],
+                "returns": "int",
+                "permission": "streams.unsubscribe"
+            },
+            {
                 "name": "subscribe",
                 "namespace": "streams",
                 "arguments": [
@@ -166,17 +177,6 @@
                 ],
                 "returns": "boolean",
                 "permission": "streams.subscribe"
-            },
-            {
-                "name": "unsubscribe",
-                "namespace": "streams",
-                "arguments": [{
-                    "name": "stream",
-                    "optional": false,
-                    "type": "String"
-                }],
-                "returns": "int",
-                "permission": "streams.unsubscribe"
             },
             {
                 "name": "subscriptionCount",
@@ -260,6 +260,57 @@
     "v2": {
         "operations": [
             {
+                "operatesOn": "Player",
+                "path": "uuid",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String",
+                "permission": "players.uuid"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "total",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double",
+                "permission": "server.performance.total"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "used",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double",
+                "permission": "server.performance.used"
+            },
+            {
+                "operatesOn": "PerformanceHolder",
+                "path": "free",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "double",
+                "permission": "server.performance.free"
+            },
+            {
+                "operatesOn": "User",
+                "path": "hasPermission",
+                "method": "POST",
+                "bodyParams": [{
+                    "name": "permission",
+                    "type": "String"
+                }],
+                "returns": "int",
+                "permission": "users.permission"
+            },
+            {
+                "operatesOn": "User",
+                "path": "username",
+                "method": "GET",
+                "bodyParams": [],
+                "returns": "String",
+                "permission": "users.username"
+            },
+            {
                 "operatesOn": "Server",
                 "path": "broadcast",
                 "method": "POST",
@@ -312,57 +363,6 @@
                 }],
                 "returns": "void",
                 "permission": "server.run_command"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "path": "total",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "double",
-                "permission": "server.performance.total"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "path": "used",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "double",
-                "permission": "server.performance.used"
-            },
-            {
-                "operatesOn": "PerformanceHolder",
-                "path": "free",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "double",
-                "permission": "server.performance.free"
-            },
-            {
-                "operatesOn": "Player",
-                "path": "uuid",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "String",
-                "permission": "players.uuid"
-            },
-            {
-                "operatesOn": "User",
-                "path": "hasPermission",
-                "method": "POST",
-                "bodyParams": [{
-                    "name": "permission",
-                    "type": "String"
-                }],
-                "returns": "int",
-                "permission": "users.permission"
-            },
-            {
-                "operatesOn": "User",
-                "path": "username",
-                "method": "GET",
-                "bodyParams": [],
-                "returns": "String",
-                "permission": "users.username"
             }
         ],
         "resources": [
@@ -388,18 +388,18 @@
                 "permission": "users.get"
             },
             {
-                "path": "users/current",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "User",
-                "permission": "users.current"
-            },
-            {
                 "path": "users/apikey",
                 "pathParams": [],
                 "queryParams": [],
                 "returns": "String",
                 "permission": "users.apikey"
+            },
+            {
+                "path": "users/current",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "User",
+                "permission": "users.current"
             },
             {
                 "path": "uma/version",
@@ -416,25 +416,11 @@
                 "permission": "uma.platform.name"
             },
             {
-                "path": "uma/platform/version",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "String",
-                "permission": "uma.platform.version"
-            },
-            {
                 "path": "uma/invoker",
                 "pathParams": [],
                 "queryParams": [],
                 "returns": "String",
                 "permission": "uma.invoker"
-            },
-            {
-                "path": "uma/ping",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "String",
-                "permission": "uma.ping"
             },
             {
                 "path": "uma/methods",
@@ -444,11 +430,18 @@
                 "permission": "uma.methods"
             },
             {
-                "path": "server/memory",
+                "path": "uma/ping",
                 "pathParams": [],
                 "queryParams": [],
-                "returns": "PerformanceHolder",
-                "permission": "server.memory"
+                "returns": "String",
+                "permission": "uma.ping"
+            },
+            {
+                "path": "uma/platform/version",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "String",
+                "permission": "uma.platform.version"
             },
             {
                 "path": "server/disk",
@@ -456,6 +449,13 @@
                 "queryParams": [],
                 "returns": "PerformanceHolder",
                 "permission": "server.disk"
+            },
+            {
+                "path": "server/memory",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "PerformanceHolder",
+                "permission": "server.memory"
             },
             {
                 "path": "players/:name",
@@ -468,18 +468,18 @@
                 "permission": "players.get"
             },
             {
-                "path": "server",
-                "pathParams": [],
-                "queryParams": [],
-                "returns": "Server",
-                "permission": "server"
-            },
-            {
                 "path": "server/commands",
                 "pathParams": [],
                 "queryParams": [],
                 "returns": "Command[]",
                 "permission": "server.commands"
+            },
+            {
+                "path": "server",
+                "pathParams": [],
+                "queryParams": [],
+                "returns": "Server",
+                "permission": "server"
             },
             {
                 "path": "server/commands/names",
@@ -492,7 +492,7 @@
     },
     "platform": {
         "name": "sponge",
-        "umaVersion": "0.2-SNAPSHOT",
-        "version": "1.8.9-4.1.0-BETA-293"
+        "umaVersion": "0.2",
+        "version": "1.10.2-5.2.0-BETA-381"
     }
 }

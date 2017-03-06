@@ -15,7 +15,7 @@ subprojects {
 
     apply plugin: 'java'
 
-    version = '0.2-SNAPSHOT'
+    version = '0.2'
     archivesBaseName = "$rootProject.name-$project.name"
 
     dependencies {
@@ -82,10 +82,6 @@ configure(subprojects.findAll { it.name == 'spigot' || it.name == 'sponge' }) {
         dependsOn sourcesJar
         dependsOn shadowJar
     }
-}
-
-task dist() {
-    dependsOn 'docgenerator:generateDoc'
 }
 
 task clean() {
