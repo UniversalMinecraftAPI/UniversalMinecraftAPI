@@ -9,6 +9,8 @@ The API can be consumed by sending a `POST` request to the URL `/api/v1/call` wi
 }
 ```
 
+You can also supply a JSON array of such requests and the API will return a JSON array of responses.
+
 ### Authentication
 It is easy to authenticate with the API by using HTTP Basic Authentication. So, if the username is `admin` and the
 password is `changeme` (the defaults), the request would need the following header:
