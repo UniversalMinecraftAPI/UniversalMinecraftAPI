@@ -24,7 +24,7 @@ blossom {
 }
 
 dependencies {
-    compile 'org.spongepowered:spongeapi:4.0.3'
+    compile 'org.spongepowered:spongeapi:5.1.0'
     compile 'org.apache.logging.log4j:log4j-core:2.0-beta9'
 
     testCompile project(':common').sourceSets.test.output

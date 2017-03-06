@@ -17,6 +17,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -43,7 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "com.koenv.universalminecraftapi.sponge", name = "UniversalMinecraftAPI", version = PluginInfo.VERSION, description = "A JSON API for Sponge")
+@Plugin(id = "universalminecraftapi", name = "UniversalMinecraftAPI", version = PluginInfo.VERSION, description = "A JSON API for Sponge")
 public class SpongeUniversalMinecraftAPI implements UniversalMinecraftAPIProvider {
     private UniversalMinecraftAPIInterface uma;
 
@@ -123,12 +124,12 @@ public class SpongeUniversalMinecraftAPI implements UniversalMinecraftAPIProvide
 
     @Override
     public String getPlatform() {
-        return Sponge.getPlatform().getImplementation().getId();
+        return Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
     }
 
     @Override
     public String getPlatformVersion() {
-        return Sponge.getPlatform().getImplementation().getVersion().orElse("UNKNOWN");
+        return Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getVersion().orElse("UNKNOWN");
     }
 
     private void reloadConfig() throws IOException {

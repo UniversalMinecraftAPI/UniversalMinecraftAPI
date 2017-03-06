@@ -15,7 +15,7 @@ public class WorldSerializer implements Serializer<World> {
         json.put("name", object.getProperties().getWorldName());
         json.put("difficulty", serializerManager.serialize(object.getDifficulty()));
         json.put("dimension", serializerManager.serialize(object.getDimension()));
-        json.put("seed", object.getCreationSettings().getSeed());
+        json.put("seed", object.getProperties().getSeed());
         json.put("time", object.getProperties().getTotalTime());
         json.put("players", object.getEntities(entity -> entity instanceof Player).stream().map(e -> ((Player) e).getName()).collect(Collectors.toList()));
         return json;
