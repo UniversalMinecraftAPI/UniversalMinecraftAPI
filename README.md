@@ -9,7 +9,8 @@ currently Spigot and Sponge, that allows external scripts to  access data on the
 This could for example be used to make interactive websites,  mobile apps and create a web store for in-game items.
 
 ## Download
-[You can download UniversalMinecraftAPI on the releases page](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI/releases)
+[You can download UniversalMinecraftAPI on the releases page](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI/releases) 
+or via [Ore](https://ore.spongepowered.org/koesie10/UniversalMinecraftAPI) for Sponge
 
 ## Documentation
 [You can view the latest documentation on uma.koenv.com](http://uma.koenv.com/)

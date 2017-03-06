@@ -47,6 +47,8 @@
                    target="_blank">Issues</a>
                 <a class="list-group-item" href="https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI"
                    target="_blank">Source code</a>
+                <a class="list-group-item" href="https://ore.spongepowered.org/koesie10/UniversalMinecraftAPI"
+                   target="_blank">Ore</a>
                 <a class="list-group-item" href="http://ci.koenv.com/job/UniversalMinecraftAPI/" target="_blank">Jenkins
                     builds</a>
             </div>

@@ -9,5 +9,6 @@ mobile apps and create a web store for in-game items.
 
 ## Download
 [You can download UniversalMinecraftAPI on the releases page](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI/releases)
+or via [Ore](https://ore.spongepowered.org/koesie10/UniversalMinecraftAPI) for Sponge
 
 The source code can be viewed and downloaded at [GitHub](https://github.com/UniversalMinecraftAPI/UniversalMinecraftAPI).
