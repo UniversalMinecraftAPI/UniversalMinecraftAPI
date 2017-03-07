@@ -1,8 +1,8 @@
 package com.koenv.universalminecraftapi.http.model;
 
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 public interface JsonSerializable {
-    JSONObject toJson(SerializerManager serializerManager);
+    void toJson(JSONWriter writer, SerializerManager serializerManager);
 }

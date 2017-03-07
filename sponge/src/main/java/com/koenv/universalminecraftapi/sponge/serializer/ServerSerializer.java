@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.sponge.serializer;
 
 import com.koenv.universalminecraftapi.serializer.Serializer;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 import org.spongepowered.api.Server;
 
 import java.net.InetAddress;
@@ -10,14 +10,20 @@ import java.net.InetSocketAddress;
 
 public class ServerSerializer implements Serializer<Server> {
     @Override
-    public Object toJson(Server object, SerializerManager serializerManager) {
-        JSONObject json = new JSONObject();
-        json.put("maxPlayers", object.getMaxPlayers());
-        json.put("port", object.getBoundAddress().map(InetSocketAddress::getPort).orElse(-1));
-        json.put("ip", object.getBoundAddress().map(InetSocketAddress::getAddress).map(InetAddress::getHostAddress).orElse(""));
-        json.put("players", serializerManager.serialize(object.getOnlinePlayers()));
-        json.put("worlds", serializerManager.serialize(object.getWorlds()));
-        json.put("motd", object.getMotd().toPlain());
-        return json;
+    public void toJson(Server object, SerializerManager serializerManager, JSONWriter writer) {
+        writer.object()
+                .key("maxPlayers").value(object.getMaxPlayers())
+                .key("port").value(object.getBoundAddress().map(InetSocketAddress::getPort).orElse(-1))
+                .key("ip").value(object.getBoundAddress().map(InetSocketAddress::getAddress).map(InetAddress::getHostAddress).orElse(""));
+
+        writer.key("players");
+        serializerManager.serialize(object.getOnlinePlayers(), writer);
+
+        writer.key("worlds");
+        serializerManager.serialize(object.getWorlds(), writer);
+
+        writer
+                .key("motd").value(object.getMotd().toPlain())
+                .endObject();
     }
 }

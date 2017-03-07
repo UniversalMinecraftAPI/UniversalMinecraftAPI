@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.streams.models;
 
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 public class ChatMessage implements JsonSerializable {
     private String player;
@@ -22,10 +22,10 @@ public class ChatMessage implements JsonSerializable {
     }
 
     @Override
-    public JSONObject toJson(SerializerManager serializerManager) {
-        JSONObject object = new JSONObject();
-        object.put("player", player);
-        object.put("message", message);
-        return object;
+    public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+        writer.object()
+                .key("player").value(player)
+                .key("message").value(message)
+                .endObject();
     }
 }

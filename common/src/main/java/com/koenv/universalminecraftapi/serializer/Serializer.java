@@ -1,5 +1,7 @@
 package com.koenv.universalminecraftapi.serializer;
 
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
+
 public interface Serializer<T> {
-    Object toJson(T object, SerializerManager serializerManager);
+    void toJson(T object, SerializerManager serializerManager, JSONWriter writer);
 }

@@ -2,6 +2,7 @@ package com.koenv.universalminecraftapi.http.model;
 
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 public class JsonErrorResponse implements JsonSerializable {
     private int code;
@@ -26,12 +27,12 @@ public class JsonErrorResponse implements JsonSerializable {
         return tag;
     }
 
-    public JSONObject toJson(SerializerManager serializerManager) {
-        JSONObject object = new JSONObject();
-        object.put("success", false);
-        object.put("code", code);
-        object.put("message", message);
-        object.put("tag", tag);
-        return object;
+    public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+        writer.object()
+                .key("success").value(false)
+                .key("code").value(code)
+                .key("message").value(message)
+                .key("tag").value(tag)
+                .endObject();
     }
 }

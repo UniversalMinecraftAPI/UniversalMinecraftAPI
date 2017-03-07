@@ -15,7 +15,6 @@ import com.koenv.universalminecraftapi.users.UserManager;
 import com.koenv.universalminecraftapi.users.model.User;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
-import com.koenv.universalminecraftapi.util.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -186,8 +185,7 @@ public class UniversalMinecraftAPIWebServer {
 
             List<JsonSerializable> responses = requestHandler.handle(request.body(), invoker);
 
-            JSONValue result = (JSONValue) serializerManager.serialize(responses);
-            return result.toString(4);
+            return serializerManager.serialize(responses);
         });
 
         Route v2Route = (request, response) -> {
@@ -203,8 +201,7 @@ public class UniversalMinecraftAPIWebServer {
 
             Object result = restRequestHandler.handle(request, invoker);
 
-            JSONValue jsonResult = (JSONValue) serializerManager.serialize(result);
-            return jsonResult.toString(4);
+            return serializerManager.serialize(result);
         };
 
         get("/api/v2/*", v2Route);

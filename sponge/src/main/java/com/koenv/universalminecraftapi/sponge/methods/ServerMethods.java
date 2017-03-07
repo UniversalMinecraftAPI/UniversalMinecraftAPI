@@ -8,10 +8,12 @@ import com.koenv.universalminecraftapi.methods.APIMethod;
 import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.permissions.RequiresPermission;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -85,29 +87,28 @@ public class ServerMethods {
     public static List<Command> getCommands() {
         return Sponge.getCommandManager().getPluginContainers().stream()
                 .flatMap(container -> Sponge.getCommandManager().getOwnedBy(container).stream().map(commandMapping -> new ImmutablePair<>(container, commandMapping)))
-                .map(pair -> {
-                    JSONObject object = new JSONObject();
-                    object.put("plugin", pair.getLeft().getName());
-                    object.put("aliases", pair.getRight().getAllAliases());
-                    object.put("description", pair.getRight().getCallable().getShortDescription(Sponge.getServer().getConsole()).map(Text::toPlain).orElse(""));
-                    object.put("help", pair.getRight().getCallable().getHelp(Sponge.getServer().getConsole()).map(Text::toPlain).orElse(""));
-                    object.put("usage", pair.getRight().getCallable().getUsage(Sponge.getServer().getConsole()).toPlain());
-
-                    return new Command(object);
-                })
+                .map(pair -> new Command(pair.getLeft(), pair.getRight()))
                 .collect(Collectors.toList());
     }
 
     public static class Command implements JsonSerializable {
-        private JSONObject json;
+        private PluginContainer container;
+        private CommandMapping command;
 
-        public Command(JSONObject json) {
-            this.json = json;
+        Command(PluginContainer container, CommandMapping command) {
+            this.container = container;
+            this.command = command;
         }
 
         @Override
-        public JSONObject toJson(SerializerManager serializerManager) {
-            return json;
+        public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+            writer.object()
+                    .key("plugin").value(container.getName())
+                    .key("aliases").value(command.getAllAliases())
+                    .key("description").value(command.getCallable().getShortDescription(Sponge.getServer().getConsole()).map(Text::toPlain).orElse(""))
+                    .key("help").value(command.getCallable().getHelp(Sponge.getServer().getConsole()).map(Text::toPlain).orElse(""))
+                    .key("usage").value(command.getCallable().getUsage(Sponge.getServer().getConsole()).toPlain())
+                    .endObject();
         }
     }
 

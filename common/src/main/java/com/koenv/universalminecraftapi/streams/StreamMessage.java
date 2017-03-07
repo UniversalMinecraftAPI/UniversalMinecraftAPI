@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.streams;
 
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 public class StreamMessage implements JsonSerializable {
     private Object value;
@@ -23,12 +23,16 @@ public class StreamMessage implements JsonSerializable {
         return tag;
     }
 
-    public JSONObject toJson(SerializerManager serializerManager) {
-        JSONObject object = new JSONObject();
-        object.put("success", true);
-        object.put("result", serializerManager.serialize(value));
-        object.put("tag", tag);
-        object.put("stream", stream);
-        return object;
+    public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+        writer.object()
+                .key("success").value(true)
+                .key("result");
+
+        serializerManager.serialize(value, writer);
+
+        writer
+                .key("tag").value(tag)
+                .key("stream").value(stream)
+                .endObject();
     }
 }

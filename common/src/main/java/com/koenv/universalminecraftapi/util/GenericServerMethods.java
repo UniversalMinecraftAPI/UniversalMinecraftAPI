@@ -7,7 +7,7 @@ import com.koenv.universalminecraftapi.methods.APIMethod;
 import com.koenv.universalminecraftapi.methods.APINamespace;
 import com.koenv.universalminecraftapi.permissions.RequiresPermission;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 import java.io.File;
 
@@ -51,23 +51,23 @@ public class GenericServerMethods {
         private double used;
         private double free;
 
-        public PerformanceHolder(double total, double used, double free) {
+        PerformanceHolder(double total, double used, double free) {
             this.total = total;
             this.used = used;
             this.free = free;
         }
 
-        public PerformanceHolder(double total, double free) {
+        PerformanceHolder(double total, double free) {
             this(total, total - free, free);
         }
 
         @Override
-        public JSONObject toJson(SerializerManager serializerManager) {
-            JSONObject json = new JSONObject();
-            json.put("total", total / 1024.0 / 1024.0);
-            json.put("used", used / 1024.0 / 1024.0);
-            json.put("free", free / 1024.0 / 1024.0);
-            return json;
+        public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+            writer.object()
+                    .key("total").value(total / 1024.0 / 1024.0)
+                    .key("used").value(used / 1024.0 / 1024.0)
+                    .key("free").value(free / 1024.0 / 1024.0)
+                    .endObject();
         }
     }
 }

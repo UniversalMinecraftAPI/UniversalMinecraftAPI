@@ -4,8 +4,11 @@ import com.koenv.universalminecraftapi.http.model.JsonSerializable;
 import com.koenv.universalminecraftapi.http.rest.RestResource;
 import com.koenv.universalminecraftapi.methods.*;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONArray;
 import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @APINamespace("uma")
 public class UniversalMinecraftAPIMethods {
@@ -40,16 +43,13 @@ public class UniversalMinecraftAPIMethods {
 
         MethodInvoker methodInvoker = UniversalMinecraftAPI.getInstance().getMethodInvoker();
 
-        JSONArray namespaces = new JSONArray();
-        methodInvoker.getNamespaces().values().forEach(map -> map.values().forEach(method -> namespaces.put(MethodUtils.getMethodDeclaration(method))));
+        List<String> namespaces = new ArrayList<>();
+        methodInvoker.getNamespaces().values().forEach(map -> map.values().forEach(method -> namespaces.add(MethodUtils.getMethodDeclaration(method))));
 
-        JSONArray classes = new JSONArray();
-        methodInvoker.getClasses().values().forEach(map -> map.values().forEach(method -> classes.put(MethodUtils.getMethodDeclaration(method))));
+        List<String> classes = new ArrayList<>();
+        methodInvoker.getClasses().values().forEach(map -> map.values().forEach(method -> classes.add(MethodUtils.getMethodDeclaration(method))));
 
-        json.put("namespaces", namespaces);
-        json.put("classes", classes);
-
-        return new Methods(json);
+        return new Methods(namespaces, classes);
     }
 
     @APIMethod
@@ -59,15 +59,25 @@ public class UniversalMinecraftAPIMethods {
     }
 
     public static class Methods implements JsonSerializable {
-        private JSONObject json;
+        private List<String> namespaces;
+        private List<String> classes;
 
-        public Methods(JSONObject json) {
-            this.json = json;
+        Methods(List<String> namespaces, List<String> classes) {
+            this.namespaces = namespaces;
+            this.classes = classes;
         }
 
         @Override
-        public JSONObject toJson(SerializerManager serializerManager) {
-            return json;
+        public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+            writer.object();
+
+            writer.key("namespaces");
+            serializerManager.serialize(namespaces, writer);
+
+            writer.key("classes");
+            serializerManager.serialize(classes, writer);
+
+            writer.endObject();
         }
     }
 }

@@ -2,7 +2,7 @@ package com.koenv.universalminecraftapi.streams.models;
 
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 
 public class ConsoleEvent implements JsonSerializable {
     private String message;
@@ -28,11 +28,11 @@ public class ConsoleEvent implements JsonSerializable {
     }
 
     @Override
-    public JSONObject toJson(SerializerManager serializerManager) {
-        JSONObject json = new JSONObject();
-        json.put("message", message);
-        json.put("level", level);
-        json.put("time", time);
-        return json;
+    public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+        writer.object()
+                .key("message").value(message)
+                .key("level").value(level)
+                .key("time").value(time)
+                .endObject();
     }
 }

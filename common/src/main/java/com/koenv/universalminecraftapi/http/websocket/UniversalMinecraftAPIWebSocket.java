@@ -134,9 +134,9 @@ public class UniversalMinecraftAPIWebSocket {
 
         List<JsonSerializable> responses = requestHandler.handle(requests, invokers.get(session));
 
-        JSONValue response = (JSONValue) serializerManager.serialize(responses);
+        String response = serializerManager.serialize(responses);
         if (session.isOpen()) {
-            session.getRemote().sendStringByFuture(response.toString());
+            session.getRemote().sendStringByFuture(response);
         }
     }
 
@@ -147,8 +147,7 @@ public class UniversalMinecraftAPIWebSocket {
 
     private String getErrorResponse(int code, String message) {
         List<JsonErrorResponse> result = Collections.singletonList(new JsonErrorResponse(code, message, null));
-        JSONValue response = (JSONValue) serializerManager.serialize(result);
-        return response.toString();
+        return serializerManager.serialize(result);
     }
 
     // http://stackoverflow.com/a/13592567/1608780

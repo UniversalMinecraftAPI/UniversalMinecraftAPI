@@ -9,8 +9,8 @@ import com.koenv.universalminecraftapi.http.rest.RestHandler;
 import com.koenv.universalminecraftapi.http.rest.RestMethod;
 import com.koenv.universalminecraftapi.serializer.SerializerManager;
 import com.koenv.universalminecraftapi.util.json.JSONException;
-import com.koenv.universalminecraftapi.util.json.JSONObject;
 import com.koenv.universalminecraftapi.util.json.JSONTokener;
+import com.koenv.universalminecraftapi.util.json.JSONWriter;
 import spark.Request;
 
 import java.util.Objects;
@@ -76,7 +76,7 @@ public class RestRequestHandler {
         private int code;
         private String message;
 
-        public ErrorResponse(int code, String message) {
+        ErrorResponse(int code, String message) {
             this.code = code;
             this.message = message;
         }
@@ -89,18 +89,18 @@ public class RestRequestHandler {
             return message;
         }
 
-        public JSONObject toJson(SerializerManager serializerManager) {
-            JSONObject object = new JSONObject();
-            object.put("code", code);
-            object.put("message", message);
-            return object;
+        public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+            writer.object()
+                    .key("code").value(code)
+                    .key("message").value("message")
+                    .endObject();
         }
     }
 
     public static class SuccessResponse implements JsonSerializable {
         private Object value;
 
-        public SuccessResponse(Object value) {
+        SuccessResponse(Object value) {
             this.value = value;
         }
 
@@ -108,10 +108,12 @@ public class RestRequestHandler {
             return value;
         }
 
-        public JSONObject toJson(SerializerManager serializerManager) {
-            JSONObject object = new JSONObject();
-            object.put("result", serializerManager.serialize(value));
-            return object;
+        public void toJson(JSONWriter writer, SerializerManager serializerManager) {
+            writer.object().key("result");
+
+            serializerManager.serialize(value, writer);
+
+            writer.endObject();
         }
     }
 }

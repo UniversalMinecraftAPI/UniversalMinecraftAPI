@@ -3,6 +3,7 @@ package com.koenv.universalminecraftapi.serializer;
 import com.koenv.universalminecraftapi.http.model.JsonSerializable;
 import com.koenv.universalminecraftapi.serializer.defaults.CollectionSerializer;
 import com.koenv.universalminecraftapi.serializer.defaults.JsonResponseSerializer;
+import com.koenv.universalminecraftapi.serializer.defaults.OptionalSerializer;
 import com.koenv.universalminecraftapi.serializer.defaults.UserSerializer;
 import com.koenv.universalminecraftapi.users.model.User;
 import com.koenv.universalminecraftapi.util.json.JSONArray;
@@ -11,17 +12,19 @@ import com.koenv.universalminecraftapi.util.json.JSONObject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DefaultSerializers {
     public static final Map<Class<?>, Serializer<?>> SERIALIZERS;
 
-    static final Serializer<Object> DEFAULT_SERIALIZER = (object, serializerManager) -> object;
+    static final Serializer<Object> DEFAULT_SERIALIZER = (object, serializerManager, writer) -> writer.value(object);
 
     static {
         SERIALIZERS = new HashMap<>();
         SERIALIZERS.put(JsonSerializable.class, new JsonResponseSerializer());
         SERIALIZERS.put(Collection.class, new CollectionSerializer());
         SERIALIZERS.put(User.class, new UserSerializer());
+        SERIALIZERS.put(Optional.class, new OptionalSerializer());
         SERIALIZERS.put(boolean.class, DEFAULT_SERIALIZER);
         SERIALIZERS.put(Boolean.class, DEFAULT_SERIALIZER);
         SERIALIZERS.put(byte.class, DEFAULT_SERIALIZER);
