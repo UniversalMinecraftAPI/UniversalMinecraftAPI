@@ -9,8 +9,17 @@ import com.koenv.universalminecraftapi.permissions.RequiresPermission;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 
+import java.util.Collection;
+
 @APINamespace("players")
 public class PlayerMethods {
+    @APIMethod
+    @RestResource("players/list")
+    @RequiresPermission("players.get")
+    public static Collection<Player> getPlayers() {
+        return Sponge.getServer().getOnlinePlayers();
+    }
+
     @APIMethod
     @RestResource("players/:name")
     @RequiresPermission("players.get")
